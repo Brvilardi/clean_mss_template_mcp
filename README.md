@@ -134,6 +134,8 @@ Clone the repository using template
 
 ### Create virtual ambient in python (only first time)
 
+**Requirements**: Python 3.9+ (tested with Python 3.13)
+
 ###### Windows
 
     python -m venv venv
@@ -163,6 +165,21 @@ Clone the repository using template
 ### To run local set .env file
 
     STAGE = TEST
+
+## Troubleshooting 🔧
+
+### Python 3.13 Compatibility
+
+If you encounter `ModuleNotFoundError: No module named 'cgi'` when running tests:
+
+1. **Update boto3** to the latest version:
+   ```bash
+   pip install --upgrade boto3
+   ```
+
+2. **Alternative**: Use Python 3.12 or earlier if you need to maintain older boto3 versions
+
+This issue occurs because Python 3.13 removed the deprecated `cgi` module, but older boto3 versions still depend on it.
 
 
 ## Contributors 💰🤝💰
