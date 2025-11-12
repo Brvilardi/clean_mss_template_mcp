@@ -4,3 +4,4 @@ boto3>=1.40.69
 python-dotenv==0.21.0
 aws-lambda-powertools==2.9.0
 aws_xray_sdk==2.11.0
+requests>=2.31.0

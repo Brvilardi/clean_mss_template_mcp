@@ -31,7 +31,7 @@ This implementation plan follows Clean Architecture principles to build a featur
 
 ## Infrastructure Layer Implementation
 
-- [ ] 3. Create external API client for re:invent catalog
+- [x] 3. Create external API client for re:invent catalog
   - Create `src/shared/infra/external/reinvent/` directory
   - Create `src/shared/infra/external/reinvent/__init__.py`
   - Create `src/shared/infra/external/reinvent/reinvent_catalog_client.py` with ReinventCatalogClient class
@@ -40,7 +40,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Add proper error logging for API failures
   - _Requirements: 1.1, 1.2, 4.2, 4.3, 5.1_
 
-- [ ] 4. Create Session SQLite DTO
+- [x] 4. Create Session SQLite DTO
   - Create `src/shared/infra/dto/session_sqlite_dto.py` with SessionSQLiteDTO class
   - Implement attributes matching database schema with JSON fields for lists
   - Implement from_entity(session) static method to convert Session to DTO
@@ -50,7 +50,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Handle JSON serialization/deserialization for speakers, topics, areas_of_interest, features
   - _Requirements: 2.2, 2.3, 6.3_
 
-- [ ] 4.1 Write Session DTO tests
+- [x] 4.1 Write Session DTO tests
   - Create `tests/shared/infra/dto/test_session_sqlite_dto.py`
   - Test from_entity() conversion
   - Test to_entity() conversion
