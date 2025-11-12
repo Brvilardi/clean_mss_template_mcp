@@ -59,14 +59,14 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test JSON list handling for speakers, topics, areas_of_interest, features
   - _Requirements: 2.2, 2.3_
 
-- [ ] 5. Create SQLite database infrastructure
+- [x] 5. Create SQLite database infrastructure
   - Create `src/shared/infra/external/sqlite/` directory
   - Create `src/shared/infra/external/sqlite/__init__.py`
   - Create database schema creation logic in repository (sessions table with all columns)
   - Add created_at and updated_at timestamp columns with triggers
   - _Requirements: 2.1, 2.2, 6.3_
 
-- [ ] 6. Implement Session Repository SQLite
+- [x] 6. Implement Session Repository SQLite
   - Create `src/shared/infra/repositories/session_repository_sqlite.py` with SessionRepositorySQLite class
   - Implement __init__() to create database file at `src/shared/infra/external/sqlite/reinvent_sessions.db`
   - Implement _initialize_database() to create schema if not exists
@@ -80,7 +80,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Add comprehensive error handling and logging
   - _Requirements: 1.1, 1.2, 1.5, 2.1, 2.3, 2.4, 2.5, 3.2, 4.2, 4.4, 5.1, 5.3, 6.3_
 
-- [ ] 6.1 Write Session Repository SQLite tests
+- [x] 6.1 Write Session Repository SQLite tests
   - Create `tests/shared/infra/repositories/test_session_repository_sqlite.py`
   - Test database creation and schema initialization
   - Test get_all_sessions() with empty and populated database
