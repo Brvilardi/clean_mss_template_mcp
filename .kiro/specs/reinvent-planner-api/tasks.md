@@ -106,7 +106,7 @@ This implementation plan follows Clean Architecture principles to build a featur
 
 ## Application Layer - Get All Sessions Feature
 
-- [ ] 9. Implement Get All Sessions use case
+- [x] 9. Implement Get All Sessions use case
   - Create `src/modules/get_all_sessions/` directory structure
   - Create `src/modules/get_all_sessions/__init__.py`
   - Create `src/modules/get_all_sessions/app/` directory
@@ -116,13 +116,13 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Return list of Session entities
   - _Requirements: 3.1, 3.2, 6.4_
 
-- [ ] 9.1 Write Get All Sessions use case tests
+- [x] 9.1 Write Get All Sessions use case tests
   - Create `tests/modules/get_all_sessions/app/test_get_all_sessions_usecase.py`
   - Test with mock repository returning sessions
   - Test with empty repository
   - _Requirements: 3.1_
 
-- [ ] 10. Implement Get All Sessions view model
+- [x] 10. Implement Get All Sessions view model
   - Create `src/modules/get_all_sessions/app/get_all_sessions_viewmodel.py`
   - Create SessionViewmodel class for individual session serialization
   - Create GetAllSessionsViewmodel class with sessions list
@@ -130,14 +130,14 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Include all session attributes in output
   - _Requirements: 3.3, 6.5_
 
-- [ ] 10.1 Write Get All Sessions view model tests
+- [x] 10.1 Write Get All Sessions view model tests
   - Create `tests/modules/get_all_sessions/app/test_get_all_sessions_viewmodel.py`
   - Test to_dict() output format
   - Test with empty sessions list
   - Test data transformation accuracy
   - _Requirements: 3.3_
 
-- [ ] 11. Implement Get All Sessions controller
+- [x] 11. Implement Get All Sessions controller
   - Create `src/modules/get_all_sessions/app/get_all_sessions_controller.py` with GetAllSessionsController class
   - Implement __call__(request) method
   - Call use case and create view model
@@ -145,14 +145,14 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Return OK (200) with view model data or empty array
   - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
 
-- [ ] 11.1 Write Get All Sessions controller tests
+- [x] 11.1 Write Get All Sessions controller tests
   - Create `tests/modules/get_all_sessions/app/test_get_all_sessions_controller.py`
   - Test successful request handling
   - Test error response mapping
   - Test HTTP status codes
   - _Requirements: 3.3, 3.5, 5.2_
 
-- [ ] 12. Implement Get All Sessions presenter
+- [x] 12. Implement Get All Sessions presenter
   - Create `src/modules/get_all_sessions/app/get_all_sessions_presenter.py`
   - Initialize repository using Environments.get_session_repo()
   - Create use case and controller instances
