@@ -4,6 +4,7 @@ import os
 from src.shared.domain.observability.observability_interface import IObservability
 
 from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.domain.repositories.session_repository_interface import ISessionRepository
 
 
 class STAGE(Enum):
@@ -69,6 +70,17 @@ class Environments:
         elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:
             from src.shared.infra.repositories.user_repository_dynamo import UserRepositoryDynamo
             return UserRepositoryDynamo
+        else:
+            raise Exception("No repository found for this stage")
+
+    @staticmethod
+    def get_session_repo() -> ISessionRepository:
+        if Environments.get_envs().stage == STAGE.TEST:
+            from src.shared.infra.repositories.session_repository_mock import SessionRepositoryMock
+            return SessionRepositoryMock
+        elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:
+            from src.shared.infra.repositories.session_repository_sqlite import SessionRepositorySQLite
+            return SessionRepositorySQLite
         else:
             raise Exception("No repository found for this stage")
 

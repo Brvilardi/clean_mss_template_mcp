@@ -89,14 +89,14 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test transaction rollback on errors
   - _Requirements: 2.1, 2.4, 2.5, 3.2, 4.2, 4.4_
 
-- [ ] 7. Implement Session Repository Mock
+- [x] 7. Implement Session Repository Mock
   - Create `src/shared/infra/repositories/session_repository_mock.py` with SessionRepositoryMock class
   - Pre-populate with 3-5 sample re:invent sessions covering different types
   - Implement all interface methods (get_all_sessions, sync_sessions_from_api, get_session_by_id)
   - Mock sync operation to simulate API fetch
   - _Requirements: 6.3_
 
-- [ ] 8. Update Environments configuration
+- [x] 8. Update Environments configuration
   - Add get_session_repo() static method to `src/shared/environments.py`
   - Return SessionRepositoryMock for TEST stage
   - Return SessionRepositorySQLite for DEV, HOMOLOG, PROD stages

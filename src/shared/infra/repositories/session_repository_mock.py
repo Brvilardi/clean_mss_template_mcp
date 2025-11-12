@@ -1,0 +1,197 @@
+from typing import List, Dict
+
+from src.shared.domain.entities.session import Session
+from src.shared.domain.repositories.session_repository_interface import ISessionRepository
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+
+
+class SessionRepositoryMock(ISessionRepository):
+    """
+    Mock implementation of ISessionRepository for testing purposes.
+    Pre-populated with sample re:invent sessions covering different types.
+    """
+
+    def __init__(self):
+        self.sessions: List[Session] = []
+        self._populate_sample_data()
+
+    def _populate_sample_data(self):
+        """Pre-populate repository with sample re:invent sessions."""
+        sample_sessions = [
+            Session(
+                session_id="1753651605588001kjXl",
+                short_id="TNC301",
+                title="Accelerate VMware Migration with AWS Transform",
+                abstract="This bootcamp is for AWS Partners only. Learn how to accelerate VMware migration using AWS Transform services and best practices.",
+                session_type="Bootcamp",
+                venue_name="Mandalay Bay",
+                venue_room="Level 2 South | Breakers K",
+                start_datetime="2025-12-04T21:00:00.000Z",
+                end_datetime="2025-12-05T01:00:00.000Z",
+                day="Thursday",
+                speakers=[
+                    {"displayName": "Parvesh Chopra", "company": "AWS"}
+                ],
+                topics=["Artificial Intelligence", "Migration"],
+                areas_of_interest=["Training & Certification"],
+                level="300 – Advanced",
+                level_value=300,
+                features=["Hands-on"],
+                seat_capacity=126
+            ),
+            Session(
+                session_id="1753651605588002abCD",
+                short_id="SVS201",
+                title="Building Serverless Applications with AWS Lambda",
+                abstract="Learn the fundamentals of building serverless applications using AWS Lambda, API Gateway, and DynamoDB.",
+                session_type="Breakout Session",
+                venue_name="Venetian",
+                venue_room="Level 3 | Marcello 4405",
+                start_datetime="2025-12-05T14:00:00.000Z",
+                end_datetime="2025-12-05T15:00:00.000Z",
+                day="Friday",
+                speakers=[
+                    {"displayName": "Jane Smith", "company": "AWS"},
+                    {"displayName": "John Doe", "company": "AWS"}
+                ],
+                topics=["Serverless", "Compute"],
+                areas_of_interest=["Application Development"],
+                level="200 – Intermediate",
+                level_value=200,
+                features=["Interactive"],
+                seat_capacity=250
+            ),
+            Session(
+                session_id="1753651605588003efGH",
+                short_id="SEC101",
+                title="Introduction to AWS Security Best Practices",
+                abstract="Get started with AWS security fundamentals. Learn about IAM, encryption, network security, and compliance.",
+                session_type="Workshop",
+                venue_name="MGM Grand",
+                venue_room="Level 1 | Grand Ballroom A",
+                start_datetime="2025-12-06T09:00:00.000Z",
+                end_datetime="2025-12-06T12:00:00.000Z",
+                day="Saturday",
+                speakers=[
+                    {"displayName": "Alice Johnson", "company": "AWS"}
+                ],
+                topics=["Security", "Identity & Access Management"],
+                areas_of_interest=["Security & Compliance"],
+                level="100 – Foundational",
+                level_value=100,
+                features=["Hands-on", "Interactive"],
+                seat_capacity=100
+            ),
+            Session(
+                session_id="1753651605588004ijKL",
+                short_id="DAT401",
+                title="Advanced Data Analytics with Amazon Redshift",
+                abstract="Deep dive into advanced analytics patterns using Amazon Redshift. Learn about performance optimization, data modeling, and integration with ML services.",
+                session_type="Chalk Talk",
+                venue_name="Wynn",
+                venue_room="Level 2 | Lafite 1",
+                start_datetime="2025-12-07T16:00:00.000Z",
+                end_datetime="2025-12-07T17:00:00.000Z",
+                day="Sunday",
+                speakers=[
+                    {"displayName": "Bob Williams", "company": "AWS"},
+                    {"displayName": "Carol Martinez", "company": "Amazon"}
+                ],
+                topics=["Analytics", "Data Lakes", "Machine Learning"],
+                areas_of_interest=["Data & Analytics"],
+                level="400 – Expert",
+                level_value=400,
+                features=["Interactive"],
+                seat_capacity=50
+            ),
+            Session(
+                session_id="1753651605588005mnOP",
+                short_id="CON202",
+                title="Container Orchestration with Amazon ECS and EKS",
+                abstract="Compare and contrast Amazon ECS and EKS for container orchestration. Learn when to use each service and best practices for deployment.",
+                session_type="Breakout Session",
+                venue_name="Caesars Forum",
+                venue_room="Level 1 | Forum 108",
+                start_datetime="2025-12-05T10:30:00.000Z",
+                end_datetime="2025-12-05T11:30:00.000Z",
+                day="Friday",
+                speakers=[
+                    {"displayName": "David Chen", "company": "AWS"}
+                ],
+                topics=["Containers", "Kubernetes", "Compute"],
+                areas_of_interest=["Application Development", "DevOps"],
+                level="200 – Intermediate",
+                level_value=200,
+                features=[],
+                seat_capacity=300
+            )
+        ]
+        
+        self.sessions = sample_sessions
+
+    def get_all_sessions(self) -> List[Session]:
+        """
+        Returns all sessions from the mock repository.
+        
+        Returns:
+            List of Session entities
+        """
+        return self.sessions.copy()
+
+    def sync_sessions_from_api(self) -> Dict[str, int]:
+        """
+        Simulates syncing sessions from external API.
+        In mock implementation, this adds one new session to demonstrate sync behavior.
+        
+        Returns:
+            Dictionary with keys 'inserted' and 'updated' containing counts
+        """
+        # Simulate adding a new session during sync
+        new_session = Session(
+            session_id="1753651605588006qrST",
+            short_id="AI303",
+            title="Generative AI Applications with Amazon Bedrock",
+            abstract="Explore building generative AI applications using Amazon Bedrock. Learn about foundation models, prompt engineering, and RAG patterns.",
+            session_type="Workshop",
+            venue_name="Venetian",
+            venue_room="Level 2 | Bellini 2004",
+            start_datetime="2025-12-06T13:00:00.000Z",
+            end_datetime="2025-12-06T16:00:00.000Z",
+            day="Saturday",
+            speakers=[
+                {"displayName": "Emily Rodriguez", "company": "AWS"}
+            ],
+            topics=["Artificial Intelligence", "Machine Learning", "Generative AI"],
+            areas_of_interest=["AI & Machine Learning"],
+            level="300 – Advanced",
+            level_value=300,
+            features=["Hands-on"],
+            seat_capacity=75
+        )
+        
+        # Check if session already exists
+        existing_ids = [s.session_id for s in self.sessions]
+        if new_session.session_id not in existing_ids:
+            self.sessions.append(new_session)
+            return {"inserted": 1, "updated": 0}
+        else:
+            return {"inserted": 0, "updated": 0}
+
+    def get_session_by_id(self, session_id: str) -> Session:
+        """
+        Returns a specific session by ID.
+        
+        Args:
+            session_id: The unique session identifier
+            
+        Returns:
+            Session entity
+            
+        Raises:
+            NoItemsFound: If session with given ID is not found
+        """
+        for session in self.sessions:
+            if session.session_id == session_id:
+                return session
+        
+        raise NoItemsFound(f"session_id: {session_id}")
