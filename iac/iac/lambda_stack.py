@@ -10,6 +10,7 @@ from aws_cdk.aws_apigateway import Resource, LambdaIntegration
 
 class LambdaStack(Construct):
     functions_that_need_dynamo_permissions = []
+    functions_that_need_sessions_dynamo_permissions = []
 
     def create_lambda_api_gateway_integration(self, module_name: str, method: str, mss_student_api_resource: Resource,
                                               environment_variables: dict = {"STAGE": "TEST"}, memory_size: int = 128,
@@ -102,3 +103,6 @@ class LambdaStack(Construct):
 
         self.functions_that_need_dynamo_permissions = [self.get_user_function, self.create_user_function,
                                                   self.delete_user_function, self.update_user_function]
+
+        self.functions_that_need_sessions_dynamo_permissions = [self.get_all_sessions_function,
+                                                                 self.sync_sessions_function]

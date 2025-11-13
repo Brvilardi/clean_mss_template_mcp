@@ -79,9 +79,11 @@ Start the DynamoDB Local container using Docker:
 1. Open Docker
 2. Start dynamodb-local container
 
-## Running the `load_user_mock_to_dynamo` Script
+## Running the Mock Data Load Scripts
 
-Finally, you can run the `load_user_mock_to_dynamo` script to load mock data into DynamoDB. Follow the steps below:
+Finally, you can run the mock data load scripts to populate DynamoDB with test data. Follow the steps below:
+
+### Loading User Mock Data
 
 1. Locate the directory or file named `load_user_mock_to_dynamo` within your project. This directory or file is responsible for loading mock data into DynamoDB
 2. If the `load_user_mock_to_dynamo` file doesn't exist, you need to create it.
@@ -104,7 +106,8 @@ Finally, you can run the `load_user_mock_to_dynamo` script to load mock data int
 │           ├── dto
 │           ├── external
 │           └── repositories
-│               └── -> [load_user_mock_to_dynamo] <-
+│               ├── -> [load_user_mock_to_dynamo] <-
+│               └── -> [load_session_mock_to_dynamo] <-
 ...
 ```
 4. This file is responsible for populating DynamoDB with mock data
@@ -114,8 +117,22 @@ Finally, you can run the `load_user_mock_to_dynamo` script to load mock data int
    py -m src.shared.infra.repositories.load_user_mock_to_dynamo
    ```
 
-
 This command will run the `load_user_mock_to_dynamo` script and populate DynamoDB with the provided mock data
+
+### Loading Session Mock Data
+
+To load mock session data for re:Invent sessions:
+
+1. Make sure you are in the root directory of your project
+2. Run the following command to execute the sessions load script:
+   ```
+   py -m src.shared.infra.repositories.load_session_mock_to_dynamo
+   ```
+
+This command will:
+- Create the Sessions DynamoDB table with GSIs (GSI-Venue, GSI-Day, GSI-Level)
+- Load mock session data from SessionRepositoryMock into the table
+- Display progress as each session is loaded
 
 ## Launch NoSQL WorkBench
 

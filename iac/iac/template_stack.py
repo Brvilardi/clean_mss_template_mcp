@@ -8,6 +8,7 @@ from aws_cdk.aws_apigateway import RestApi, Cors
 
 from .lambda_stack import LambdaStack
 from .template_dynamo_table import TemplateDynamoTable
+from .sessions_dynamo_table import SessionsDynamoTable
 
 
 class TemplateStack(Stack):
@@ -35,12 +36,15 @@ class TemplateStack(Stack):
                                                                )
 
         self.dynamo_table = TemplateDynamoTable(self, "TemplateDynamoTable")
+        self.sessions_dynamo_table = SessionsDynamoTable(self, "SessionsDynamoTable")
 
         ENVIRONMENT_VARIABLES = {
             "STAGE": "DEV",
             "DYNAMO_TABLE_NAME": self.dynamo_table.table.table_name,
             "DYNAMO_PARTITION_KEY": "PK",
             "DYNAMO_SORT_KEY": "SK",
+            "SESSIONS_DYNAMO_TABLE_NAME": self.sessions_dynamo_table.table.table_name,
+            "SESSIONS_DYNAMO_PARTITION_KEY": "PK",
             "REGION": self.region,
         }
 
@@ -51,5 +55,8 @@ class TemplateStack(Stack):
 
         for function in self.lambda_stack.functions_that_need_dynamo_permissions:
             self.dynamo_table.table.grant_read_write_data(function)
+
+        for function in self.lambda_stack.functions_that_need_sessions_dynamo_permissions:
+            self.sessions_dynamo_table.table.grant_read_write_data(function)
 
         

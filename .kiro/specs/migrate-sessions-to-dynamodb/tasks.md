@@ -1,7 +1,7 @@
 # Implementation Plan
 
-- [ ] 1. Provisionar infraestrutura DynamoDB via CDK
-- [ ] 1.1 Criar SessionsDynamoTable (tabela exclusiva para Sessions)
+- [x] 1. Provisionar infraestrutura DynamoDB via CDK
+- [x] 1.1 Criar SessionsDynamoTable (tabela exclusiva para Sessions)
   - Criar arquivo iac/iac/sessions_dynamo_table.py seguindo padrão de template_dynamo_table.py
   - Criar classe SessionsDynamoTable que herda de Construct
   - Criar tabela com apenas partition_key "PK" (String) sem sort_key
@@ -9,21 +9,21 @@
   - Configurar removal_policy como RETAIN para proteção de dados
   - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 1.2 Adicionar Global Secondary Indexes na SessionsDynamoTable
+- [x] 1.2 Adicionar Global Secondary Indexes na SessionsDynamoTable
   - Adicionar GSI-Venue usando table.add_global_secondary_index (PK: venue_name, SK: start_datetime)
   - Adicionar GSI-Day usando table.add_global_secondary_index (PK: day, SK: start_datetime)
   - Adicionar GSI-Level usando table.add_global_secondary_index (PK: level_value Number, SK: start_datetime)
   - Configurar projection_type como dynamodb.ProjectionType.ALL para todos os GSIs
   - _Requirements: 4.5, 4.6, 4.7_
 
-- [ ] 1.3 Integrar SessionsDynamoTable no TemplateStack
+- [x] 1.3 Integrar SessionsDynamoTable no TemplateStack
   - Importar SessionsDynamoTable em template_stack.py
   - Instanciar SessionsDynamoTable no __init__ do TemplateStack
   - Adicionar variável de ambiente SESSIONS_DYNAMO_TABLE_NAME com table_name da SessionsDynamoTable
   - Adicionar variável de ambiente SESSIONS_DYNAMO_PARTITION_KEY com valor "PK"
   - _Requirements: 4.1, 5.4_
 
-- [ ] 1.4 Configurar permissões IAM no Lambda Stack
+- [x] 1.4 Configurar permissões IAM no Lambda Stack
   - Criar lista functions_that_need_sessions_dynamo_permissions no lambda_stack.py
   - Adicionar get_all_sessions_function à lista functions_that_need_sessions_dynamo_permissions
   - Adicionar sync_sessions_function à lista functions_that_need_sessions_dynamo_permissions
@@ -31,7 +31,7 @@
   - Garantir que permissões incluem dynamodb:Query para os GSIs
   - _Requirements: 4.8, 4.9, 8.1, 8.2_
 
-- [ ] 1.5 Criar script de setup e load para DynamoDB Local
+- [x] 1.5 Criar script de setup e load para DynamoDB Local
   - Criar script load_session_mock_to_dynamo.py em src/shared/infra/repositories/
   - Implementar função setup_dynamo_table que cria tabela com apenas PK (sem SK)
   - Implementar criação do GSI-Venue (PK: venue_name, SK: start_datetime) na função setup
@@ -105,7 +105,7 @@
   - Validar que GSIs estão funcionando e ordenando por start_datetime
   - _Requirements: 9.1, 9.2, 9.5_
 
-- [ ] 8. Criar script de migração de dados
+<!-- - [ ] 8. Criar script de migração de dados
   - Criar script migrate_sqlite_to_dynamodb.py
   - Implementar leitura de todas as sessões do SQLite
   - Implementar conversão de SessionSQLiteDTO para SessionDynamoDTO
@@ -113,7 +113,7 @@
   - Implementar validação de contagem de registros migrados
   - Implementar geração de relatório de migração (sucesso, erros, total)
   - Adicionar tratamento de erros para continuar migração mesmo com falhas individuais
-  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+  - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_ -->
 
 - [ ] 9. Validar funcionalidade end-to-end em DEV
   - Executar script de migração em ambiente DEV
