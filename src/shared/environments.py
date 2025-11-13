@@ -75,7 +75,7 @@ class Environments:
 
     @staticmethod
     def get_session_repo() -> ISessionRepository:
-        if Environments.get_envs().stage == STAGE.TEST:
+        if Environments.get_envs().stage in [STAGE.DEV, STAGE.TEST]:
             from src.shared.infra.repositories.session_repository_mock import SessionRepositoryMock
             return SessionRepositoryMock
         elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:

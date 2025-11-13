@@ -3,6 +3,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
     NestedStack, Duration
 )
+from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 from constructs import Construct
 from aws_cdk.aws_apigateway import Resource, LambdaIntegration
 
@@ -11,15 +12,21 @@ class LambdaStack(Construct):
     functions_that_need_dynamo_permissions = []
 
     def create_lambda_api_gateway_integration(self, module_name: str, method: str, mss_student_api_resource: Resource,
-                                              environment_variables: dict = {"STAGE": "TEST"}):
+                                              environment_variables: dict = {"STAGE": "TEST"}, memory_size: int = 128,
+                                              timeout_seconds: int = 15, needs_external_deps: bool = False):
+        layers = [self.lambda_layer, self.lambda_power_tools]
+        if needs_external_deps:
+            layers.append(self.external_dependencies_layer)
+        
         function = lambda_.Function(
             self, module_name.title(),
             code=lambda_.Code.from_asset(f"../src/modules/{module_name}"),
             handler=f"app.{module_name}_presenter.lambda_handler",
             runtime=lambda_.Runtime.PYTHON_3_9,
-            layers=[self.lambda_layer, self.lambda_power_tools],
+            layers=layers,
             environment=environment_variables,
-            timeout=Duration.seconds(15)
+            memory_size=memory_size,
+            timeout=Duration.seconds(timeout_seconds)
         )
 
         mss_student_api_resource.add_resource(module_name.replace("_", "-")).add_method(method,
@@ -36,7 +43,14 @@ class LambdaStack(Construct):
                                                  compatible_runtimes=[lambda_.Runtime.PYTHON_3_9]
                                                  )
 
-        self.lambda_power_tools = lambda_.LayerVersion.from_layer_version_arn(self, "Lambda_Power_Tools", layer_version_arn="arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:22")
+        self.lambda_power_tools = lambda_.LayerVersion.from_layer_version_arn(self, "Lambda_Power_Tools", layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:68")
+        
+        self.external_dependencies_layer = PythonLayerVersion(
+            self, "External_Dependencies_Layer",
+            entry="./lambda_external_dependencies",
+            compatible_runtimes=[lambda_.Runtime.PYTHON_3_9],
+            description="Layer with external dependencies like requests"
+        )
 
         self.get_user_function = self.create_lambda_api_gateway_integration(
             module_name="get_user",
@@ -64,6 +78,26 @@ class LambdaStack(Construct):
             method="POST",
             mss_student_api_resource=api_gateway_resource,
             environment_variables=environment_variables
+        )
+
+        self.get_all_sessions_function = self.create_lambda_api_gateway_integration(
+            module_name="get_all_sessions",
+            method="GET",
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables,
+            memory_size=512,
+            timeout_seconds=30,
+            needs_external_deps=True
+        )
+
+        self.sync_sessions_function = self.create_lambda_api_gateway_integration(
+            module_name="sync_sessions",
+            method="POST",
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables,
+            memory_size=512,
+            timeout_seconds=30,
+            needs_external_deps=True
         )
 
         self.functions_that_need_dynamo_permissions = [self.get_user_function, self.create_user_function,

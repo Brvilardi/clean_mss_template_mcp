@@ -219,7 +219,7 @@ This implementation plan follows Clean Architecture principles to build a featur
 
 ## Infrastructure as Code
 
-- [ ] 17. Add Lambda functions to CDK stack
+- [x] 17. Add Lambda functions to CDK stack
   - Update `iac/iac/lambda_stack.py` to add get_all_sessions_function
   - Configure as GET method on appropriate API Gateway resource
   - Update `iac/iac/lambda_stack.py` to add sync_sessions_function
