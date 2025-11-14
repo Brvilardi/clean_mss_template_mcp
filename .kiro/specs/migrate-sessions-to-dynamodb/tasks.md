@@ -24,9 +24,8 @@
   - _Requirements: 4.1, 5.4_
 
 - [x] 1.4 Configurar permissões IAM no Lambda Stack
-  - Criar lista functions_that_need_sessions_dynamo_permissions no lambda_stack.py
-  - Adicionar get_all_sessions_function à lista functions_that_need_sessions_dynamo_permissions
-  - Adicionar sync_sessions_function à lista functions_that_need_sessions_dynamo_permissions
+  - Adicionar get_all_sessions_function à lista functions_that_need_dynamo_permissions no lambda_stack.py
+  - Adicionar sync_sessions_function à lista functions_that_need_dynamo_permissions no lambda_stack.py
   - No template_stack.py, conceder grant_read_write_data da SessionsDynamoTable para funções da lista
   - Garantir que permissões incluem dynamodb:Query para os GSIs
   - _Requirements: 4.8, 4.9, 8.1, 8.2_

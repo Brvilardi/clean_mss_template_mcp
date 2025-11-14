@@ -231,6 +231,236 @@ This implementation plan follows Clean Architecture principles to build a featur
 
 ---
 
+## Application Layer - Get Sessions by Venue Feature
+
+- [ ] 18. Implement Get Sessions by Venue feature
+- [ ] 18.1 Implement Get Sessions by Venue use case
+  - Create `src/modules/get_sessions_by_venue/` directory structure
+  - Create `src/modules/get_sessions_by_venue/__init__.py`
+  - Create `src/modules/get_sessions_by_venue/app/` directory
+  - Create `src/modules/get_sessions_by_venue/app/__init__.py`
+  - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_usecase.py` with GetSessionsByVenueUsecase class
+  - Implement __call__(venue_name: str) method that filters sessions by venue_name
+  - Return list of Session entities matching the venue
+  - Create `tests/modules/get_sessions_by_venue/app/test_get_sessions_by_venue_usecase.py`
+  - Test with mock repository returning filtered sessions
+  - Test with venue that has no sessions
+  - Test case-insensitive matching
+  - _Requirements: 3.1, 3.2, 6.4_
+
+- [ ] 18.2 Implement Get Sessions by Venue view model
+  - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_viewmodel.py`
+  - Create GetSessionsByVenueViewmodel class with sessions list
+  - Implement to_dict() returning JSON-serializable dict with sessions array, count, and venue_name
+  - Include all session attributes in output
+  - Create `tests/modules/get_sessions_by_venue/app/test_get_sessions_by_venue_viewmodel.py`
+  - Test to_dict() output format
+  - Test with empty sessions list
+  - _Requirements: 3.3, 6.5_
+
+- [ ] 18.3 Implement Get Sessions by Venue controller
+  - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_controller.py` with GetSessionsByVenueController class
+  - Implement __call__(request) method
+  - Extract venue_name from query parameters
+  - Handle missing venue_name parameter (400)
+  - Call use case and create view model
+  - Handle exceptions: MissingParameters (400), EntityError (400), Exception (500)
+  - Return OK (200) with view model data or empty array
+  - Create `tests/modules/get_sessions_by_venue/app/test_get_sessions_by_venue_controller.py`
+  - Test successful request handling
+  - Test missing venue_name parameter
+  - Test error response mapping
+  - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
+
+- [ ] 18.4 Implement Get Sessions by Venue presenter
+  - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_presenter.py`
+  - Initialize repository using Environments.get_session_repo()
+  - Create use case and controller instances
+  - Implement lambda_handler(event, context) function
+  - Convert Lambda event to LambdaHttpRequest
+  - Return LambdaHttpResponse with proper status codes
+  - _Requirements: 6.5_
+
+---
+
+## Application Layer - Get Sessions by Day Feature
+
+- [ ] 19. Implement Get Sessions by Day feature
+- [ ] 19.1 Implement Get Sessions by Day use case
+  - Create `src/modules/get_sessions_by_day/` directory structure
+  - Create `src/modules/get_sessions_by_day/__init__.py`
+  - Create `src/modules/get_sessions_by_day/app/` directory
+  - Create `src/modules/get_sessions_by_day/app/__init__.py`
+  - Create `src/modules/get_sessions_by_day/app/get_sessions_by_day_usecase.py` with GetSessionsByDayUsecase class
+  - Implement __call__(day: str) method that filters sessions by day
+  - Return list of Session entities matching the day
+  - Create `tests/modules/get_sessions_by_day/app/test_get_sessions_by_day_usecase.py`
+  - Test with mock repository returning filtered sessions
+  - Test with day that has no sessions
+  - Test case-insensitive matching
+  - _Requirements: 3.1, 3.2, 6.4_
+
+- [ ] 19.2 Implement Get Sessions by Day view model
+  - Create `src/modules/get_sessions_by_day/app/get_sessions_by_day_viewmodel.py`
+  - Create GetSessionsByDayViewmodel class with sessions list
+  - Implement to_dict() returning JSON-serializable dict with sessions array, count, and day
+  - Include all session attributes in output
+  - Create `tests/modules/get_sessions_by_day/app/test_get_sessions_by_day_viewmodel.py`
+  - Test to_dict() output format
+  - Test with empty sessions list
+  - _Requirements: 3.3, 6.5_
+
+- [ ] 19.3 Implement Get Sessions by Day controller
+  - Create `src/modules/get_sessions_by_day/app/get_sessions_by_day_controller.py` with GetSessionsByDayController class
+  - Implement __call__(request) method
+  - Extract day from query parameters
+  - Handle missing day parameter (400)
+  - Call use case and create view model
+  - Handle exceptions: MissingParameters (400), EntityError (400), Exception (500)
+  - Return OK (200) with view model data or empty array
+  - Create `tests/modules/get_sessions_by_day/app/test_get_sessions_by_day_controller.py`
+  - Test successful request handling
+  - Test missing day parameter
+  - Test error response mapping
+  - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
+
+- [ ] 19.4 Implement Get Sessions by Day presenter
+  - Create `src/modules/get_sessions_by_day/app/get_sessions_by_day_presenter.py`
+  - Initialize repository using Environments.get_session_repo()
+  - Create use case and controller instances
+  - Implement lambda_handler(event, context) function
+  - Convert Lambda event to LambdaHttpRequest
+  - Return LambdaHttpResponse with proper status codes
+  - _Requirements: 6.5_
+
+---
+
+## Application Layer - Get Sessions by Level Feature
+
+- [ ] 20. Implement Get Sessions by Level feature
+- [ ] 20.1 Implement Get Sessions by Level use case
+  - Create `src/modules/get_sessions_by_level/` directory structure
+  - Create `src/modules/get_sessions_by_level/__init__.py`
+  - Create `src/modules/get_sessions_by_level/app/` directory
+  - Create `src/modules/get_sessions_by_level/app/__init__.py`
+  - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_usecase.py` with GetSessionsByLevelUsecase class
+  - Implement __call__(level_value: int) method that filters sessions by level_value
+  - Validate level_value is one of: 100, 200, 300, 400
+  - Return list of Session entities matching the level
+  - Create `tests/modules/get_sessions_by_level/app/test_get_sessions_by_level_usecase.py`
+  - Test with mock repository returning filtered sessions
+  - Test with level that has no sessions
+  - Test invalid level_value raises EntityError
+  - _Requirements: 3.1, 3.2, 6.4_
+
+- [ ] 20.2 Implement Get Sessions by Level view model
+  - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_viewmodel.py`
+  - Create GetSessionsByLevelViewmodel class with sessions list
+  - Implement to_dict() returning JSON-serializable dict with sessions array, count, and level_value
+  - Include all session attributes in output
+  - Create `tests/modules/get_sessions_by_level/app/test_get_sessions_by_level_viewmodel.py`
+  - Test to_dict() output format
+  - Test with empty sessions list
+  - _Requirements: 3.3, 6.5_
+
+- [ ] 20.3 Implement Get Sessions by Level controller
+  - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_controller.py` with GetSessionsByLevelController class
+  - Implement __call__(request) method
+  - Extract level_value from query parameters
+  - Handle missing level_value parameter (400)
+  - Convert level_value to integer
+  - Handle invalid type conversion (400)
+  - Call use case and create view model
+  - Handle exceptions: MissingParameters (400), WrongTypeParameter (400), EntityError (400), Exception (500)
+  - Return OK (200) with view model data or empty array
+  - Create `tests/modules/get_sessions_by_level/app/test_get_sessions_by_level_controller.py`
+  - Test successful request handling
+  - Test missing level_value parameter
+  - Test invalid level_value type
+  - Test invalid level_value (not 100/200/300/400)
+  - Test error response mapping
+  - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
+
+- [ ] 20.4 Implement Get Sessions by Level presenter
+  - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_presenter.py`
+  - Initialize repository using Environments.get_session_repo()
+  - Create use case and controller instances
+  - Implement lambda_handler(event, context) function
+  - Convert Lambda event to LambdaHttpRequest
+  - Return LambdaHttpResponse with proper status codes
+  - _Requirements: 6.5_
+
+---
+
+## Application Layer - Get Sessions by Short ID Feature
+
+- [ ] 21. Implement Get Sessions by Short ID feature
+- [ ] 21.1 Implement Get Sessions by Short ID use case
+  - Create `src/modules/get_sessions_by_short_id/` directory structure
+  - Create `src/modules/get_sessions_by_short_id/__init__.py`
+  - Create `src/modules/get_sessions_by_short_id/app/` directory
+  - Create `src/modules/get_sessions_by_short_id/app/__init__.py`
+  - Create `src/modules/get_sessions_by_short_id/app/get_sessions_by_short_id_usecase.py` with GetSessionsByShortIdUsecase class
+  - Implement __call__(short_id: str) method that filters sessions by short_id
+  - Return list of Session entities matching the short_id (should be 0 or 1 result)
+  - Create `tests/modules/get_sessions_by_short_id/app/test_get_sessions_by_short_id_usecase.py`
+  - Test with mock repository returning matching session
+  - Test with short_id that doesn't exist
+  - Test case-insensitive matching
+  - _Requirements: 3.1, 3.2, 6.4_
+
+- [ ] 21.2 Implement Get Sessions by Short ID view model
+  - Create `src/modules/get_sessions_by_short_id/app/get_sessions_by_short_id_viewmodel.py`
+  - Create GetSessionsByShortIdViewmodel class with sessions list
+  - Implement to_dict() returning JSON-serializable dict with sessions array, count, and short_id
+  - Include all session attributes in output
+  - Create `tests/modules/get_sessions_by_short_id/app/test_get_sessions_by_short_id_viewmodel.py`
+  - Test to_dict() output format
+  - Test with empty sessions list
+  - _Requirements: 3.3, 6.5_
+
+- [ ] 21.3 Implement Get Sessions by Short ID controller
+  - Create `src/modules/get_sessions_by_short_id/app/get_sessions_by_short_id_controller.py` with GetSessionsByShortIdController class
+  - Implement __call__(request) method
+  - Extract short_id from query parameters
+  - Handle missing short_id parameter (400)
+  - Call use case and create view model
+  - Handle exceptions: MissingParameters (400), EntityError (400), Exception (500)
+  - Return OK (200) with view model data or empty array
+  - Create `tests/modules/get_sessions_by_short_id/app/test_get_sessions_by_short_id_controller.py`
+  - Test successful request handling
+  - Test missing short_id parameter
+  - Test error response mapping
+  - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
+
+- [ ] 21.4 Implement Get Sessions by Short ID presenter
+  - Create `src/modules/get_sessions_by_short_id/app/get_sessions_by_short_id_presenter.py`
+  - Initialize repository using Environments.get_session_repo()
+  - Create use case and controller instances
+  - Implement lambda_handler(event, context) function
+  - Convert Lambda event to LambdaHttpRequest
+  - Return LambdaHttpResponse with proper status codes
+  - _Requirements: 6.5_
+
+---
+
+## Infrastructure as Code - New Query Endpoints
+
+- [ ] 22. Add new Lambda functions to CDK stack
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_venue_function
+  - Configure as GET method with query parameter venue_name
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_day_function
+  - Configure as GET method with query parameter day
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_level_function
+  - Configure as GET method with query parameter level_value
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_short_id_function
+  - Configure as GET method with query parameter short_id
+  - Set memory to 512 MB and timeout to 30 seconds for all functions
+  - Note: SQLite functions do NOT need DynamoDB permissions
+  - _Requirements: 6.5_
+
+---
+
 ## Notes
 
 - Tasks marked with * are optional and focus on testing
@@ -240,3 +470,5 @@ This implementation plan follows Clean Architecture principles to build a featur
 - Auto-initialization ensures database is populated on cold starts
 - All validation happens in domain layer
 - Error handling follows existing patterns in the codebase
+- New query endpoints filter sessions from the existing get_all_sessions repository method
+- All filtering logic is implemented in use cases, not in repository layer
