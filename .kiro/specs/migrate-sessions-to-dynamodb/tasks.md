@@ -42,7 +42,7 @@
   - Atualizar iac/local/configure_dynamodb.md com seção sobre load_session_mock_to_dynamo
   - _Requirements: 5.4_
 
-- [ ] 2. Criar SessionDynamoDTO
+- [x] 2. Criar SessionDynamoDTO
   - Implementar classe SessionDynamoDTO com todos os 17 atributos da entidade Session
   - Implementar método from_entity para converter Session para SessionDynamoDTO
   - Implementar método to_dynamo para converter SessionDynamoDTO para dict DynamoDB
