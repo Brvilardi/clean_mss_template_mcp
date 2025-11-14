@@ -44,3 +44,42 @@ class ISessionRepository(ABC):
             NoItemsFound: If session with given ID is not found
         """
         pass
+
+    @abstractmethod
+    def get_sessions_by_venue(self, venue_name: str) -> List[Session]:
+        """
+        Returns sessions filtered by venue name, ordered by start_datetime.
+        
+        Args:
+            venue_name: The venue name to filter by
+            
+        Returns:
+            List of Session entities ordered by start_datetime
+        """
+        pass
+
+    @abstractmethod
+    def get_sessions_by_day(self, day: str) -> List[Session]:
+        """
+        Returns sessions filtered by day, ordered by start_datetime.
+        
+        Args:
+            day: The day to filter by (e.g., "Monday", "Tuesday")
+            
+        Returns:
+            List of Session entities ordered by start_datetime
+        """
+        pass
+
+    @abstractmethod
+    def get_sessions_by_level(self, level_value: int) -> List[Session]:
+        """
+        Returns sessions filtered by level value, ordered by start_datetime.
+        
+        Args:
+            level_value: The level value to filter by (100, 200, 300, 400)
+            
+        Returns:
+            List of Session entities ordered by start_datetime
+        """
+        pass
