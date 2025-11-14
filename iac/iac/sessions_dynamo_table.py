@@ -10,10 +10,11 @@ class SessionsDynamoTable(Construct):
     DynamoDB table construct for storing re:Invent sessions.
     
     This table uses a single partition key (PK) without a sort key,
-    and includes three Global Secondary Indexes for optimized queries:
+    and includes four Global Secondary Indexes for optimized queries:
     - GSI-Venue: Query sessions by venue
     - GSI-Day: Query sessions by day
     - GSI-Level: Query sessions by level
+    - GSI-ShortId: Query sessions by short_id for quick lookups
     """
     table: dynamodb.Table
 
@@ -68,6 +69,16 @@ class SessionsDynamoTable(Construct):
             ),
             sort_key=dynamodb.Attribute(
                 name="start_datetime",
+                type=dynamodb.AttributeType.STRING
+            ),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        # GSI-ShortId: Query sessions by short_id for quick lookups
+        self.table.add_global_secondary_index(
+            index_name="GSI-ShortId",
+            partition_key=dynamodb.Attribute(
+                name="short_id",
                 type=dynamodb.AttributeType.STRING
             ),
             projection_type=dynamodb.ProjectionType.ALL

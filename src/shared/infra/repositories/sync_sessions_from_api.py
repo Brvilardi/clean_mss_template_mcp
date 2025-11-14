@@ -9,7 +9,6 @@ import boto3
 import dotenv
 
 
-
 def setup_dynamo_table():
     """
     Creates the Sessions DynamoDB table in local DynamoDB with GSIs.
@@ -120,46 +119,99 @@ def setup_dynamo_table():
         print("Sessions table already exists!")
 
 
-def load_mock_to_local_dynamo():
+def sync_sessions_from_api_to_dynamo():
     """
-    Loads mock session data from SessionRepositoryMock into local DynamoDB.
-    Uses the SessionDynamoDTO for proper data conversion.
-    
-    Note: This script requires SessionRepositoryDynamo and SessionDynamoDTO
-    to be implemented first (tasks 2 and 3 in the migration plan).
+    Fetches sessions from the re:invent catalog API and loads them into DynamoDB Local.
+    Uses the SessionRepositoryDynamo.sync_sessions_from_api() method.
     """
     setup_dynamo_table()
     
     try:
         # Import here to avoid circular dependencies
-        from src.shared.infra.repositories.session_repository_mock import SessionRepositoryMock
         from src.shared.infra.repositories.session_repository_dynamo import SessionRepositoryDynamo
-        from src.shared.infra.dto.session_dynamo_dto import SessionDynamoDTO
     except ImportError as e:
         print(f"Error: Required modules not yet implemented: {e}")
-        print("Please complete tasks 2 and 3 (SessionDynamoDTO and SessionRepositoryDynamo) first.")
+        print("Please ensure SessionRepositoryDynamo is properly implemented.")
         return
     
-    mock_repo = SessionRepositoryMock()
+    print()
+    print('=' * 80)
+    print('Syncing sessions from re:invent Catalog API to DynamoDB Local')
+    print('=' * 80)
+    print()
+    
+    # Create repository instance
     dynamo_repo = SessionRepositoryDynamo()
-
-    count = 0
-
-    print('Loading mock session data to dynamo...')
-    for session in mock_repo.get_all_sessions():
-        print(f"Loading session {session.session_id} | {session.title} to dynamo")
-        # Use the repository's internal method to store the session
-        # This will use SessionDynamoDTO for proper conversion
-        session_dto = SessionDynamoDTO.from_entity(session)
-        dynamo_repo.dynamo.put_item(
-            partition_key=SessionRepositoryDynamo.partition_key_format(session.session_id),
-            item=session_dto.to_dynamo()
-        )
-        count += 1
-
-    print(f"{count} sessions loaded to dynamo!")
+    
+    print('Fetching sessions from API...')
+    print('(This may take a moment as it fetches 2500+ sessions)')
+    print()
+    
+    try:
+        # Use the sync method which handles all the API fetching and data transformation
+        result = dynamo_repo.sync_sessions_from_api()
+        
+        print()
+        print('=' * 80)
+        print('SYNC COMPLETED SUCCESSFULLY')
+        print('=' * 80)
+        print(f"  Inserted: {result['inserted']} new sessions")
+        print(f"  Updated:  {result['updated']} existing sessions")
+        print(f"  Total:    {result['inserted'] + result['updated']} sessions processed")
+        print('=' * 80)
+        print()
+        
+        # Verify the data
+        print('Verifying data in DynamoDB...')
+        all_sessions = dynamo_repo.get_all_sessions()
+        print(f"✓ Total sessions in DynamoDB: {len(all_sessions)}")
+        
+        # Show some statistics
+        if all_sessions:
+            venues = set(s.venue_name for s in all_sessions)
+            days = set(s.day for s in all_sessions)
+            levels = set(s.level_value for s in all_sessions)
+            session_types = set(s.session_type for s in all_sessions)
+            
+            print()
+            print('Statistics:')
+            print(f"  Unique venues: {len(venues)}")
+            print(f"  Unique days: {len(days)}")
+            print(f"  Unique levels: {len(levels)}")
+            print(f"  Unique session types: {len(session_types)}")
+            
+            print()
+            print('Sample sessions:')
+            for i, session in enumerate(all_sessions[:5]):
+                print(f"  {i+1}. {session.short_id} - {session.title[:60]}...")
+                print(f"     Venue: {session.venue_name}, Day: {session.day}, Level: {session.level_value}")
+        
+        print()
+        print('✓ Sessions successfully synced from API to DynamoDB Local!')
+        
+    except ConnectionError as e:
+        print()
+        print('=' * 80)
+        print('ERROR: Failed to connect to API')
+        print('=' * 80)
+        print(f"  {str(e)}")
+        print()
+        print('Please check:')
+        print('  1. Internet connection is available')
+        print('  2. API endpoint is accessible: https://reinvent-planner.cloud/api/catalog')
+        print('=' * 80)
+        
+    except Exception as e:
+        print()
+        print('=' * 80)
+        print('ERROR: Sync failed')
+        print('=' * 80)
+        print(f"  {str(e)}")
+        print('=' * 80)
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == '__main__':
     dotenv.load_dotenv()
-    load_mock_to_local_dynamo()
+    sync_sessions_from_api_to_dynamo()

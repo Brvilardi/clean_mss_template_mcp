@@ -64,15 +64,15 @@
   - Garantir que resultados sejam ordenados por start_datetime
   - _Requirements: 3.1.7_
 
-- [ ] 5. Implementar SessionRepositoryDynamo
-- [ ] 5.1 Criar estrutura básica do repositório
+- [x] 5. Implementar SessionRepositoryDynamo
+- [x] 5.1 Criar estrutura básica do repositório
   - Criar classe SessionRepositoryDynamo que implementa ISessionRepository
   - Implementar __init__ para inicializar DynamoDatasource com configurações do Environments (usar variáveis SESSIONS_DYNAMO_*)
   - Implementar método estático partition_key_format que retorna "SESSION#{session_id}"
   - Nota: Não precisa de sort_key_format pois tabela não tem SK
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 5.2 Implementar operações básicas de CRUD
+- [x] 5.2 Implementar operações básicas de CRUD
   - Implementar get_session_by_id usando GetItem com apenas PK (sem SK)
   - Implementar get_all_sessions usando Scan com filter entity='session'
   - Implementar sync_sessions_from_api com fetch da API e batch write
@@ -80,14 +80,14 @@
   - Garantir que EntityError seja lançado quando dados da API forem inválidos
   - _Requirements: 1.2, 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 5.3 Implementar queries otimizadas com GSIs
+- [x] 5.3 Implementar queries otimizadas com GSIs
   - Implementar get_sessions_by_venue usando Query no GSI-Venue
   - Implementar get_sessions_by_day usando Query no GSI-Day
   - Implementar get_sessions_by_level usando Query no GSI-Level
   - Garantir que resultados sejam ordenados por start_datetime
   - _Requirements: 1.6, 1.7, 1.8, 3.1.4, 3.1.5, 3.1.6_
 
-- [ ] 6. Atualizar configuração de ambiente
+- [x] 6. Atualizar configuração de ambiente
   - Implementar método get_session_repo no Environments
   - Configurar retorno de SessionRepositoryMock quando STAGE é "TEST"
   - Configurar retorno de SessionRepositoryDynamo quando STAGE é "DEV" ou "PROD"
@@ -95,7 +95,7 @@
   - Atualizar presenters de get_all_sessions e sync_sessions para usar Environments.get_session_repo()
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 8.3_
 
-- [ ] 7. Testar localmente com DynamoDB Local
+- [x] 7. Testar localmente com DynamoDB Local
   - Iniciar DynamoDB Local via docker: `docker run -p 8000:8000 amazon/dynamodb-local -sharedDB -inMemory`
   - Executar script load_session_mock_to_dynamo.py para criar tabela e carregar dados
   - Testar get_session_by_id com DynamoDB Local retorna sessão correta

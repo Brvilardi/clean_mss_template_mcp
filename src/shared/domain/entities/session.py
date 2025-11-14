@@ -197,17 +197,18 @@ class Session(abc.ABC):
     @staticmethod
     def validate_level_value(level_value: int) -> bool:
         """
-        Validates level_value is a valid numeric level (100-400).
+        Validates level_value is a valid numeric level (0, 100-500).
         
         Args:
             level_value: The numeric level to validate
             
         Returns:
-            True if valid (100, 200, 300, or 400), False otherwise
+            True if valid (0, 100, 200, 300, 400, or 500), False otherwise
+            Note: 0 is used for sessions without a defined level
         """
         if type(level_value) != int:
             return False
-        if level_value not in [100, 200, 300, 400]:
+        if level_value not in [0, 100, 200, 300, 400, 500]:
             return False
         return True
 

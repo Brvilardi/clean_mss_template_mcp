@@ -29,6 +29,8 @@ class Environments:
     dynamo_table_name: str
     dynamo_partition_key: str
     dynamo_sort_key: str
+    sessions_dynamo_table_name: str
+    sessions_dynamo_partition_key: str
     cloud_frontget_user_presenter_distribution_domain: str
     mss_name: str 
 
@@ -51,6 +53,8 @@ class Environments:
             self.dynamo_table_name = "user_mss_template-table"
             self.dynamo_partition_key = "PK"
             self.dynamo_sort_key = "SK"
+            self.sessions_dynamo_table_name = "sessions_mss_template-table"
+            self.sessions_dynamo_partition_key = "PK"
             self.cloud_front_distribution_domain = "https://d3q9q9q9q9q9q9.cloudfront.net"
 
         else:
@@ -60,6 +64,8 @@ class Environments:
             self.dynamo_table_name = os.environ.get("DYNAMO_TABLE_NAME")
             self.dynamo_partition_key = os.environ.get("DYNAMO_PARTITION_KEY")
             self.dynamo_sort_key = os.environ.get("DYNAMO_SORT_KEY")
+            self.sessions_dynamo_table_name = os.environ.get("SESSIONS_DYNAMO_TABLE_NAME")
+            self.sessions_dynamo_partition_key = os.environ.get("SESSIONS_DYNAMO_PARTITION_KEY")
             self.cloud_front_distribution_domain = os.environ.get("CLOUD_FRONT_DISTRIBUTION_DOMAIN")
 
     @staticmethod
@@ -75,12 +81,12 @@ class Environments:
 
     @staticmethod
     def get_session_repo() -> ISessionRepository:
-        if Environments.get_envs().stage in [STAGE.DEV, STAGE.TEST]:
+        if Environments.get_envs().stage == STAGE.TEST:
             from src.shared.infra.repositories.session_repository_mock import SessionRepositoryMock
             return SessionRepositoryMock
         elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:
-            from src.shared.infra.repositories.session_repository_sqlite import SessionRepositorySQLite
-            return SessionRepositorySQLite
+            from src.shared.infra.repositories.session_repository_dynamo import SessionRepositoryDynamo
+            return SessionRepositoryDynamo
         else:
             raise Exception("No repository found for this stage")
 

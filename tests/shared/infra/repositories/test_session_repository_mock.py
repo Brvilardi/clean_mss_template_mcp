@@ -27,13 +27,52 @@ class Test_SessionRepositoryMock:
         assert len(sessions) == 5
     
     def test_sync_sessions_from_api(self):
-        """Test syncing sessions from API"""
+        """Test syncing sessions from API inserts new session"""
         repo = SessionRepositoryMock()
+        initial_count = len(repo.sessions)
+        
         result = repo.sync_sessions_from_api()
         
         assert result["inserted"] == 1
         assert result["updated"] == 0
-        assert len(repo.sessions) == 6
+        assert len(repo.sessions) == initial_count + 1
+        
+        # Verify the new session was added
+        new_session = repo.get_session_by_id("1753651605588006qrST")
+        assert new_session.short_id == "AI303"
+        assert new_session.title == "Generative AI Applications with Amazon Bedrock"
+        assert new_session.venue_name == "Venetian"
+        assert new_session.level_value == 300
+    
+    def test_sync_sessions_from_api_idempotent(self):
+        """Test syncing sessions from API is idempotent (doesn't duplicate)"""
+        repo = SessionRepositoryMock()
+        
+        # First sync
+        result1 = repo.sync_sessions_from_api()
+        assert result1["inserted"] == 1
+        assert result1["updated"] == 0
+        count_after_first = len(repo.sessions)
+        
+        # Second sync - should not insert duplicate
+        result2 = repo.sync_sessions_from_api()
+        assert result2["inserted"] == 0
+        assert result2["updated"] == 0
+        assert len(repo.sessions) == count_after_first
+    
+    def test_sync_sessions_from_api_returns_correct_counts(self):
+        """Test sync_sessions_from_api returns correct inserted and updated counts"""
+        repo = SessionRepositoryMock()
+        
+        result = repo.sync_sessions_from_api()
+        
+        # Verify return structure
+        assert "inserted" in result
+        assert "updated" in result
+        assert isinstance(result["inserted"], int)
+        assert isinstance(result["updated"], int)
+        assert result["inserted"] >= 0
+        assert result["updated"] >= 0
     
     def test_get_sessions_by_venue(self):
         """Test retrieving sessions filtered by venue"""

@@ -241,10 +241,20 @@ class Test_Session:
     def test_validate_level_value_400(self):
         """Test validate_level_value with 400"""
         assert Session.validate_level_value(400) is True
+    
+    def test_validate_level_value_500(self):
+        """Test validate_level_value with 500 (Distinguished level)"""
+        assert Session.validate_level_value(500) is True
+    
+    def test_validate_level_value_0(self):
+        """Test validate_level_value with 0 (no level specified)"""
+        assert Session.validate_level_value(0) is True
 
     def test_validate_level_value_invalid(self):
         """Test validate_level_value with invalid value"""
-        assert Session.validate_level_value(500) is False
+        assert Session.validate_level_value(600) is False
+        assert Session.validate_level_value(50) is False
+        assert Session.validate_level_value(150) is False
 
     def test_validate_level_value_not_int(self):
         """Test validate_level_value with non-integer type"""
@@ -253,7 +263,7 @@ class Test_Session:
     def test_level_value_invalid(self):
         """Test Session constructor with invalid level_value"""
         data = self.valid_session_data.copy()
-        data["level_value"] = 500
+        data["level_value"] = 600
         with pytest.raises(EntityError):
             Session(**data)
 
