@@ -319,3 +319,27 @@ class Test_SessionRepositoryDynamo:
             level_sessions = repo.get_sessions_by_level(test_level)
             assert len(level_sessions) > 0
             assert all(s.level_value == test_level for s in level_sessions)
+    
+    # @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_session_by_id_performance(self):
+        """Test that get_session_by_id completes in less than 500ms"""
+        import time
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Get first session from mock for testing
+        test_session_id = repo_mock.sessions[0].session_id
+        
+        # Measure performance
+        start_time = time.time()
+        result = repo.get_session_by_id(test_session_id)
+        end_time = time.time()
+        
+        elapsed_ms = (end_time - start_time) * 1000
+        
+        # Verify result is correct
+        assert result.session_id == test_session_id
+        
+        # Verify performance is under 500ms
+        assert elapsed_ms < 500, f"get_session_by_id took {elapsed_ms:.2f}ms, expected < 500ms"

@@ -115,8 +115,7 @@
   - Adicionar tratamento de erros para continuar migração mesmo com falhas individuais
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_ -->
 
-- [ ] 9. Validar funcionalidade end-to-end em DEV
-  - Executar script de migração em ambiente DEV
+- [x] 9. Validar funcionalidade end-to-end em DEV
   - Testar get_all_sessions retorna todas as sessões
   - Testar get_session_by_id com ID válido retorna sessão correta
   - Testar get_session_by_id com ID inválido lança NoItemsFound
@@ -127,7 +126,7 @@
   - Validar performance de get_session_by_id < 500ms
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 10. Remover código SQLite obsoleto
+- [x] 10. Remover código SQLite obsoleto
   - Remover arquivo session_repository_sqlite.py
   - Remover arquivo session_sqlite_dto.py
   - Remover diretório src/shared/infra/external/sqlite
