@@ -351,8 +351,8 @@ This implementation plan follows Clean Architecture principles to build a featur
 
 ## Application Layer - Get Sessions by Level Feature
 
-- [ ] 20. Implement Get Sessions by Level feature
-- [ ] 20.1 Implement Get Sessions by Level use case
+- [x] 20. Implement Get Sessions by Level feature
+- [x] 20.1 Implement Get Sessions by Level use case
   - Create `src/modules/get_sessions_by_level/` directory structure
   - Create `src/modules/get_sessions_by_level/__init__.py`
   - Create `src/modules/get_sessions_by_level/app/` directory
@@ -367,7 +367,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test invalid level_value raises EntityError
   - _Requirements: 3.1, 3.2, 6.4_
 
-- [ ] 20.2 Implement Get Sessions by Level view model
+- [x] 20.2 Implement Get Sessions by Level view model
   - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_viewmodel.py`
   - Create GetSessionsByLevelViewmodel class with sessions list
   - Implement to_dict() returning JSON-serializable dict with sessions array, count, and level_value
@@ -377,7 +377,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test with empty sessions list
   - _Requirements: 3.3, 6.5_
 
-- [ ] 20.3 Implement Get Sessions by Level controller
+- [x] 20.3 Implement Get Sessions by Level controller
   - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_controller.py` with GetSessionsByLevelController class
   - Implement __call__(request) method
   - Extract level_value from query parameters
@@ -395,7 +395,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test error response mapping
   - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
 
-- [ ] 20.4 Implement Get Sessions by Level presenter
+- [x] 20.4 Implement Get Sessions by Level presenter
   - Create `src/modules/get_sessions_by_level/app/get_sessions_by_level_presenter.py`
   - Initialize repository using Environments.get_session_repo()
   - Create use case and controller instances
@@ -404,7 +404,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Return LambdaHttpResponse with proper status codes
   - _Requirements: 6.5_
 
-- [ ] 20.5 Add Get Sessions by Level Lambda to CDK stack
+- [x] 20.5 Add Get Sessions by Level Lambda to CDK stack
   - Update `iac/iac/lambda_stack.py` to add get_sessions_by_level_function
   - Configure as GET method with query parameter level_value
   - Set memory to 512 MB and timeout to 30 seconds
