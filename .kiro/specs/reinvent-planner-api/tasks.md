@@ -233,8 +233,8 @@ This implementation plan follows Clean Architecture principles to build a featur
 
 ## Application Layer - Get Sessions by Venue Feature
 
-- [ ] 18. Implement Get Sessions by Venue feature
-- [ ] 18.1 Implement Get Sessions by Venue use case
+- [x] 18. Implement Get Sessions by Venue feature
+- [x] 18.1 Implement Get Sessions by Venue use case
   - Create `src/modules/get_sessions_by_venue/` directory structure
   - Create `src/modules/get_sessions_by_venue/__init__.py`
   - Create `src/modules/get_sessions_by_venue/app/` directory
@@ -248,7 +248,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test case-insensitive matching
   - _Requirements: 3.1, 3.2, 6.4_
 
-- [ ] 18.2 Implement Get Sessions by Venue view model
+- [x] 18.2 Implement Get Sessions by Venue view model
   - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_viewmodel.py`
   - Create GetSessionsByVenueViewmodel class with sessions list
   - Implement to_dict() returning JSON-serializable dict with sessions array, count, and venue_name
@@ -258,7 +258,7 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test with empty sessions list
   - _Requirements: 3.3, 6.5_
 
-- [ ] 18.3 Implement Get Sessions by Venue controller
+- [x] 18.3 Implement Get Sessions by Venue controller
   - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_controller.py` with GetSessionsByVenueController class
   - Implement __call__(request) method
   - Extract venue_name from query parameters
@@ -272,13 +272,20 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Test error response mapping
   - _Requirements: 3.3, 3.4, 3.5, 5.2, 6.5_
 
-- [ ] 18.4 Implement Get Sessions by Venue presenter
+- [x] 18.4 Implement Get Sessions by Venue presenter
   - Create `src/modules/get_sessions_by_venue/app/get_sessions_by_venue_presenter.py`
   - Initialize repository using Environments.get_session_repo()
   - Create use case and controller instances
   - Implement lambda_handler(event, context) function
   - Convert Lambda event to LambdaHttpRequest
   - Return LambdaHttpResponse with proper status codes
+  - _Requirements: 6.5_
+
+- [x] 18.5 Add Get Sessions by Venue Lambda to CDK stack
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_venue_function
+  - Configure as GET method with query parameter venue_name
+  - Set memory to 512 MB and timeout to 30 seconds
+  - Add function to `functions_that_need_dynamo_permissions` list
   - _Requirements: 6.5_
 
 ---
@@ -331,6 +338,13 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Implement lambda_handler(event, context) function
   - Convert Lambda event to LambdaHttpRequest
   - Return LambdaHttpResponse with proper status codes
+  - _Requirements: 6.5_
+
+- [ ] 19.5 Add Get Sessions by Day Lambda to CDK stack
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_day_function
+  - Configure as GET method with query parameter day
+  - Set memory to 512 MB and timeout to 30 seconds
+  - Add function to `functions_that_need_dynamo_permissions` list
   - _Requirements: 6.5_
 
 ---
@@ -390,6 +404,13 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Return LambdaHttpResponse with proper status codes
   - _Requirements: 6.5_
 
+- [ ] 20.5 Add Get Sessions by Level Lambda to CDK stack
+  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_level_function
+  - Configure as GET method with query parameter level_value
+  - Set memory to 512 MB and timeout to 30 seconds
+  - Add function to `functions_that_need_dynamo_permissions` list
+  - _Requirements: 6.5_
+
 ---
 
 ## Application Layer - Get Sessions by Short ID Feature
@@ -442,21 +463,11 @@ This implementation plan follows Clean Architecture principles to build a featur
   - Return LambdaHttpResponse with proper status codes
   - _Requirements: 6.5_
 
----
-
-## Infrastructure as Code - New Query Endpoints
-
-- [ ] 22. Add new Lambda functions to CDK stack
-  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_venue_function
-  - Configure as GET method with query parameter venue_name
-  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_day_function
-  - Configure as GET method with query parameter day
-  - Update `iac/iac/lambda_stack.py` to add get_sessions_by_level_function
-  - Configure as GET method with query parameter level_value
+- [ ] 21.5 Add Get Sessions by Short ID Lambda to CDK stack
   - Update `iac/iac/lambda_stack.py` to add get_sessions_by_short_id_function
   - Configure as GET method with query parameter short_id
-  - Set memory to 512 MB and timeout to 30 seconds for all functions
-  - Note: SQLite functions do NOT need DynamoDB permissions
+  - Set memory to 512 MB and timeout to 30 seconds
+  - Add function to `functions_that_need_dynamo_permissions` list
   - _Requirements: 6.5_
 
 ---
@@ -470,5 +481,7 @@ This implementation plan follows Clean Architecture principles to build a featur
 - Auto-initialization ensures database is populated on cold starts
 - All validation happens in domain layer
 - Error handling follows existing patterns in the codebase
+- **New query endpoints (tasks 18-21) use DynamoDB** via SessionRepositoryDynamo
 - New query endpoints filter sessions from the existing get_all_sessions repository method
 - All filtering logic is implemented in use cases, not in repository layer
+- All new Lambda functions require DynamoDB permissions and must be added to `functions_that_need_dynamo_permissions` list
