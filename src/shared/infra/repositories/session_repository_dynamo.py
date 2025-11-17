@@ -276,3 +276,29 @@ class SessionRepositoryDynamo(ISessionRepository):
         
         # Results are already ordered by start_datetime (GSI sort key)
         return sessions
+
+    def get_sessions_by_short_id(self, short_id: str) -> List[Session]:
+        """
+        Returns sessions filtered by short_id (case-insensitive).
+        Note: Without a GSI for short_id, this performs a scan with filter.
+        
+        Args:
+            short_id: The short ID to filter by (e.g., "TNC301")
+            
+        Returns:
+            List of Session entities (typically 0 or 1 result)
+        """
+        from boto3.dynamodb.conditions import Attr
+        
+        # Scan with filter expression for short_id (case-insensitive)
+        # Note: DynamoDB doesn't support case-insensitive comparisons natively,
+        # so we need to filter in application code
+        all_sessions = self.get_all_sessions()
+        
+        # Filter by short_id (case-insensitive)
+        filtered_sessions = [
+            session for session in all_sessions
+            if session.short_id.lower() == short_id.lower()
+        ]
+        
+        return filtered_sessions

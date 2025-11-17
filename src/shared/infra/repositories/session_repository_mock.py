@@ -249,3 +249,20 @@ class SessionRepositoryMock(ISessionRepository):
         
         # Sort by start_datetime
         return sorted(filtered_sessions, key=lambda s: s.start_datetime)
+
+    def get_sessions_by_short_id(self, short_id: str) -> List[Session]:
+        """
+        Returns sessions filtered by short_id (case-insensitive).
+        
+        Args:
+            short_id: The short ID to filter by (e.g., "TNC301")
+            
+        Returns:
+            List of Session entities (typically 0 or 1 result)
+        """
+        filtered_sessions = [
+            session for session in self.sessions
+            if session.short_id.lower() == short_id.lower()
+        ]
+        
+        return filtered_sessions

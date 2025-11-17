@@ -131,6 +131,16 @@ class LambdaStack(Construct):
             timeout_seconds=30
         )
 
+        self.get_sessions_by_short_id_function = self.create_lambda_api_gateway_integration(
+            module_name="get_sessions_by_short_id",
+            method="GET",
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables,
+            needs_external_deps=True,
+            memory_size=512,
+            timeout_seconds=30
+        )
+
         self.functions_that_need_dynamo_permissions = [self.get_user_function, self.create_user_function,
                                                   self.delete_user_function, self.update_user_function]
 
@@ -138,4 +148,5 @@ class LambdaStack(Construct):
                                                                  self.sync_sessions_function,
                                                                  self.get_sessions_by_venue_function,
                                                                  self.get_sessions_by_day_function,
-                                                                 self.get_sessions_by_level_function]
+                                                                 self.get_sessions_by_level_function,
+                                                                 self.get_sessions_by_short_id_function]

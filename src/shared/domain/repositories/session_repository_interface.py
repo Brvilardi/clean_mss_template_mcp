@@ -83,3 +83,16 @@ class ISessionRepository(ABC):
             List of Session entities ordered by start_datetime
         """
         pass
+
+    @abstractmethod
+    def get_sessions_by_short_id(self, short_id: str) -> List[Session]:
+        """
+        Returns sessions filtered by short_id (case-insensitive).
+        
+        Args:
+            short_id: The short ID to filter by (e.g., "TNC301")
+            
+        Returns:
+            List of Session entities (typically 0 or 1 result)
+        """
+        pass
