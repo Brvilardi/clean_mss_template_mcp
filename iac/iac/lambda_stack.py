@@ -53,34 +53,6 @@ class LambdaStack(Construct):
             description="Layer with external dependencies like requests"
         )
 
-        self.get_user_function = self.create_lambda_api_gateway_integration(
-            module_name="get_user",
-            method="GET",
-            mss_student_api_resource=api_gateway_resource,
-            environment_variables=environment_variables
-        )
-
-        self.create_user_function = self.create_lambda_api_gateway_integration(
-            module_name="create_user",
-            method="POST",
-            mss_student_api_resource=api_gateway_resource,
-            environment_variables=environment_variables
-        )
-
-        self.delete_user_function = self.create_lambda_api_gateway_integration(
-            module_name="delete_user",
-            method="POST",
-            mss_student_api_resource=api_gateway_resource,
-            environment_variables=environment_variables
-        )
-
-        self.update_user_function = self.create_lambda_api_gateway_integration(
-            module_name="update_user",
-            method="POST",
-            mss_student_api_resource=api_gateway_resource,
-            environment_variables=environment_variables
-        )
-
         self.get_all_sessions_function = self.create_lambda_api_gateway_integration(
             module_name="get_all_sessions",
             method="GET",
@@ -141,8 +113,7 @@ class LambdaStack(Construct):
             timeout_seconds=30
         )
 
-        self.functions_that_need_dynamo_permissions = [self.get_user_function, self.create_user_function,
-                                                  self.delete_user_function, self.update_user_function]
+        self.functions_that_need_dynamo_permissions = []
 
         self.functions_that_need_sessions_dynamo_permissions = [self.get_all_sessions_function,
                                                                  self.sync_sessions_function,

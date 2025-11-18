@@ -79,7 +79,7 @@ Our folder structure was developed specially for our projects.
 ### Files and Directories 📁
 
 - Files have the same name as the classes
-- snake_case 🐍 (ex: `./app/create_user_controller.py`)
+- snake_case 🐍 (ex: `./app/get_all_sessions_controller.py`)
 
 ### Classes 🕴
 - #### Pattern 📟
@@ -88,17 +88,17 @@ Our folder structure was developed specially for our projects.
 
 - #### Types 🧭
 
-    - **Interface** starts with "I" --> `IUserRepository`, `ISelfieRepository` 😀
-    - **Repository** have the same name as interface, without the "I" and the type in final (ex: `UserRepositoryMock`, `SelfieRepositoryDynamo`) 🥬
-    - **Controller** ends with "Controller" --> `CreateUserController`, `GetSelfieController` 🎮
-    - **Usecase** ends with "Usecase" --> `CreateUserUsecase`, `GetSelfieUsecase` 🏠
-    - **Viewmodel** ends with "Viewmodel" --> `CreateUserViewmodel`, `GetSelfieViewmodel` 👀
-    - **Presenter** ends with "Presenter" --> `CreateUserPresenter`, `GetSelfiePresenter`🎁
+    - **Interface** starts with "I" --> `ISessionRepository`, `ISelfieRepository` 😀
+    - **Repository** have the same name as interface, without the "I" and the type in final (ex: `SessionRepositoryMock`, `SelfieRepositoryDynamo`) 🥬
+    - **Controller** ends with "Controller" --> `GetAllSessionsController`, `GetSelfieController` 🎮
+    - **Usecase** ends with "Usecase" --> `GetAllSessionsUsecase`, `GetSelfieUsecase` 🏠
+    - **Viewmodel** ends with "Viewmodel" --> `GetAllSessionsViewmodel`, `GetSelfieViewmodel` 👀
+    - **Presenter** ends with "Presenter" --> `GetAllSessionsPresenter`, `GetSelfiePresenter`🎁
 
 ### Methods 👨‍🏫
 
 - snake_case 🐍
-- Try associate with a verb (ex: `create_user`, `get_user`, `update_selfie`)
+- Try associate with a verb (ex: `get_all_sessions`, `sync_sessions`, `update_selfie`)
 
 ### Variables 🅰
 
@@ -113,7 +113,7 @@ Our folder structure was developed specially for our projects.
 ### Tests 📄
 
 - snake_case 🐍
-- "test" follow by class name (ex: `test_cadastrar_usuario_valido`, `test_cadastrar_usuario_sem_email`)
+- "test" follow by class name (ex: `test_get_all_sessions`, `test_sync_sessions_success`)
     - The files must start with "test" to pytest recognition
 
 ### Commit 💢

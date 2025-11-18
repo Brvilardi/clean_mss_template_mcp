@@ -2,8 +2,6 @@ import enum
 from enum import Enum
 import os
 from src.shared.domain.observability.observability_interface import IObservability
-
-from src.shared.domain.repositories.user_repository_interface import IUserRepository
 from src.shared.domain.repositories.session_repository_interface import ISessionRepository
 
 
@@ -31,7 +29,7 @@ class Environments:
     dynamo_sort_key: str
     sessions_dynamo_table_name: str
     sessions_dynamo_partition_key: str
-    cloud_frontget_user_presenter_distribution_domain: str
+    cloud_front_distribution_domain: str
     mss_name: str 
 
     def _configure_local(self):
@@ -50,7 +48,7 @@ class Environments:
             self.s3_bucket_name = "bucket-test"
             self.region = "sa-east-1"
             self.endpoint_url = "http://localhost:8000"
-            self.dynamo_table_name = "user_mss_template-table"
+            self.dynamo_table_name = "sessions_mss_template-table"
             self.dynamo_partition_key = "PK"
             self.dynamo_sort_key = "SK"
             self.sessions_dynamo_table_name = "sessions_mss_template-table"
@@ -67,17 +65,6 @@ class Environments:
             self.sessions_dynamo_table_name = os.environ.get("SESSIONS_DYNAMO_TABLE_NAME")
             self.sessions_dynamo_partition_key = os.environ.get("SESSIONS_DYNAMO_PARTITION_KEY")
             self.cloud_front_distribution_domain = os.environ.get("CLOUD_FRONT_DISTRIBUTION_DOMAIN")
-
-    @staticmethod
-    def get_user_repo() -> IUserRepository:
-        if Environments.get_envs().stage == STAGE.TEST:
-            from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
-            return UserRepositoryMock
-        elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:
-            from src.shared.infra.repositories.user_repository_dynamo import UserRepositoryDynamo
-            return UserRepositoryDynamo
-        else:
-            raise Exception("No repository found for this stage")
 
     @staticmethod
     def get_session_repo() -> ISessionRepository:
@@ -100,6 +87,7 @@ class Environments:
             return ObservabilityAWS
         else:
             raise Exception("No observability class found for this stage")
+    
     @staticmethod
     def get_envs() -> "Environments":
         """
@@ -113,4 +101,3 @@ class Environments:
 
     def __repr__(self):
         return self.__dict__
-
