@@ -3,10 +3,13 @@ from aws_cdk import (
     Stack,
     # aws_sqs as sqs,
 )
+
+from aws_cdk import aws_apigateway as apigw
 from constructs import Construct
 from aws_cdk.aws_apigateway import RestApi, Cors
 
 from .lambda_stack import LambdaStack
+from .mcp_stack import MCPStack
 from .template_dynamo_table import TemplateDynamoTable
 from .sessions_dynamo_table import SessionsDynamoTable
 
@@ -23,7 +26,11 @@ class TemplateStack(Stack):
                                     {
                                         "allow_origins": Cors.ALL_ORIGINS,
                                         "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                                        "allow_headers": ["*"]
+                                        "allow_headers": [
+                                            *apigw.Cors.DEFAULT_HEADERS,
+                                            "mcp-protocol-version",
+                                            "mcp-session-id"
+                                            ]
                                     },
                                 )
 
@@ -31,7 +38,11 @@ class TemplateStack(Stack):
         {
             "allow_origins": Cors.ALL_ORIGINS,
             "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": Cors.DEFAULT_HEADERS
+            "allow_headers": [
+                *apigw.Cors.DEFAULT_HEADERS,
+                "mcp-protocol-version",
+                "mcp-session-id"
+            ]
         }
                                                                )
 
@@ -58,5 +69,10 @@ class TemplateStack(Stack):
 
         for function in self.lambda_stack.functions_that_need_sessions_dynamo_permissions:
             self.sessions_dynamo_table.table.grant_read_write_data(function)
+
+
+        self.mcp_stack = MCPStack(self, api_gateway_resource=api_gateway_resource,
+                                        environment_variables=ENVIRONMENT_VARIABLES,
+                                  dependencies_layers= self.lambda_stack.external_dependencies_layer, region=self.region)
 
         

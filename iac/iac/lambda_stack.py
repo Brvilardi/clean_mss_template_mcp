@@ -23,7 +23,8 @@ class LambdaStack(Construct):
             self, module_name.title(),
             code=lambda_.Code.from_asset(f"../src/modules/{module_name}"),
             handler=f"app.{module_name}_presenter.lambda_handler",
-            runtime=lambda_.Runtime.PYTHON_3_9,
+            runtime=lambda_.Runtime.PYTHON_3_14,
+            architecture=lambda_.Architecture.ARM_64,
             layers=layers,
             environment=environment_variables,
             memory_size=memory_size,
@@ -41,7 +42,7 @@ class LambdaStack(Construct):
 
         self.lambda_layer = lambda_.LayerVersion(self, "Template_Layer",
                                                  code=lambda_.Code.from_asset("./lambda_layer_out_temp"),
-                                                 compatible_runtimes=[lambda_.Runtime.PYTHON_3_9]
+                                                 compatible_runtimes=[lambda_.Runtime.PYTHON_3_14]
                                                  )
 
         self.lambda_power_tools = lambda_.LayerVersion.from_layer_version_arn(self, "Lambda_Power_Tools", layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:68")
@@ -49,7 +50,8 @@ class LambdaStack(Construct):
         self.external_dependencies_layer = PythonLayerVersion(
             self, "External_Dependencies_Layer",
             entry="./lambda_external_dependencies",
-            compatible_runtimes=[lambda_.Runtime.PYTHON_3_9],
+            compatible_runtimes=[lambda_.Runtime.PYTHON_3_14],
+            compatible_architectures=[lambda_.Architecture.ARM_64],
             description="Layer with external dependencies like requests"
         )
 

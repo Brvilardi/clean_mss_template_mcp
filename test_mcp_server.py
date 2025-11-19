@@ -11,7 +11,7 @@ def test_mcp_server():
     
     # Start the MCP server
     process = subprocess.Popen(
-        [sys.executable, "src/mcp/server.py"],
+        [sys.executable, "src/mcp/mcp_server.py"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

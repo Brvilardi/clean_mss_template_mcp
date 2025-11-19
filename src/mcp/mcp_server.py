@@ -13,6 +13,8 @@ import sys
 from typing import Dict, Any
 from fastmcp import FastMCP
 import requests
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 
 # Configure logging to stderr (stdout reserved for MCP protocol)
 logging.basicConfig(
@@ -24,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger("mcp.server")
 
 # Initialize FastMCP server
-mcp = FastMCP("reinvent-planner-api")
+mcp = FastMCP("reinvent-planner-api", stateless_http=True)
 
 # Configuration from environment variables
 API_BASE_URL = os.getenv(
@@ -454,6 +456,20 @@ def get_sessions_by_level(level: int) -> Dict[str, Any]:
         }
 
 
-if __name__ == "__main__":
-    logger.info("Starting MCP server with stdio transport")
-    mcp.run()
+# Define CORS middleware
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=["*"],          # 🔓 debug; later swap to ["http://localhost:6274"]
+        allow_methods=["*"],          # GET, POST, OPTIONS, etc.
+        allow_headers=["*"],          # accept all request headers
+        expose_headers=["mcp-session-id"],
+    )
+]
+
+
+app = mcp.http_app(middleware=middleware, path="/mcp")
+
+# if __name__ == "__main__":
+#     logger.info(f"Starting MCP server with HTTP")
+#     mcp.run(transport="http", app=app)
