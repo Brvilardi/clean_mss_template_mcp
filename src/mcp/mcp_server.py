@@ -84,6 +84,7 @@ def get_all_sessions() -> Dict[str, Any]:
         
         result = response.json()
         logger.info(f"Successfully retrieved {result.get('count', 0)} sessions")
+        logger.info("Sessions: ", result)
         
         return result
         
