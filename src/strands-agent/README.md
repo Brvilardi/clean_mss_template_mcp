@@ -6,6 +6,8 @@ A Strands-based AI agent that helps users organize their AWS re:Invent conferenc
 
 This agent leverages the existing MCP server to access session data and provides intelligent recommendations based on re:Invent best practices, venue logistics, and session characteristics.
 
+The agent is deployed as an AWS Lambda function using AWS Lambda Web Adapter, providing a cost-effective serverless architecture with automatic scaling.
+
 ## Features
 
 - **Session Discovery**: Natural language queries for finding sessions by topic, venue, day, or difficulty level
@@ -20,8 +22,8 @@ This agent leverages the existing MCP server to access session data and provides
 src/strands-agent/
 ├── agent.py           # Agent factory and system prompt
 ├── config.py          # Environment configuration
-├── entrypoint.py      # FastAPI application for Agent Core
-├── Dockerfile         # ARM64 container configuration
+├── entrypoint.py      # FastAPI application
+├── run.sh             # Lambda handler script
 ├── requirements.txt   # Python dependencies
 └── README.md         # This file
 ```
@@ -29,7 +31,7 @@ src/strands-agent/
 ## Dependencies
 
 - **strands-agents**: Core agent framework
-- **fastapi**: Web framework for Agent Core endpoints
+- **fastapi**: Web framework for HTTP endpoints
 - **uvicorn**: ASGI server
 - **boto3**: AWS SDK for Python
 - **httpx**: HTTP client for MCP communication
@@ -47,14 +49,17 @@ The agent is configured via environment variables:
 | `MODEL_TEMPERATURE` | Model temperature | `0.7` |
 | `ENVIRONMENT` | Deployment environment | `development` |
 | `LOG_LEVEL` | Logging level | `INFO` |
+| `AWS_LAMBDA_EXEC_WRAPPER` | Lambda Web Adapter wrapper | `/opt/bootstrap` |
+| `AWS_LWA_PORT` | Lambda Web Adapter port | `8000` |
+| `AWS_LWA_REMOVE_BASE_PATH` | API Gateway base path to remove | `/mss-template` |
 
 ## Local Development
 
 ### Prerequisites
 
-- Python 3.11+
-- Docker (for containerized testing)
+- Python 3.14+
 - AWS credentials configured
+- MCP server endpoint accessible
 
 ### Setup
 
@@ -66,18 +71,23 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Run locally (once implemented)
-python entrypoint.py
+# Set environment variables
+export MCP_ENDPOINT="https://3yf7o1q3s2.execute-api.us-east-1.amazonaws.com/prod/mss-template/mcp"
+export AWS_REGION="us-east-1"
+export MODEL_NAME="anthropic.claude-3-5-sonnet-20241022-v2:0"
 ```
 
 ### Testing Locally
 
 ```bash
-# Test health check
-curl http://localhost:8080/ping
+# Start the FastAPI application
+python -m uvicorn entrypoint:app --host 0.0.0.0 --port 8000
+
+# In another terminal, test health check
+curl http://localhost:8000/ping
 
 # Test agent invocation
-curl -X POST http://localhost:8080/invocations \
+curl -X POST http://localhost:8000/invocations \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
@@ -86,70 +96,51 @@ curl -X POST http://localhost:8080/invocations \
   }'
 ```
 
-## Docker Deployment
+## Lambda Deployment
 
-### Build Image
+The agent is deployed as an AWS Lambda function using AWS Lambda Web Adapter. This provides:
 
-```bash
-# Build for ARM64 (required by Agent Core)
-docker buildx build --platform linux/arm64 -t reinvent-planner-agent:latest .
+- **Cost Optimization**: Pay only for actual invocations (ARM64 architecture for 20% savings)
+- **Automatic Scaling**: Lambda handles scaling automatically
+- **Simplified Infrastructure**: No container registry or Docker builds needed
+- **Fast Deployments**: Direct code deployment without container builds
 
-# Test locally
-docker run --platform linux/arm64 -p 8080:8080 \
-  -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
-  -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
-  -e AWS_SESSION_TOKEN="$AWS_SESSION_TOKEN" \
-  -e AWS_REGION="$AWS_REGION" \
-  reinvent-planner-agent:latest
+### Architecture
+
+```
+API Gateway → Lambda (with Lambda Web Adapter) → FastAPI → Strands Agent → MCP Server
 ```
 
-### Push to ECR
-
-```bash
-# Authenticate with ECR
-aws ecr get-login-password --region us-east-1 | \
-  docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
-
-# Tag and push
-docker tag reinvent-planner-agent:latest \
-  <account-id>.dkr.ecr.us-east-1.amazonaws.com/reinvent-planner-agent:latest
-
-docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/reinvent-planner-agent:latest
-```
-
-## Deployment to AWS Bedrock Agent Core
-
-The agent is deployed using AWS CDK. See the infrastructure code in `iac/iac/strands_agent_stack.py`.
+The Lambda Web Adapter converts Lambda events to HTTP requests, allowing the FastAPI application to run unchanged.
 
 ### Deploy with CDK
 
 ```bash
 cd iac
-cdk deploy StrandsAgentStack
+cdk deploy LambdaStack
 ```
+
+This deploys:
+- Lambda function with Python 3.14 runtime (ARM64)
+- Lambda Web Adapter layer
+- Dependencies layer
+- API Gateway integration at `/mss-template/agent`
+- IAM permissions for Bedrock model invocation
 
 ### Invoke Deployed Agent
 
-```python
-import boto3
-import json
-
-client = boto3.client('bedrock-agentcore', region_name='us-east-1')
-
-payload = json.dumps({
+```bash
+# Via API Gateway
+curl -X POST https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent/invocations \
+  -H "Content-Type: application/json" \
+  -d '{
     "input": {
-        "prompt": "Help me find sessions about machine learning"
+      "prompt": "Help me find sessions about machine learning"
     }
-})
+  }'
 
-response = client.invoke_agent_runtime(
-    agentRuntimeArn='arn:aws:bedrock-agentcore:us-east-1:<account-id>:runtime/<runtime-id>',
-    runtimeSessionId='unique-session-id-at-least-33-chars-long',
-    payload=payload
-)
-
-response_body = response['response'].read()
-print(json.loads(response_body))
+# Health check
+curl https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent/ping
 ```
 
 ## Agent Capabilities
@@ -199,29 +190,34 @@ To view metrics:
 ## Architecture
 
 ```
-User → Agent Core → FastAPI App → Strands Agent → MCP Client → MCP Server → Lambda Functions → DynamoDB
+User → API Gateway → Lambda (Lambda Web Adapter) → FastAPI → Strands Agent → MCP Client → API Gateway → MCP Server Lambda → re:Invent Planner API → DynamoDB
 ```
 
-## Implementation Status
+### Key Components
 
-- [x] Task 1: Project structure and dependencies
-- [ ] Task 2: Agent core module
-- [ ] Task 3: FastAPI entrypoint
-- [ ] Task 4: Docker configuration
-- [ ] Task 5: Session discovery features
-- [ ] Task 6: CDK infrastructure
-- [ ] Task 7: Documentation
-- [ ] Task 8: Unit tests
-- [ ] Task 9: Integration tests
-- [ ] Task 10: Deployment
+1. **Lambda Function**: Runs the FastAPI application with Python 3.14 (ARM64)
+2. **Lambda Web Adapter**: Converts Lambda events to HTTP requests
+3. **FastAPI Application**: Provides `/invocations` and `/ping` endpoints
+4. **Strands Agent**: Processes queries using Bedrock models
+5. **MCP Client**: Communicates with MCP server via HTTPS
+6. **API Gateway**: Provides HTTP endpoints for both agent and MCP server
+
+## Lambda Configuration
+
+- **Runtime**: Python 3.14
+- **Architecture**: ARM64 (20% cost savings)
+- **Memory**: 512 MB
+- **Timeout**: 30 seconds
+- **Handler**: `run.sh` (shell script that starts uvicorn)
+- **Layers**: Dependencies layer + Lambda Web Adapter layer
 
 ## References
 
 - [Strands Agents Documentation](https://strandsagents.com/latest/)
-- [AWS Bedrock Agent Core Documentation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/)
+- [AWS Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter)
 - [MCP Protocol](https://modelcontextprotocol.io/)
-- [Project Requirements](.kiro/specs/strands-reinvent-agent/requirements.md)
-- [Project Design](.kiro/specs/strands-reinvent-agent/design.md)
+- [Lambda Deployment Spec](.kiro/specs/lambda-strands-agent-deployment/requirements.md)
+- [Lambda Deployment Design](.kiro/specs/lambda-strands-agent-deployment/design.md)
 
 ## License
 

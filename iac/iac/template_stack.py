@@ -10,6 +10,7 @@ from aws_cdk.aws_apigateway import RestApi, Cors
 
 from .lambda_stack import LambdaStack
 from .mcp_stack import MCPStack
+from .strands_agent_stack import StrandsAgentStack
 from .template_dynamo_table import TemplateDynamoTable
 from .sessions_dynamo_table import SessionsDynamoTable
 
@@ -74,5 +75,14 @@ class TemplateStack(Stack):
         self.mcp_stack = MCPStack(self, api_gateway_resource=api_gateway_resource,
                                         environment_variables=ENVIRONMENT_VARIABLES,
                                   dependencies_layers= self.lambda_stack.external_dependencies_layer, region=self.region)
+
+
+        self.strands_agent_stack = StrandsAgentStack(
+            self,
+            api_gateway_resource=api_gateway_resource,
+            environment_variables=ENVIRONMENT_VARIABLES,
+            dependencies_layer=self.lambda_stack.external_dependencies_layer,
+            region=self.region
+        )
 
         

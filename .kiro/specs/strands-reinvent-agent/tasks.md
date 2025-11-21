@@ -36,8 +36,8 @@
     - Return user-friendly error messages
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 4. Create Docker configuration
-  - [ ] 4.1 Create `src/strands-agent/Dockerfile`
+- [x] 4. Create Docker configuration
+  - [x] 4.1 Create `src/strands-agent/Dockerfile`
     - Use ARM64 Python base image
     - Install dependencies from requirements.txt
     - Copy application files
@@ -45,12 +45,12 @@
     - Set CMD to run uvicorn
     - _Requirements: 10.1, 10.2_
   
-  - [ ] 4.2 Create `.dockerignore` file
+  - [x] 4.2 Create `.dockerignore` file
     - Exclude unnecessary files from Docker context
     - _Requirements: 10.2_
 
 - [ ] 5. Implement session discovery features
-  - [ ] 5.1 Verify MCP tools are accessible through agent
+  - [x] 5.1 Verify MCP tools are accessible through agent
     - Test get_all_sessions_paginated tool
     - Test get_session_by_short_id tool
     - Test get_sessions_by_venue tool
@@ -58,28 +58,28 @@
     - Test get_sessions_by_level tool
     - _Requirements: 1.4, 2.1, 2.2, 2.3, 2.4, 2.5_
   
-  - [ ] 5.2 Implement pagination handling logic
+  - [x] 5.2 Implement pagination handling logic
     - Agent automatically handles pagination through MCP tools
     - Limit automatic pagination to prevent excessive calls
     - Inform users when results are truncated
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 6. Implement CDK infrastructure stack
-  - [ ] 6.1 Create `iac/iac/strands_agent_stack.py`
+- [x] 6. Implement CDK infrastructure stack
+  - [x] 6.1 Create `iac/iac/strands_agent_stack.py`
     - Create ECR repository for agent image
     - Implement DockerImageAsset for ARM64 build
     - Create IAM role for Agent Core with Bedrock permissions
     - Create CloudWatch log group
     - _Requirements: 10.1, 10.2, 10.6, 10.7_
   
-  - [ ] 6.2 Implement Agent Core custom resource
+  - [x] 6.2 Implement Agent Core custom resource
     - Create Lambda function for Agent Core management
     - Implement create/update/delete handlers
     - Configure IAM permissions for Lambda
     - Add dependency on Docker image asset
     - _Requirements: 10.1, 10.6, 10.7_
   
-  - [ ] 6.3 Update `iac/app.py` to include Strands agent stack
+  - [x] 6.3 Update `iac/app.py` to include Strands agent stack
     - Import StrandsAgentStack
     - Instantiate stack in CDK app
     - _Requirements: 10.1, 10.7_

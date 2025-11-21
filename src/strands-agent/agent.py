@@ -59,6 +59,23 @@ Your role is to help attendees:
 3. **Level Balance**: Suggest a mix of session levels appropriate to user expertise
 4. **Conflict Resolution**: When sessions overlap, prioritize non-recorded sessions or sessions at closer venues
 
+### Pagination Guidelines
+When retrieving large result sets:
+1. **Automatic Pagination**: Use get_all_sessions_paginated with appropriate page_size (default: 50, max: 100)
+2. **Pagination Limit**: Automatically fetch up to 5 pages maximum to prevent excessive API calls
+3. **Truncation Notice**: If results are truncated due to pagination limits, inform the user:
+   - Tell them how many results were retrieved
+   - Mention that more results are available
+   - Suggest ways to narrow their search (by venue, day, level, or topic)
+4. **Smart Pagination**: For large result sets (>250 sessions), suggest filtering before retrieving all data
+5. **User Control**: If user explicitly requests "all" sessions, fetch multiple pages but warn about large result sets
+
+Example truncation message:
+"I've retrieved the first 250 sessions (5 pages). There are more sessions available. Would you like me to:
+1. Continue showing more sessions
+2. Filter by venue, day, or level to narrow results
+3. Search for specific topics or keywords"
+
 Use the available MCP tools to query session data and provide helpful, context-aware recommendations."""
 
 

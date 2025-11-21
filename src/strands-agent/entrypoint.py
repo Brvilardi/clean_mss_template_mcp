@@ -1,7 +1,7 @@
 """
 FastAPI entrypoint for the re:Invent Planner Agent.
 
-This module provides the FastAPI application for Agent Core deployment,
+This module provides the FastAPI application for Lambda deployment with Lambda Web Adapter,
 including request/response handling, error management, and health checks.
 """
 
@@ -137,7 +137,7 @@ class ErrorResponse(BaseModel):
 })
 async def invoke_agent(request: InvocationRequest):
     """
-    Agent Core invocation endpoint.
+    Agent invocation endpoint.
     
     Processes user queries and returns agent responses with error handling
     and retry logic for tool invocations.
@@ -321,7 +321,7 @@ async def invoke_agent(request: InvocationRequest):
 @app.get("/ping")
 async def ping():
     """
-    Health check endpoint required by Agent Core.
+    Health check endpoint for Lambda.
     
     Returns agent status and basic health information.
     
