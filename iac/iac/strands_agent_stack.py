@@ -101,8 +101,8 @@ class StrandsAgentStack(Construct):
             method="ANY",
             api_gateway_resource=api_gateway_resource,
             environment_variables=envs,
-            memory_size=2048,
-            timeout_seconds=30,
+            memory_size=3008,  # Increased for better performance
+            timeout_seconds=120,  # Increased timeout for agent processing
             layers=self.layers
         )
         

@@ -57,8 +57,8 @@ class MCPStack(Construct):
             method="ANY",
             mss_student_api_resource=api_gateway_resource,
             environment_variables=envs,
-            memory_size=2048,
-            timeout_seconds=30,
+            memory_size=3008,  # Increased for better performance
+            timeout_seconds=60,  # Increased timeout for complex queries
             layers=self.layers
         )
         

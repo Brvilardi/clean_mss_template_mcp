@@ -25,7 +25,9 @@ class Config:
     
     # Model Configuration
     MODEL_PROVIDER: str = os.getenv("MODEL_PROVIDER", "bedrock")
-    MODEL_NAME: str = os.getenv("MODEL_NAME", "us.anthropic.claude-3-5-sonnet-20241022-v2:0")
+    # Use Haiku for faster responses (3-5x faster than Sonnet)
+    # For better quality, use: us.anthropic.claude-3-5-sonnet-20241022-v2:0
+    MODEL_NAME: str = os.getenv("MODEL_NAME", "anthropic.claude-3-haiku-20240307-v1:0")
     
     # Deployment Configuration
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
