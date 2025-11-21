@@ -235,3 +235,98 @@ class Test_SessionRepositoryMock:
         assert sessions[0].start_datetime == "2025-12-04T08:00:00.000Z"
         assert sessions[1].start_datetime == "2025-12-04T21:00:00.000Z"
         assert sessions[2].start_datetime == "2025-12-08T20:00:00.000Z"
+    
+    def test_get_all_sessions_paginated_returns_correct_page_size(self):
+        """Test get_all_sessions_paginated returns correct page size"""
+        repo = SessionRepositoryMock()
+        sessions, next_token = repo.get_all_sessions_paginated(page_size=2)
+        
+        assert len(sessions) == 2
+        assert next_token is not None
+    
+    def test_get_all_sessions_paginated_with_multiple_pages(self):
+        """Test get_all_sessions_paginated with multiple pages"""
+        repo = SessionRepositoryMock()
+        
+        # First page
+        page1, token1 = repo.get_all_sessions_paginated(page_size=2)
+        assert len(page1) == 2
+        assert token1 is not None
+        
+        # Second page
+        page2, token2 = repo.get_all_sessions_paginated(page_size=2, last_evaluated_key=token1)
+        assert len(page2) == 2
+        assert token2 is not None
+        
+        # Third page (last page with 1 item)
+        page3, token3 = repo.get_all_sessions_paginated(page_size=2, last_evaluated_key=token2)
+        assert len(page3) == 1
+        assert token3 is None
+    
+    def test_get_all_sessions_paginated_token_works_across_requests(self):
+        """Test pagination token works across requests"""
+        repo = SessionRepositoryMock()
+        
+        # Get first page
+        page1, token1 = repo.get_all_sessions_paginated(page_size=3)
+        
+        # Get second page using token
+        page2, token2 = repo.get_all_sessions_paginated(page_size=3, last_evaluated_key=token1)
+        
+        # Verify no overlap
+        page1_ids = [s.session_id for s in page1]
+        page2_ids = [s.session_id for s in page2]
+        assert len(set(page1_ids) & set(page2_ids)) == 0
+    
+    def test_get_all_sessions_paginated_last_page_returns_none_token(self):
+        """Test last page returns None next_token"""
+        repo = SessionRepositoryMock()
+        
+        # Get all sessions in one page
+        sessions, next_token = repo.get_all_sessions_paginated(page_size=100)
+        
+        assert len(sessions) == 5
+        assert next_token is None
+    
+    def test_get_all_sessions_paginated_expired_token_raises_error(self):
+        """Test expired token raises ValueError"""
+        repo = SessionRepositoryMock()
+        
+        # Create an expired token (issued_at in the past)
+        import time
+        from src.shared.helpers.pagination.pagination_helper import PaginationHelper
+        
+        pagination_helper = PaginationHelper()
+        expired_token_data = {
+            'index': 2,
+            'issued_at': int(time.time()) - 400,  # 400 seconds ago (expired)
+            'ttl': 300
+        }
+        
+        import base64
+        import json
+        expired_token = base64.b64encode(json.dumps(expired_token_data).encode('utf-8')).decode('utf-8')
+        
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size=2, last_evaluated_key=expired_token)
+        
+        assert "expired" in str(exc_info.value).lower()
+    
+    def test_get_all_sessions_paginated_invalid_page_size_raises_error(self):
+        """Test invalid page_size raises ValueError"""
+        repo = SessionRepositoryMock()
+        
+        # Test page_size < 1
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size=0)
+        assert "at least 1" in str(exc_info.value)
+        
+        # Test page_size > 100
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size=101)
+        assert "cannot exceed 100" in str(exc_info.value)
+        
+        # Test page_size not an integer
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size="invalid")
+        assert "must be an integer" in str(exc_info.value)

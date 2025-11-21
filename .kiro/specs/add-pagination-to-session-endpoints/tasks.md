@@ -35,15 +35,15 @@ This implementation plan adds new paginated endpoints for session retrieval whil
 
 ## Feature 1: Get All Sessions Paginated
 
-- [ ] 2. Implement Get All Sessions Paginated
-- [ ] 2.1 Add repository interface method
+- [x] 2. Implement Get All Sessions Paginated
+- [x] 2.1 Add repository interface method
   - Update `src/shared/domain/repositories/session_repository_interface.py`
   - Add `get_all_sessions_paginated(page_size, last_evaluated_key)` abstract method
   - Method returns `Tuple[List[Session], Optional[str]]`
   - Add comprehensive docstring with parameter descriptions
   - _Requirements: 3.1, 3.2, 5.1, 5.2, 8.1_
 
-- [ ] 2.2 Implement Mock repository method
+- [x] 2.2 Implement Mock repository method
   - Update `src/shared/infra/repositories/session_repository_mock.py`
   - Import PaginationHelper
   - Implement `get_all_sessions_paginated(page_size, last_evaluated_key)`
@@ -52,7 +52,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Return appropriate next_token when more results exist
   - _Requirements: 3.1, 3.2, 5.1, 5.2, 8.2_
 
-- [ ] 2.3 Write Mock repository method tests
+- [x] 2.3 Write Mock repository method tests
   - Update `tests/shared/infra/repositories/test_session_repository_mock.py`
   - Test `get_all_sessions_paginated` returns correct page size
   - Test `get_all_sessions_paginated` with multiple pages
@@ -62,7 +62,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Test invalid page_size raises ValueError
   - _Requirements: 3.1, 3.2, 5.2_
 
-- [ ] 2.4 Implement DynamoDB repository method
+- [x] 2.4 Implement DynamoDB repository method
   - Update `src/shared/infra/repositories/session_repository_dynamo.py`
   - Import PaginationHelper
   - Implement `get_all_sessions_paginated(page_size, last_evaluated_key)`
@@ -75,7 +75,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Maintain consistent ordering with `ScanIndexForward: True`
   - _Requirements: 3.1, 3.2, 5.1, 5.2, 5.3, 7.1, 7.2, 7.3, 8.2_
 
-- [ ] 2.5 Write DynamoDB repository method tests
+- [x] 2.5 Write DynamoDB repository method tests
   - Update `tests/shared/infra/repositories/test_session_repository_dynamo.py`
   - Mark tests with `@pytest.mark.skip(reason="Needs dynamoDB")`
   - Test `get_all_sessions_paginated` with page_size only
@@ -86,7 +86,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Test invalid page_size raises ValueError
   - _Requirements: 3.1, 3.2, 5.2, 5.3, 7.1_
 
-- [ ] 2.6 Implement use case
+- [x] 2.6 Implement use case
   - Create `src/modules/get_all_sessions_paginated/` directory structure
   - Create `src/modules/get_all_sessions_paginated/__init__.py`
   - Create `src/modules/get_all_sessions_paginated/app/` directory
@@ -98,7 +98,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Return tuple of (sessions, next_token)
   - _Requirements: 3.1, 3.2, 8.3_
 
-- [ ] 2.7 Write use case tests
+- [x] 2.7 Write use case tests
   - Create `tests/modules/get_all_sessions_paginated/` directory structure
   - Create `tests/modules/get_all_sessions_paginated/app/test_get_all_sessions_paginated_usecase.py`
   - Test use case with mock repository
@@ -107,7 +107,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Test use case with page_size and last_evaluated_key
   - _Requirements: 3.1, 3.2_
 
-- [ ] 2.8 Implement view model
+- [x] 2.8 Implement view model
   - Create `src/modules/get_all_sessions_paginated/app/get_all_sessions_paginated_viewmodel.py`
   - Implement `GetAllSessionsPaginatedViewmodel` class
   - Accept sessions list, page_size, and next_token in constructor
@@ -117,7 +117,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Include last_evaluated_key only when has_more is true
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 8.5_
 
-- [ ] 2.9 Write view model tests
+- [x] 2.9 Write view model tests
   - Create `tests/modules/get_all_sessions_paginated/app/test_get_all_sessions_paginated_viewmodel.py`
   - Test `to_dict()` output format
   - Test has_more is true when next_token exists
@@ -127,7 +127,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Test page_size is included in response
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 2.10 Implement controller
+- [x] 2.10 Implement controller
   - Create `src/modules/get_all_sessions_paginated/app/get_all_sessions_paginated_controller.py`
   - Implement `GetAllSessionsPaginatedController` class
   - Implement `__call__(request)` method
@@ -144,7 +144,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Handle Exception (500)
   - _Requirements: 1.1, 1.5, 2.1, 2.5, 4.1, 6.1, 6.2, 6.3, 6.4, 6.5, 8.4_
 
-- [ ] 2.11 Write controller tests
+- [x] 2.11 Write controller tests
   - Create `tests/modules/get_all_sessions_paginated/app/test_get_all_sessions_paginated_controller.py`
   - Test successful request with page_size only
   - Test successful request with page_size and last_evaluated_key
@@ -157,7 +157,7 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Test response includes pagination metadata
   - _Requirements: 1.1, 1.5, 2.1, 2.5, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 2.12 Implement presenter
+- [x] 2.12 Implement presenter
   - Create `src/modules/get_all_sessions_paginated/app/get_all_sessions_paginated_presenter.py`
   - Initialize repository using `Environments.get_session_repo()`
   - Create use case instance
@@ -168,14 +168,14 @@ This implementation plan adds new paginated endpoints for session retrieval whil
   - Return LambdaHttpResponse with proper status codes
   - _Requirements: 8.5_
 
-- [ ] 2.13 Write presenter tests
+- [x] 2.13 Write presenter tests
   - Create `tests/modules/get_all_sessions_paginated/app/test_get_all_sessions_paginated_presenter.py`
   - Test lambda_handler with valid event
   - Test response status code is 200
   - Test response body includes pagination metadata
   - _Requirements: 8.5_
 
-- [ ] 2.14 Add Lambda function to CDK stack
+- [x] 2.14 Add Lambda function to CDK stack
   - Update `iac/iac/lambda_stack.py`
   - Add `get_all_sessions_paginated_function` as GET method on `/sessions/paginated`
   - Set memory to 512 MB and timeout to 30 seconds

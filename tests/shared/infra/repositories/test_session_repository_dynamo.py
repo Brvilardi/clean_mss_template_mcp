@@ -343,3 +343,101 @@ class Test_SessionRepositoryDynamo:
         
         # Verify performance is under 500ms
         assert elapsed_ms < 500, f"get_session_by_id took {elapsed_ms:.2f}ms, expected < 500ms"
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_all_sessions_paginated_with_page_size_only(self):
+        """Test get_all_sessions_paginated with page_size only"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        sessions, next_token = repo.get_all_sessions_paginated(page_size=2)
+        
+        assert len(sessions) <= 2
+        # Should have next_token if there are more than 2 sessions
+        if len(repo.get_all_sessions()) > 2:
+            assert next_token is not None
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_all_sessions_paginated_with_page_size_and_token(self):
+        """Test get_all_sessions_paginated with page_size and last_evaluated_key"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        # Get first page
+        page1, token1 = repo.get_all_sessions_paginated(page_size=2)
+        
+        # Get second page using token
+        page2, token2 = repo.get_all_sessions_paginated(page_size=2, last_evaluated_key=token1)
+        
+        # Verify no overlap
+        page1_ids = [s.session_id for s in page1]
+        page2_ids = [s.session_id for s in page2]
+        assert len(set(page1_ids) & set(page2_ids)) == 0
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_all_sessions_paginated_returns_correct_next_token(self):
+        """Test pagination returns correct next_token when more results exist"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        # Get first page with small page size
+        sessions, next_token = repo.get_all_sessions_paginated(page_size=1)
+        
+        # Should have next_token if there are more than 1 session
+        total_sessions = len(repo.get_all_sessions())
+        if total_sessions > 1:
+            assert next_token is not None
+        else:
+            assert next_token is None
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_all_sessions_paginated_returns_none_token_on_last_page(self):
+        """Test pagination returns None next_token on last page"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        # Get all sessions in one page
+        sessions, next_token = repo.get_all_sessions_paginated(page_size=100)
+        
+        # Should not have next_token on last page
+        assert next_token is None
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_all_sessions_paginated_expired_token_raises_error(self):
+        """Test expired token raises ValueError"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        # Create an expired token
+        import time
+        import base64
+        import json
+        
+        expired_token_data = {
+            'PK': 'SESSION#test',
+            'issued_at': int(time.time()) - 400,  # 400 seconds ago (expired)
+            'ttl': 300
+        }
+        
+        expired_token = base64.b64encode(json.dumps(expired_token_data).encode('utf-8')).decode('utf-8')
+        
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size=2, last_evaluated_key=expired_token)
+        
+        assert "expired" in str(exc_info.value).lower()
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_get_all_sessions_paginated_invalid_page_size_raises_error(self):
+        """Test invalid page_size raises ValueError"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        # Test page_size < 1
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size=0)
+        assert "at least 1" in str(exc_info.value)
+        
+        # Test page_size > 100
+        with pytest.raises(ValueError) as exc_info:
+            repo.get_all_sessions_paginated(page_size=101)
+        assert "cannot exceed 100" in str(exc_info.value)

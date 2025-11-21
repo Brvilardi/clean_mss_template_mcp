@@ -40,51 +40,145 @@ logger.info(f"MCP Server initialized with API_BASE_URL: {API_BASE_URL}")
 logger.info(f"Request timeout set to: {TIMEOUT} seconds")
 
 
-@mcp.tool()
-def get_all_sessions() -> Dict[str, Any]:
-    """
-    Retrieve all re:invent sessions from the database.
+# @mcp.tool()
+# def get_all_sessions() -> Dict[str, Any]:
+#     """
+#     Retrieve all re:invent sessions from the database.
     
-    Returns a list of all sessions with their complete details including
-    title, venue, speakers, schedule, topics, and difficulty level.
+#     Returns a list of all sessions with their complete details including
+#     title, venue, speakers, schedule, topics, and difficulty level.
+    
+#     Returns:
+#         Dictionary containing:
+#         - sessions: List of session objects with full details
+#         - count: Total number of sessions
+        
+#         On error, returns:
+#         - error: Error message string
+#         - status_code: HTTP status code
+    
+#     Example response:
+#         {
+#             "sessions": [
+#                 {
+#                     "session_id": "abc123",
+#                     "short_id": "TNC301",
+#                     "title": "Advanced Networking",
+#                     "venue_name": "Mandalay Bay",
+#                     "day": "Monday",
+#                     "level": "Advanced",
+#                     ...
+#                 }
+#             ],
+#             "count": 150
+#         }
+#     """
+#     try:
+#         logger.info("Tool invoked: get_all_sessions")
+        
+#         url = f"{API_BASE_URL}/get-all-sessions"
+#         logger.debug(f"Making GET request to: {url}")
+        
+#         response = requests.get(url, timeout=TIMEOUT)
+#         response.raise_for_status()
+        
+#         result = response.json()
+#         logger.info(f"Successfully retrieved {result.get('count', 0)} sessions")
+#         logger.info("Sessions: ", result)
+        
+#         return result
+        
+#     except requests.exceptions.RequestException as e:
+#         error_msg = str(e)
+#         status_code = getattr(e.response, 'status_code', 500) if hasattr(e, 'response') else 500
+        
+#         logger.error(
+#             f"Error in get_all_sessions: {error_msg}",
+#             extra={"status_code": status_code},
+#             exc_info=True
+#         )
+        
+#         return {
+#             "error": error_msg,
+#             "status_code": status_code
+#         }
+
+
+@mcp.tool()
+def get_all_sessions_paginated(
+    page_size: int = 50,
+    last_evaluated_key: str = None
+) -> Dict[str, Any]:
+    """
+    Retrieve re:invent sessions with pagination support.
+    
+    Returns sessions in pages to handle large datasets efficiently. Use this
+    tool when you need to process sessions in batches or when the full dataset
+    is too large. Pagination tokens expire after 5 minutes.
+    
+    Args:
+        page_size: Number of sessions per page (1-100, default: 50)
+        last_evaluated_key: Pagination token from previous response (optional)
     
     Returns:
         Dictionary containing:
-        - sessions: List of session objects with full details
-        - count: Total number of sessions
+        - sessions: List of session objects for current page
+        - count: Number of sessions in current page
+        - page_size: Requested page size
+        - has_more: Boolean indicating if more results exist
+        - last_evaluated_key: Token for next page (only if has_more is true)
         
         On error, returns:
         - error: Error message string
-        - status_code: HTTP status code
+        - status_code: HTTP status code (400 for invalid parameters)
     
-    Example response:
+    Example response (first page):
         {
-            "sessions": [
-                {
-                    "session_id": "abc123",
-                    "short_id": "TNC301",
-                    "title": "Advanced Networking",
-                    "venue_name": "Mandalay Bay",
-                    "day": "Monday",
-                    "level": "Advanced",
-                    ...
-                }
-            ],
-            "count": 150
+            "sessions": [...],
+            "count": 50,
+            "page_size": 50,
+            "has_more": true,
+            "last_evaluated_key": "eyJpbmRleCI6NTB9..."
+        }
+    
+    Example response (last page):
+        {
+            "sessions": [...],
+            "count": 25,
+            "page_size": 50,
+            "has_more": false
         }
     """
     try:
-        logger.info("Tool invoked: get_all_sessions")
+        logger.info(
+            f"Tool invoked: get_all_sessions_paginated with "
+            f"page_size={page_size}, has_token={last_evaluated_key is not None}"
+        )
         
-        url = f"{API_BASE_URL}/get-all-sessions"
-        logger.debug(f"Making GET request to: {url}")
+        # Validate page_size
+        if page_size < 1 or page_size > 100:
+            logger.warning(f"Invalid page_size: {page_size}")
+            return {
+                "error": "page_size must be between 1 and 100",
+                "status_code": 400
+            }
         
-        response = requests.get(url, timeout=TIMEOUT)
+        url = f"{API_BASE_URL}/get-all-sessions-paginated"
+        params = {"page_size": page_size}
+        
+        if last_evaluated_key:
+            params["last_evaluated_key"] = last_evaluated_key
+        
+        logger.debug(f"Making GET request to: {url} with params: {params}")
+        
+        response = requests.get(url, params=params, timeout=TIMEOUT)
         response.raise_for_status()
         
         result = response.json()
-        logger.info(f"Successfully retrieved {result.get('count', 0)} sessions")
-        logger.info("Sessions: ", result)
+        logger.info(
+            f"Successfully retrieved {result.get('count', 0)} sessions "
+            f"(has_more: {result.get('has_more', False)})"
+        )
         
         return result
         
@@ -92,11 +186,15 @@ def get_all_sessions() -> Dict[str, Any]:
         error_msg = str(e)
         status_code = getattr(e.response, 'status_code', 500) if hasattr(e, 'response') else 500
         
-        logger.error(
-            f"Error in get_all_sessions: {error_msg}",
-            extra={"status_code": status_code},
-            exc_info=True
-        )
+        # Check for specific error cases
+        if status_code == 400:
+            logger.warning(f"Bad request in get_all_sessions_paginated: {error_msg}")
+        else:
+            logger.error(
+                f"Error in get_all_sessions_paginated: {error_msg}",
+                extra={"status_code": status_code},
+                exc_info=True
+            )
         
         return {
             "error": error_msg,
@@ -286,7 +384,7 @@ def get_sessions_by_venue(venue: str) -> Dict[str, Any]:
         
         response = requests.get(
             url,
-            params={"venue": venue},
+            params={"venue_name": venue},
             timeout=TIMEOUT
         )
         response.raise_for_status()

@@ -1,8 +1,9 @@
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 
 from src.shared.domain.entities.session import Session
 from src.shared.domain.repositories.session_repository_interface import ISessionRepository
 from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.helpers.pagination.pagination_helper import PaginationHelper
 
 
 class SessionRepositoryMock(ISessionRepository):
@@ -266,3 +267,43 @@ class SessionRepositoryMock(ISessionRepository):
         ]
         
         return filtered_sessions
+
+    def get_all_sessions_paginated(
+        self,
+        page_size: int,
+        last_evaluated_key: Optional[str] = None
+    ) -> Tuple[List[Session], Optional[str]]:
+        """
+        Returns all sessions with simulated pagination.
+        
+        Args:
+            page_size: Maximum number of sessions to return (1-100)
+            last_evaluated_key: Base64-encoded pagination token from previous request
+            
+        Returns:
+            Tuple of (sessions list, next_page_token)
+            
+        Raises:
+            ValueError: If page_size is invalid or pagination token is expired/malformed
+        """
+        # Validate page size
+        pagination_helper = PaginationHelper()
+        page_size = pagination_helper.validate_page_size(page_size)
+        
+        # Decode start index from token
+        start_index = 0
+        if last_evaluated_key:
+            decoded = pagination_helper.decode_token(last_evaluated_key)
+            start_index = decoded.get('index', 0)
+        
+        # Slice results
+        end_index = start_index + page_size
+        page_sessions = self.sessions[start_index:end_index]
+        
+        # Generate next token if more results exist
+        next_token = None
+        if end_index < len(self.sessions):
+            next_key = {'index': end_index}
+            next_token = pagination_helper.encode_token(next_key)
+        
+        return page_sessions, next_token

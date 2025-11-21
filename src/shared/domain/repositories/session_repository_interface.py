@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 
 from src.shared.domain.entities.session import Session
 
@@ -94,5 +94,28 @@ class ISessionRepository(ABC):
             
         Returns:
             List of Session entities (typically 0 or 1 result)
+        """
+        pass
+
+    @abstractmethod
+    def get_all_sessions_paginated(
+        self,
+        page_size: int,
+        last_evaluated_key: Optional[str] = None
+    ) -> Tuple[List[Session], Optional[str]]:
+        """
+        Returns sessions from storage with pagination.
+        
+        Args:
+            page_size: Maximum number of sessions to return (1-100)
+            last_evaluated_key: Base64-encoded pagination token from previous request
+            
+        Returns:
+            Tuple of (sessions list, next_page_token)
+            - sessions list: List of Session entities for the current page
+            - next_page_token: Base64-encoded token for next page, None if no more results
+            
+        Raises:
+            ValueError: If page_size is invalid or pagination token is expired/malformed
         """
         pass
