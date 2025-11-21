@@ -29,10 +29,10 @@ logger = logging.getLogger("mcp.server")
 mcp = FastMCP("reinvent-planner-api", stateless_http=True)
 
 # Configuration from environment variables
-API_BASE_URL = os.getenv(
-    "API_GATEWAY_BASE_URL",
-    "https://3yf7o1q3s2.execute-api.us-east-1.amazonaws.com/prod/mss-template"
-)
+API_BASE_URL = os.getenv("API_GATEWAY_BASE_URL")
+if not API_BASE_URL:
+    raise ValueError("API_GATEWAY_BASE_URL environment variable is required")
+
 TIMEOUT = 30
 
 # Log configuration on startup

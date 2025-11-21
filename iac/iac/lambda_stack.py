@@ -28,7 +28,8 @@ class LambdaStack(Construct):
             layers=layers,
             environment=environment_variables,
             memory_size=memory_size,
-            timeout=Duration.seconds(timeout_seconds)
+            timeout=Duration.seconds(timeout_seconds),
+            tracing=lambda_.Tracing.ACTIVE
         )
 
         mss_student_api_resource.add_resource(module_name.replace("_", "-")).add_method(method,

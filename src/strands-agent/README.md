@@ -41,11 +41,11 @@ src/strands-agent/
 
 The agent is configured via environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MCP_ENDPOINT` | MCP server endpoint URL | `https://3yf7o1q3s2.execute-api.us-east-1.amazonaws.com/prod/mss-template/mcp` |
-| `AWS_REGION` | AWS region for Bedrock | `us-east-1` |
-| `MODEL_NAME` | Bedrock model ID | `anthropic.claude-3-5-sonnet-20241022-v2:0` |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `MCP_ENDPOINT` | MCP server endpoint URL | Yes (set by CDK) |
+| `AWS_REGION` | AWS region for Bedrock | Yes (default: `us-east-1`) |
+| `MODEL_NAME` | Bedrock model ID | Yes (default: `anthropic.claude-3-5-sonnet-20241022-v2:0`) |
 | `MODEL_TEMPERATURE` | Model temperature | `0.7` |
 | `ENVIRONMENT` | Deployment environment | `development` |
 | `LOG_LEVEL` | Logging level | `INFO` |
@@ -71,8 +71,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Set environment variables
-export MCP_ENDPOINT="https://3yf7o1q3s2.execute-api.us-east-1.amazonaws.com/prod/mss-template/mcp"
+# Set environment variables (MCP_ENDPOINT is set automatically by CDK deployment)
 export AWS_REGION="us-east-1"
 export MODEL_NAME="anthropic.claude-3-5-sonnet-20241022-v2:0"
 ```
@@ -130,8 +129,8 @@ This deploys:
 ### Invoke Deployed Agent
 
 ```bash
-# Via API Gateway
-curl -X POST https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent/invocations \
+# Via API Gateway (replace with your actual API Gateway URL from CDK outputs)
+curl -X POST https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/mss-template/agent/invocations \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
@@ -140,7 +139,7 @@ curl -X POST https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-tem
   }'
 
 # Health check
-curl https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent/ping
+curl https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/mss-template/agent/ping
 ```
 
 ## Agent Capabilities

@@ -24,7 +24,8 @@ class MCPStack(Construct):
             layers=layers,
             environment=environment_variables,
             memory_size=memory_size,
-            timeout=Duration.seconds(timeout_seconds)
+            timeout=Duration.seconds(timeout_seconds),
+            tracing=lambda_.Tracing.ACTIVE
         )
 
         mss_student_api_resource.add_resource("mcp").add_method(method,
@@ -34,7 +35,7 @@ class MCPStack(Construct):
 
         return function
 
-    def __init__(self, scope: Construct, api_gateway_resource: Resource, environment_variables: dict, dependencies_layers, region ) -> None:
+    def __init__(self, scope: Construct, api_gateway_resource: Resource, environment_variables: dict, dependencies_layers, region) -> None:
         super().__init__(scope, "Template_MCP")
 
         self.lambda_web_adapter_layer = PythonLayerVersion.from_layer_version_arn(
@@ -46,7 +47,7 @@ class MCPStack(Construct):
         self.layers.append(dependencies_layers)
         self.layers.append(self.lambda_web_adapter_layer)
 
-        envs = environment_variables
+        envs = environment_variables.copy()
         envs['AWS_LAMBDA_EXEC_WRAPPER'] = "/opt/bootstrap" # set location for the other layers to work
         envs['AWS_LWA_PORT'] = "8000" # set the port to handle FastMCP requests
         envs['AWS_LWA_REMOVE_BASE_PATH'] = "/mss-template" #remove the apigateway base path
@@ -55,9 +56,16 @@ class MCPStack(Construct):
             method="ANY",
             mss_student_api_resource=api_gateway_resource,
             environment_variables=envs,
-            memory_size=512,
+            memory_size=2048,
             timeout_seconds=30,
             layers=self.layers
+        )
+        
+        # Add API_GATEWAY_BASE_URL after function is created to avoid circular dependency
+        # This will be resolved at deployment time
+        self.mcp_server.add_environment(
+            "API_GATEWAY_BASE_URL",
+            f"https://{api_gateway_resource.api.rest_api_id}.execute-api.{region}.amazonaws.com/prod/mss-template"
         )
 
 

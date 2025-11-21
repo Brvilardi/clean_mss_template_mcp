@@ -97,8 +97,8 @@ def create_agent(mcp_endpoint: str) -> Agent:
     
     # Create Bedrock model (uses Claude 3.5 Sonnet with cross-region inference profile)
     model = BedrockModel(
-        model_id="us.anthropic.claude-3-5-sonnet-20241022-v2:0",
-        temperature=0.7,
+        model_id="anthropic.claude-3-haiku-20240307-v1:0",
+        temperature=0.1,
         region_name=os.getenv("AWS_REGION", "us-east-1")
     )
     

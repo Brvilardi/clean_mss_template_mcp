@@ -1,6 +1,7 @@
 from aws_cdk import (
     # Duration,
     Stack,
+    CfnOutput,
     # aws_sqs as sqs,
 )
 
@@ -72,10 +73,14 @@ class TemplateStack(Stack):
             self.sessions_dynamo_table.table.grant_read_write_data(function)
 
 
-        self.mcp_stack = MCPStack(self, api_gateway_resource=api_gateway_resource,
-                                        environment_variables=ENVIRONMENT_VARIABLES,
-                                  dependencies_layers= self.lambda_stack.external_dependencies_layer, region=self.region)
-
+        # Create MCP and Strands Agent stacks without URL dependencies
+        self.mcp_stack = MCPStack(
+            self,
+            api_gateway_resource=api_gateway_resource,
+            environment_variables=ENVIRONMENT_VARIABLES,
+            dependencies_layers=self.lambda_stack.external_dependencies_layer,
+            region=self.region
+        )
 
         self.strands_agent_stack = StrandsAgentStack(
             self,
@@ -83,6 +88,26 @@ class TemplateStack(Stack):
             environment_variables=ENVIRONMENT_VARIABLES,
             dependencies_layer=self.lambda_stack.external_dependencies_layer,
             region=self.region
+        )
+        
+        # Now that all resources are created, output the API Gateway URLs
+        # These use url_for_path which is safe after all integrations are complete
+        CfnOutput(
+            self, "ApiGatewayBaseUrl",
+            value=f"https://{self.rest_api.rest_api_id}.execute-api.{self.region}.amazonaws.com/prod/mss-template",
+            description="API Gateway base URL for all endpoints"
+        )
+        
+        CfnOutput(
+            self, "McpEndpointUrl",
+            value=f"https://{self.rest_api.rest_api_id}.execute-api.{self.region}.amazonaws.com/prod/mss-template/mcp",
+            description="MCP server endpoint URL"
+        )
+        
+        CfnOutput(
+            self, "StrandsAgentUrl",
+            value=f"https://{self.rest_api.rest_api_id}.execute-api.{self.region}.amazonaws.com/prod/mss-template/agent",
+            description="Strands Agent endpoint URL"
         )
 
         

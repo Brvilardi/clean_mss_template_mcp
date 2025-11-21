@@ -13,10 +13,11 @@ class Config:
     """Configuration for the re:Invent agent."""
     
     # MCP Server Configuration
-    MCP_ENDPOINT: str = os.getenv(
-        "MCP_ENDPOINT",
-        "https://3yf7o1q3s2.execute-api.us-east-1.amazonaws.com/prod/mss-template/mcp"
-    )
+    MCP_ENDPOINT: str = os.getenv("MCP_ENDPOINT")
+    
+    def __post_init__(self):
+        if not self.MCP_ENDPOINT:
+            raise ValueError("MCP_ENDPOINT environment variable is required")
     
     # Agent Configuration
     AGENT_NAME: str = os.getenv("AGENT_NAME", "re:Invent Planner Agent")
@@ -31,7 +32,7 @@ class Config:
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
     
     # Logging Configuration
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "DEBUG")
     
     @classmethod
     def is_production(cls) -> bool:

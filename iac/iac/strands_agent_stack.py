@@ -49,7 +49,8 @@ class StrandsAgentStack(Construct):
             layers=layers,
             environment=environment_variables,
             memory_size=memory_size,
-            timeout=Duration.seconds(timeout_seconds)
+            timeout=Duration.seconds(timeout_seconds),
+            tracing=lambda_.Tracing.ACTIVE
         )
 
         # Create API Gateway resource with proxy for all sub-paths
@@ -94,18 +95,21 @@ class StrandsAgentStack(Construct):
         envs['AWS_LWA_PORT'] = "8000"  # Port for FastAPI
         envs['AWS_LWA_REMOVE_BASE_PATH'] = "/mss-template/agent"  # Remove API Gateway base path including /agent
 
-        # Add MCP endpoint (API Gateway URL)
-        # The agent calls the MCP server through API Gateway
-        envs['MCP_ENDPOINT'] = 'https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/mcp'
-
         # Create Lambda function with API Gateway integration
         self.agent_function = self.create_lambda_api_gateway_integration(
             method="ANY",
             api_gateway_resource=api_gateway_resource,
             environment_variables=envs,
-            memory_size=512,
+            memory_size=2048,
             timeout_seconds=30,
             layers=self.layers
+        )
+        
+        # Add MCP_ENDPOINT after function is created to avoid circular dependency
+        # This will be resolved at deployment time
+        self.agent_function.add_environment(
+            "MCP_ENDPOINT",
+            f"https://{api_gateway_resource.api.rest_api_id}.execute-api.{region}.amazonaws.com/prod/mss-template/mcp"
         )
 
         # Grant Bedrock permissions
