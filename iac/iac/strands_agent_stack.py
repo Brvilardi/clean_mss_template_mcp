@@ -50,7 +50,8 @@ class StrandsAgentStack(Construct):
             environment=environment_variables,
             memory_size=memory_size,
             timeout=Duration.seconds(timeout_seconds),
-            tracing=lambda_.Tracing.ACTIVE
+            tracing=lambda_.Tracing.ACTIVE,
+            snap_start=lambda_.SnapStartConf.ON_PUBLISHED_VERSIONS
         )
 
         # Create API Gateway resource with proxy for all sub-paths

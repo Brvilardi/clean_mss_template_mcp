@@ -25,7 +25,8 @@ class MCPStack(Construct):
             environment=environment_variables,
             memory_size=memory_size,
             timeout=Duration.seconds(timeout_seconds),
-            tracing=lambda_.Tracing.ACTIVE
+            tracing=lambda_.Tracing.ACTIVE,
+            snap_start=lambda_.SnapStartConf.ON_PUBLISHED_VERSIONS
         )
 
         mss_student_api_resource.add_resource("mcp").add_method(method,
