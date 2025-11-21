@@ -555,6 +555,135 @@ def get_sessions_by_level(level: int) -> Dict[str, Any]:
         }
 
 
+@mcp.tool()
+def search_sessions(
+    day: str = None,
+    venue: str = None,
+    level: int = None,
+    keywords: str = None,
+    page_size: int = 50,
+    next_page_token: str = None
+) -> Dict[str, Any]:
+    """
+    Search sessions using multiple filter criteria with pagination.
+    
+    Performs an intelligent search across sessions using any combination of
+    filters. Supports keyword search across title, abstract, topics, and
+    areas of interest. Results are ordered by relevance when keywords are
+    provided, otherwise by start time.
+    
+    Args:
+        day: Filter by day (e.g., "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+        venue: Filter by venue name (e.g., "Mandalay Bay", "Venetian", "MGM Grand")
+        level: Filter by difficulty level (100, 200, 300, or 400)
+        keywords: Space-separated keywords to search (e.g., "security machine learning")
+        page_size: Number of results per page (1-100, default: 50)
+        next_page_token: Pagination token from previous response (optional)
+    
+    Returns:
+        Dictionary containing:
+        - sessions: List of matching session objects
+        - pagination: Object with page_size and next_page_token (if more results exist)
+        - message: Success message
+        
+        On error, returns:
+        - error: Error message string
+        - status_code: HTTP status code (400 for invalid parameters)
+    
+    Example response:
+        {
+            "sessions": [
+                {
+                    "session_id": "abc123",
+                    "short_id": "SEC301",
+                    "title": "Advanced Security Practices",
+                    "venue_name": "Venetian",
+                    "day": "Monday",
+                    "level": "Advanced",
+                    "level_value": 300,
+                    ...
+                }
+            ],
+            "pagination": {
+                "page_size": 50,
+                "next_page_token": "eyJQSyI6IlNFU1NJT04jYWJjMTIzIn0="
+            },
+            "message": "search completed successfully"
+        }
+    
+    Search tips:
+    - Use multiple keywords for broader results (OR logic)
+    - Combine filters for more specific results
+    - Keywords search across title, abstract, topics, and areas of interest
+    - Results with keyword matches in title appear first
+    """
+    try:
+        logger.info(
+            f"Tool invoked: search_sessions with "
+            f"day={day}, venue={venue}, level={level}, "
+            f"keywords={keywords}, page_size={page_size}, "
+            f"has_token={next_page_token is not None}"
+        )
+        
+        # Validate page_size
+        if page_size < 1 or page_size > 100:
+            logger.warning(f"Invalid page_size: {page_size}")
+            return {
+                "error": "page_size must be between 1 and 100",
+                "status_code": 400
+            }
+        
+        url = f"{API_BASE_URL}/search-sessions"
+        params = {"page_size": page_size}
+        
+        # Add optional filters
+        if day:
+            params["day"] = day
+        if venue:
+            params["venue"] = venue
+        if level is not None:
+            params["level"] = level
+        if keywords:
+            params["keywords"] = keywords
+        if next_page_token:
+            params["next_page_token"] = next_page_token
+        
+        logger.debug(f"Making GET request to: {url} with params: {params}")
+        
+        response = requests.get(url, params=params, timeout=TIMEOUT)
+        response.raise_for_status()
+        
+        result = response.json()
+        session_count = len(result.get('sessions', []))
+        has_more = result.get('pagination', {}).get('next_page_token') is not None
+        
+        logger.info(
+            f"Successfully retrieved {session_count} sessions "
+            f"(has_more: {has_more})"
+        )
+        
+        return result
+        
+    except requests.exceptions.RequestException as e:
+        error_msg = str(e)
+        status_code = getattr(e.response, 'status_code', 500) if hasattr(e, 'response') else 500
+        
+        # Check for specific error cases
+        if status_code == 400:
+            logger.warning(f"Bad request in search_sessions: {error_msg}")
+        else:
+            logger.error(
+                f"Error in search_sessions: {error_msg}",
+                extra={"status_code": status_code},
+                exc_info=True
+            )
+        
+        return {
+            "error": error_msg,
+            "status_code": status_code
+        }
+
+
 # Define CORS middleware
 middleware = [
     Middleware(

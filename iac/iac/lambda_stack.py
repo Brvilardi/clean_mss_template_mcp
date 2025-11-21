@@ -126,6 +126,16 @@ class LambdaStack(Construct):
             timeout_seconds=30
         )
 
+        self.search_sessions_function = self.create_lambda_api_gateway_integration(
+            module_name="search_sessions",
+            method="GET",
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables,
+            needs_external_deps=True,
+            memory_size=512,
+            timeout_seconds=10
+        )
+
         self.functions_that_need_dynamo_permissions = []
 
         self.functions_that_need_sessions_dynamo_permissions = [self.get_all_sessions_function,
@@ -134,4 +144,5 @@ class LambdaStack(Construct):
                                                                  self.get_sessions_by_day_function,
                                                                  self.get_sessions_by_level_function,
                                                                  self.get_sessions_by_short_id_function,
-                                                                 self.get_all_sessions_paginated_function]
+                                                                 self.get_all_sessions_paginated_function,
+                                                                 self.search_sessions_function]

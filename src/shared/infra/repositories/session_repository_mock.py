@@ -307,3 +307,118 @@ class SessionRepositoryMock(ISessionRepository):
             next_token = pagination_helper.encode_token(next_key)
         
         return page_sessions, next_token
+
+    def search_sessions(
+        self,
+        day: Optional[str] = None,
+        venue: Optional[str] = None,
+        level: Optional[int] = None,
+        keywords: Optional[str] = None,
+        page_size: int = 50,
+        last_evaluated_key: Optional[str] = None
+    ) -> Tuple[List[Session], Optional[str]]:
+        """
+        Search sessions with multiple filter criteria and pagination.
+        
+        Args:
+            day: Filter by day (e.g., "Monday", "Tuesday")
+            venue: Filter by venue name
+            level: Filter by level value (100, 200, 300, 400)
+            keywords: Space-separated keywords to search in title, abstract, topics, areas
+            page_size: Maximum results per page (1-100, default 50)
+            last_evaluated_key: Pagination token from previous request
+            
+        Returns:
+            Tuple of (sessions list, next_page_token)
+            
+        Raises:
+            ValueError: If parameters are invalid
+        """
+        # Validate page size
+        pagination_helper = PaginationHelper()
+        page_size = pagination_helper.validate_page_size(page_size)
+        
+        # Start with all sessions
+        filtered_sessions = self.sessions.copy()
+        
+        # Apply indexed filters
+        if day is not None:
+            filtered_sessions = [s for s in filtered_sessions if s.day == day]
+        
+        if venue is not None:
+            filtered_sessions = [s for s in filtered_sessions if s.venue_name == venue]
+        
+        if level is not None:
+            filtered_sessions = [s for s in filtered_sessions if s.level_value == level]
+        
+        # Apply keyword filtering with relevance scoring
+        if keywords is not None and keywords.strip():
+            keyword_list = keywords.lower().split()
+            sessions_with_scores = []
+            
+            for session in filtered_sessions:
+                score = self._calculate_relevance_score(session, keyword_list)
+                if score > 0:
+                    sessions_with_scores.append((session, score))
+            
+            # Sort by relevance score (descending), then by start_datetime (ascending)
+            sessions_with_scores.sort(key=lambda x: (-x[1], x[0].start_datetime))
+            filtered_sessions = [s[0] for s in sessions_with_scores]
+        else:
+            # No keyword search - sort by start_datetime only
+            filtered_sessions.sort(key=lambda s: s.start_datetime)
+        
+        # Apply pagination
+        start_index = 0
+        if last_evaluated_key:
+            decoded = pagination_helper.decode_token(last_evaluated_key)
+            start_index = decoded.get('index', 0)
+        
+        # Slice results
+        end_index = start_index + page_size
+        page_sessions = filtered_sessions[start_index:end_index]
+        
+        # Generate next token if more results exist
+        next_token = None
+        if end_index < len(filtered_sessions):
+            next_key = {'index': end_index}
+            next_token = pagination_helper.encode_token(next_key)
+        
+        return page_sessions, next_token
+    
+    def _calculate_relevance_score(self, session: Session, keywords: List[str]) -> int:
+        """
+        Calculate relevance score for a session based on keyword matches.
+        Higher score = more relevant.
+        
+        Args:
+            session: Session entity to score
+            keywords: List of lowercase keywords to search for
+            
+        Returns:
+            Relevance score (0 if no matches)
+        """
+        score = 0
+        
+        for keyword in keywords:
+            # Title matches (highest priority)
+            if keyword in session.title.lower():
+                score += 10
+            
+            # Abstract matches
+            if keyword in session.abstract.lower():
+                score += 5
+            
+            # Topic matches
+            for topic in session.topics:
+                if keyword in topic.lower():
+                    score += 3
+                    break
+            
+            # Area of interest matches
+            for area in session.areas_of_interest:
+                if keyword in area.lower():
+                    score += 2
+                    break
+        
+        return score

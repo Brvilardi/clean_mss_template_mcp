@@ -119,3 +119,34 @@ class ISessionRepository(ABC):
             ValueError: If page_size is invalid or pagination token is expired/malformed
         """
         pass
+
+    @abstractmethod
+    def search_sessions(
+        self,
+        day: Optional[str] = None,
+        venue: Optional[str] = None,
+        level: Optional[int] = None,
+        keywords: Optional[str] = None,
+        page_size: int = 50,
+        last_evaluated_key: Optional[str] = None
+    ) -> Tuple[List[Session], Optional[str]]:
+        """
+        Search sessions with multiple filter criteria and pagination.
+        
+        Args:
+            day: Filter by day (e.g., "Monday", "Tuesday")
+            venue: Filter by venue name
+            level: Filter by level value (100, 200, 300, 400)
+            keywords: Space-separated keywords to search in title, abstract, topics, areas
+            page_size: Maximum results per page (1-100, default 50)
+            last_evaluated_key: Pagination token from previous request
+            
+        Returns:
+            Tuple of (sessions list, next_page_token)
+            - sessions list: List of Session entities matching the search criteria
+            - next_page_token: Base64-encoded token for next page, None if no more results
+            
+        Raises:
+            ValueError: If parameters are invalid
+        """
+        pass

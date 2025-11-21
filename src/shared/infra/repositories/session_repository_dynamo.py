@@ -358,3 +358,261 @@ class SessionRepositoryDynamo(ISessionRepository):
             next_token = pagination_helper.encode_token(resp['LastEvaluatedKey'])
         
         return sessions, next_token
+
+    def search_sessions(
+        self,
+        day: Optional[str] = None,
+        venue: Optional[str] = None,
+        level: Optional[int] = None,
+        keywords: Optional[str] = None,
+        page_size: int = 50,
+        last_evaluated_key: Optional[str] = None
+    ) -> Tuple[List[Session], Optional[str]]:
+        """
+        Search sessions with multiple filter criteria and pagination.
+        Uses GSI queries when possible for optimal performance.
+        
+        Args:
+            day: Filter by day (e.g., "Monday", "Tuesday")
+            venue: Filter by venue name
+            level: Filter by level value (100, 200, 300, 400)
+            keywords: Space-separated keywords to search in title, abstract, topics, areas
+            page_size: Maximum results per page (1-100, default 50)
+            last_evaluated_key: Pagination token from previous request
+            
+        Returns:
+            Tuple of (sessions list, next_page_token)
+            
+        Raises:
+            ValueError: If parameters are invalid
+        """
+        from boto3.dynamodb.conditions import Key, Attr
+        
+        # Validate page size
+        pagination_helper = PaginationHelper()
+        page_size = pagination_helper.validate_page_size(page_size)
+        
+        # Decode pagination token
+        exclusive_start_key = None
+        offset = 0
+        if last_evaluated_key:
+            try:
+                decoded = pagination_helper.decode_token(last_evaluated_key)
+                # Check if this is an offset-based token or a DynamoDB key
+                if 'offset' in decoded:
+                    offset = decoded['offset']
+                else:
+                    exclusive_start_key = decoded
+            except ValueError:
+                raise ValueError("Invalid or expired pagination token")
+        
+        # Determine query strategy based on available filters
+        # Priority: Level > Venue > Day (based on selectivity)
+        # Note: When using offset-based pagination, we need to fetch all results
+        sessions = []
+        last_evaluated_key_from_db = None
+        fetch_limit = page_size * 2 if offset == 0 else 1000  # Fetch more when using offset
+        
+        if level is not None:
+            # Use GSI-Level (most selective)
+            sessions, last_evaluated_key_from_db = self._query_with_gsi(
+                index_name="GSI-Level",
+                key_name="level_value",
+                key_value=level,
+                page_size=fetch_limit,
+                exclusive_start_key=exclusive_start_key
+            )
+            # Apply additional filters in application
+            if day is not None:
+                sessions = [s for s in sessions if s.day == day]
+            if venue is not None:
+                sessions = [s for s in sessions if s.venue_name == venue]
+                
+        elif venue is not None:
+            # Use GSI-Venue (medium selectivity)
+            sessions, last_evaluated_key_from_db = self._query_with_gsi(
+                index_name="GSI-Venue",
+                key_name="venue_name",
+                key_value=venue,
+                page_size=fetch_limit,
+                exclusive_start_key=exclusive_start_key
+            )
+            # Apply additional filters in application
+            if day is not None:
+                sessions = [s for s in sessions if s.day == day]
+                
+        elif day is not None:
+            # Use GSI-Day (least selective of indexed filters)
+            sessions, last_evaluated_key_from_db = self._query_with_gsi(
+                index_name="GSI-Day",
+                key_name="day",
+                key_value=day,
+                page_size=fetch_limit,
+                exclusive_start_key=exclusive_start_key
+            )
+            
+        else:
+            # No indexed filters - use scan with entity filter
+            sessions, last_evaluated_key_from_db = self._scan_all_sessions(
+                page_size=fetch_limit,
+                exclusive_start_key=exclusive_start_key
+            )
+        
+        # Apply keyword filtering with relevance scoring
+        if keywords is not None and keywords.strip():
+            keyword_list = keywords.lower().split()
+            sessions_with_scores = []
+            
+            for session in sessions:
+                score = self._calculate_relevance_score(session, keyword_list)
+                if score > 0:
+                    sessions_with_scores.append((session, score))
+            
+            # Sort by relevance score (descending), then by start_datetime (ascending)
+            sessions_with_scores.sort(key=lambda x: (-x[1], x[0].start_datetime))
+            filtered_sessions = [s[0] for s in sessions_with_scores]
+        else:
+            # No keyword search - sort by start_datetime only
+            filtered_sessions = sorted(sessions, key=lambda s: s.start_datetime)
+        
+        # Apply offset if using offset-based pagination
+        if offset > 0:
+            filtered_sessions = filtered_sessions[offset:]
+        
+        # Apply pagination to filtered results
+        page_sessions = filtered_sessions[:page_size]
+        
+        # Generate next token if more results exist
+        # Note: This is a simplified pagination approach. When we apply application-level
+        # filtering (keywords, additional filters, sorting), we lose the ability to use
+        # DynamoDB's native pagination efficiently. A production implementation would need
+        # a more sophisticated approach, such as:
+        # 1. Fetching all results and paginating in-memory (works for small datasets)
+        # 2. Using a cursor-based pagination with session_id
+        # 3. Storing filter state in the pagination token
+        #
+        # For this implementation, we'll use approach #1 since we have a small dataset
+        next_token = None
+        if len(filtered_sessions) > page_size:
+            # We have more filtered results than requested
+            # Create a simple offset-based token
+            offset_token = {'offset': offset + page_size}
+            next_token = pagination_helper.encode_token(offset_token)
+        elif last_evaluated_key_from_db is not None and len(filtered_sessions) == len(sessions) and offset == 0:
+            # DynamoDB has more results and we didn't filter anything out
+            next_token = pagination_helper.encode_token(last_evaluated_key_from_db)
+        
+        return page_sessions, next_token
+    
+    def _query_with_gsi(
+        self,
+        index_name: str,
+        key_name: str,
+        key_value: any,
+        page_size: int,
+        exclusive_start_key: Optional[Dict] = None
+    ) -> Tuple[List[Session], Optional[Dict]]:
+        """
+        Query a GSI and return matching sessions with pagination info.
+        
+        Args:
+            index_name: Name of the GSI to query
+            key_name: Partition key name for the GSI
+            key_value: Value to query for
+            page_size: Maximum number of items to fetch
+            exclusive_start_key: Starting point for pagination
+            
+        Returns:
+            Tuple of (List of Session entities, LastEvaluatedKey or None)
+        """
+        from boto3.dynamodb.conditions import Key
+        
+        query_params = {
+            'IndexName': index_name,
+            'KeyConditionExpression': Key(key_name).eq(key_value),
+            'Limit': page_size * 2  # Fetch more to account for potential filtering
+        }
+        
+        if exclusive_start_key:
+            query_params['ExclusiveStartKey'] = exclusive_start_key
+        
+        resp = self.dynamo.dynamo_table.query(**query_params)
+        
+        sessions = []
+        for item in resp.get('Items', []):
+            sessions.append(SessionDynamoDTO.from_dynamo(item).to_entity())
+        
+        last_evaluated_key = resp.get('LastEvaluatedKey')
+        return sessions, last_evaluated_key
+    
+    def _scan_all_sessions(
+        self,
+        page_size: int,
+        exclusive_start_key: Optional[Dict] = None
+    ) -> Tuple[List[Session], Optional[Dict]]:
+        """
+        Scan all sessions with entity filter.
+        
+        Args:
+            page_size: Maximum number of items to fetch
+            exclusive_start_key: Starting point for pagination
+            
+        Returns:
+            Tuple of (List of Session entities, LastEvaluatedKey or None)
+        """
+        scan_params = {
+            'Limit': page_size * 2,  # Fetch more to account for potential filtering
+            'FilterExpression': 'entity = :entity_type',
+            'ExpressionAttributeValues': {
+                ':entity_type': 'session'
+            }
+        }
+        
+        if exclusive_start_key:
+            scan_params['ExclusiveStartKey'] = exclusive_start_key
+        
+        resp = self.dynamo.dynamo_table.scan(**scan_params)
+        
+        sessions = []
+        for item in resp.get('Items', []):
+            sessions.append(SessionDynamoDTO.from_dynamo(item).to_entity())
+        
+        last_evaluated_key = resp.get('LastEvaluatedKey')
+        return sessions, last_evaluated_key
+    
+    def _calculate_relevance_score(self, session: Session, keywords: List[str]) -> int:
+        """
+        Calculate relevance score for a session based on keyword matches.
+        Higher score = more relevant.
+        
+        Args:
+            session: Session entity to score
+            keywords: List of lowercase keywords to search for
+            
+        Returns:
+            Relevance score (0 if no matches)
+        """
+        score = 0
+        
+        for keyword in keywords:
+            # Title matches (highest priority)
+            if keyword in session.title.lower():
+                score += 10
+            
+            # Abstract matches
+            if keyword in session.abstract.lower():
+                score += 5
+            
+            # Topic matches
+            for topic in session.topics:
+                if keyword in topic.lower():
+                    score += 3
+                    break
+            
+            # Area of interest matches
+            for area in session.areas_of_interest:
+                if keyword in area.lower():
+                    score += 2
+                    break
+        
+        return score

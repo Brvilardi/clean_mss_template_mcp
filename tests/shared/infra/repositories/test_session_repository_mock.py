@@ -330,3 +330,397 @@ class Test_SessionRepositoryMock:
         with pytest.raises(ValueError) as exc_info:
             repo.get_all_sessions_paginated(page_size="invalid")
         assert "must be an integer" in str(exc_info.value)
+
+    # ========== Property-Based Tests for search_sessions ==========
+    
+    def test_search_sessions_property_combined_filter_matching(self):
+        """
+        Property test: Combined filter matching
+        Feature: intelligent-session-search, Property 1: Combined filter matching
+        Validates: Requirements 1.1
+        
+        For any combination of day, venue, level, and keywords filters,
+        all returned sessions should match all provided filter criteria.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Define valid values based on mock data
+        valid_days = ["Thursday", "Friday", "Saturday", "Sunday"]
+        valid_venues = ["Mandalay Bay", "Venetian", "MGM Grand", "Wynn", "Caesars Forum"]
+        valid_levels = [100, 200, 300, 400]
+        valid_keywords = ["AWS", "security", "serverless", "data", "container"]
+        
+        @given(
+            day=st.one_of(st.none(), st.sampled_from(valid_days)),
+            venue=st.one_of(st.none(), st.sampled_from(valid_venues)),
+            level=st.one_of(st.none(), st.sampled_from(valid_levels)),
+            keywords=st.one_of(st.none(), st.sampled_from(valid_keywords))
+        )
+        @settings(max_examples=100)
+        def property_test(day, venue, level, keywords):
+            sessions, _ = repo.search_sessions(
+                day=day,
+                venue=venue,
+                level=level,
+                keywords=keywords
+            )
+            
+            # Verify all returned sessions match all provided filters
+            for session in sessions:
+                if day is not None:
+                    assert session.day == day, f"Session day {session.day} doesn't match filter {day}"
+                
+                if venue is not None:
+                    assert session.venue_name == venue, f"Session venue {session.venue_name} doesn't match filter {venue}"
+                
+                if level is not None:
+                    assert session.level_value == level, f"Session level {session.level_value} doesn't match filter {level}"
+                
+                if keywords is not None and keywords.strip():
+                    # Verify keyword appears in at least one searchable field
+                    keyword_lower = keywords.lower()
+                    found = (
+                        keyword_lower in session.title.lower() or
+                        keyword_lower in session.abstract.lower() or
+                        any(keyword_lower in topic.lower() for topic in session.topics) or
+                        any(keyword_lower in area.lower() for area in session.areas_of_interest)
+                    )
+                    assert found, f"Keyword '{keywords}' not found in session {session.session_id}"
+        
+        property_test()
+    
+    def test_search_sessions_property_partial_filter_matching(self):
+        """
+        Property test: Partial filter matching
+        Feature: intelligent-session-search, Property 2: Partial filter matching
+        Validates: Requirements 1.2
+        
+        For any subset of available filters, all returned sessions should match
+        only the provided filters and ignore unprovided filters.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        @given(
+            use_day=st.booleans(),
+            use_venue=st.booleans(),
+            use_level=st.booleans()
+        )
+        @settings(max_examples=100)
+        def property_test(use_day, use_venue, use_level):
+            # Build filter parameters
+            day = "Friday" if use_day else None
+            venue = "Venetian" if use_venue else None
+            level = 200 if use_level else None
+            
+            sessions, _ = repo.search_sessions(
+                day=day,
+                venue=venue,
+                level=level
+            )
+            
+            # Verify only provided filters are applied
+            for session in sessions:
+                if use_day:
+                    assert session.day == "Friday"
+                if use_venue:
+                    assert session.venue_name == "Venetian"
+                if use_level:
+                    assert session.level_value == 200
+        
+        property_test()
+    
+    def test_search_sessions_property_keyword_field_coverage(self):
+        """
+        Property test: Keyword field coverage
+        Feature: intelligent-session-search, Property 4: Keyword field coverage
+        Validates: Requirements 2.1
+        
+        For any keyword, if it appears in a session's title, abstract, topics,
+        or areas_of_interest, that session should be included in search results.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Get all unique words from all sessions
+        all_words = set()
+        for session in repo.sessions:
+            all_words.update(session.title.lower().split())
+            all_words.update(session.abstract.lower().split())
+            for topic in session.topics:
+                all_words.update(topic.lower().split())
+            for area in session.areas_of_interest:
+                all_words.update(area.lower().split())
+        
+        # Filter to reasonable words (length > 3)
+        searchable_words = [w for w in all_words if len(w) > 3]
+        
+        @given(keyword=st.sampled_from(searchable_words))
+        @settings(max_examples=100)
+        def property_test(keyword):
+            sessions, _ = repo.search_sessions(keywords=keyword)
+            
+            # Find all sessions that should match this keyword
+            expected_matches = []
+            for session in repo.sessions:
+                if (keyword in session.title.lower() or
+                    keyword in session.abstract.lower() or
+                    any(keyword in topic.lower() for topic in session.topics) or
+                    any(keyword in area.lower() for area in session.areas_of_interest)):
+                    expected_matches.append(session.session_id)
+            
+            # Verify all expected matches are in results
+            result_ids = [s.session_id for s in sessions]
+            for expected_id in expected_matches:
+                assert expected_id in result_ids, f"Session {expected_id} with keyword '{keyword}' not in results"
+        
+        property_test()
+    
+    def test_search_sessions_property_case_insensitive_keyword_matching(self):
+        """
+        Property test: Case-insensitive keyword matching
+        Feature: intelligent-session-search, Property 5: Case-insensitive keyword matching
+        Validates: Requirements 2.6
+        
+        For any keyword with different casing, the search should return the same results.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        keywords = ["security", "serverless", "lambda", "data", "aws"]
+        
+        @given(keyword=st.sampled_from(keywords))
+        @settings(max_examples=100)
+        def property_test(keyword):
+            # Search with lowercase
+            sessions_lower, _ = repo.search_sessions(keywords=keyword.lower())
+            
+            # Search with uppercase
+            sessions_upper, _ = repo.search_sessions(keywords=keyword.upper())
+            
+            # Search with mixed case
+            sessions_mixed, _ = repo.search_sessions(keywords=keyword.capitalize())
+            
+            # All should return same session IDs
+            ids_lower = [s.session_id for s in sessions_lower]
+            ids_upper = [s.session_id for s in sessions_upper]
+            ids_mixed = [s.session_id for s in sessions_mixed]
+            
+            assert ids_lower == ids_upper, f"Case sensitivity issue: {keyword.lower()} != {keyword.upper()}"
+            assert ids_lower == ids_mixed, f"Case sensitivity issue: {keyword.lower()} != {keyword.capitalize()}"
+        
+        property_test()
+    
+    def test_search_sessions_property_multiple_keyword_or_logic(self):
+        """
+        Property test: Multiple keyword OR logic
+        Feature: intelligent-session-search, Property 6: Multiple keyword OR logic
+        Validates: Requirements 2.7
+        
+        For any multi-word keyword string, sessions matching any of the individual
+        keywords should be included in results (OR logic, not AND).
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        @given(
+            keyword1=st.sampled_from(["security", "serverless", "data"]),
+            keyword2=st.sampled_from(["aws", "lambda", "analytics"])
+        )
+        @settings(max_examples=100)
+        def property_test(keyword1, keyword2):
+            # Search with combined keywords
+            combined_keywords = f"{keyword1} {keyword2}"
+            sessions_combined, _ = repo.search_sessions(keywords=combined_keywords)
+            
+            # Search with individual keywords
+            sessions_kw1, _ = repo.search_sessions(keywords=keyword1)
+            sessions_kw2, _ = repo.search_sessions(keywords=keyword2)
+            
+            # Combined should include all sessions from either keyword (OR logic)
+            ids_combined = set(s.session_id for s in sessions_combined)
+            ids_kw1 = set(s.session_id for s in sessions_kw1)
+            ids_kw2 = set(s.session_id for s in sessions_kw2)
+            
+            # Union of individual searches should equal combined search
+            expected_ids = ids_kw1 | ids_kw2
+            assert ids_combined == expected_ids, f"OR logic failed: combined={ids_combined}, expected={expected_ids}"
+        
+        property_test()
+    
+    # ========== Unit Tests for search_sessions ==========
+    
+    def test_search_sessions_empty_filters_returns_all(self):
+        """Test search with no filters returns all sessions"""
+        repo = SessionRepositoryMock()
+        sessions, next_token = repo.search_sessions()
+        
+        assert len(sessions) == 5
+        assert next_token is None
+    
+    def test_search_sessions_day_only(self):
+        """Test search with day filter only"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(day="Friday")
+        
+        assert len(sessions) == 2
+        assert all(s.day == "Friday" for s in sessions)
+    
+    def test_search_sessions_venue_only(self):
+        """Test search with venue filter only"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(venue="Venetian")
+        
+        assert len(sessions) == 1
+        assert sessions[0].venue_name == "Venetian"
+    
+    def test_search_sessions_level_only(self):
+        """Test search with level filter only"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(level=200)
+        
+        assert len(sessions) == 2
+        assert all(s.level_value == 200 for s in sessions)
+    
+    def test_search_sessions_keywords_only(self):
+        """Test search with keywords filter only"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(keywords="serverless")
+        
+        assert len(sessions) >= 1
+        # Verify keyword appears in at least one field
+        for session in sessions:
+            found = (
+                "serverless" in session.title.lower() or
+                "serverless" in session.abstract.lower() or
+                any("serverless" in topic.lower() for topic in session.topics) or
+                any("serverless" in area.lower() for area in session.areas_of_interest)
+            )
+            assert found
+    
+    def test_search_sessions_combined_filters(self):
+        """Test search with multiple filters combined"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(day="Friday", level=200)
+        
+        assert len(sessions) == 2
+        assert all(s.day == "Friday" and s.level_value == 200 for s in sessions)
+    
+    def test_search_sessions_empty_result(self):
+        """Test search that returns no results"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(day="Monday")
+        
+        assert len(sessions) == 0
+        assert sessions == []
+    
+    def test_search_sessions_pagination_page_size(self):
+        """Test search respects page_size parameter"""
+        repo = SessionRepositoryMock()
+        sessions, next_token = repo.search_sessions(page_size=2)
+        
+        assert len(sessions) == 2
+        assert next_token is not None
+    
+    def test_search_sessions_pagination_continuation(self):
+        """Test pagination continuation with next_token"""
+        repo = SessionRepositoryMock()
+        
+        # First page
+        page1, token1 = repo.search_sessions(page_size=2)
+        assert len(page1) == 2
+        assert token1 is not None
+        
+        # Second page
+        page2, token2 = repo.search_sessions(page_size=2, last_evaluated_key=token1)
+        assert len(page2) == 2
+        
+        # Verify no overlap
+        page1_ids = [s.session_id for s in page1]
+        page2_ids = [s.session_id for s in page2]
+        assert len(set(page1_ids) & set(page2_ids)) == 0
+    
+    def test_search_sessions_relevance_ordering(self):
+        """Test keyword search orders by relevance"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(keywords="aws")
+        
+        # Verify results are ordered by relevance (title matches should be first)
+        # All sessions should have keyword in some field
+        assert len(sessions) > 0
+        
+        # Calculate scores manually to verify ordering
+        scores = []
+        for session in sessions:
+            score = repo._calculate_relevance_score(session, ["aws"])
+            scores.append(score)
+        
+        # Verify scores are in descending order
+        for i in range(len(scores) - 1):
+            assert scores[i] >= scores[i + 1], "Results not ordered by relevance"
+    
+    def test_search_sessions_datetime_ordering_without_keywords(self):
+        """Test search without keywords orders by start_datetime"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(day="Friday")
+        
+        # Verify chronological ordering
+        for i in range(len(sessions) - 1):
+            assert sessions[i].start_datetime <= sessions[i + 1].start_datetime
+    
+    def test_search_sessions_invalid_page_size(self):
+        """Test search with invalid page_size raises ValueError"""
+        repo = SessionRepositoryMock()
+        
+        with pytest.raises(ValueError):
+            repo.search_sessions(page_size=0)
+        
+        with pytest.raises(ValueError):
+            repo.search_sessions(page_size=101)
+    
+    def test_search_sessions_multiple_keywords(self):
+        """Test search with multiple space-separated keywords"""
+        repo = SessionRepositoryMock()
+        sessions, _ = repo.search_sessions(keywords="serverless lambda")
+        
+        # Should return sessions matching either keyword
+        assert len(sessions) >= 1
+        
+        for session in sessions:
+            # At least one keyword should match
+            found = (
+                "serverless" in session.title.lower() or
+                "serverless" in session.abstract.lower() or
+                "lambda" in session.title.lower() or
+                "lambda" in session.abstract.lower() or
+                any("serverless" in topic.lower() or "lambda" in topic.lower() for topic in session.topics)
+            )
+            assert found
+    
+    def test_search_sessions_get_sessions_by_short_id(self):
+        """Test retrieving sessions by short_id (case-insensitive)"""
+        repo = SessionRepositoryMock()
+        sessions = repo.get_sessions_by_short_id("TNC301")
+        
+        assert len(sessions) == 1
+        assert sessions[0].short_id == "TNC301"
+    
+    def test_search_sessions_get_sessions_by_short_id_case_insensitive(self):
+        """Test short_id search is case-insensitive"""
+        repo = SessionRepositoryMock()
+        
+        sessions_upper = repo.get_sessions_by_short_id("TNC301")
+        sessions_lower = repo.get_sessions_by_short_id("tnc301")
+        sessions_mixed = repo.get_sessions_by_short_id("TnC301")
+        
+        assert len(sessions_upper) == 1
+        assert len(sessions_lower) == 1
+        assert len(sessions_mixed) == 1
+        assert sessions_upper[0].session_id == sessions_lower[0].session_id
+        assert sessions_upper[0].session_id == sessions_mixed[0].session_id

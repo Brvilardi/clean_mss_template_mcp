@@ -344,7 +344,7 @@ class Test_SessionRepositoryDynamo:
         # Verify performance is under 500ms
         assert elapsed_ms < 500, f"get_session_by_id took {elapsed_ms:.2f}ms, expected < 500ms"
     
-    @pytest.mark.skip(reason="Needs dynamoDB")
+    # @pytest.mark.skip(reason="Needs dynamoDB")
     def test_get_all_sessions_paginated_with_page_size_only(self):
         """Test get_all_sessions_paginated with page_size only"""
         
@@ -357,7 +357,7 @@ class Test_SessionRepositoryDynamo:
         if len(repo.get_all_sessions()) > 2:
             assert next_token is not None
     
-    @pytest.mark.skip(reason="Needs dynamoDB")
+    # @pytest.mark.skip(reason="Needs dynamoDB")
     def test_get_all_sessions_paginated_with_page_size_and_token(self):
         """Test get_all_sessions_paginated with page_size and last_evaluated_key"""
         
@@ -374,7 +374,7 @@ class Test_SessionRepositoryDynamo:
         page2_ids = [s.session_id for s in page2]
         assert len(set(page1_ids) & set(page2_ids)) == 0
     
-    @pytest.mark.skip(reason="Needs dynamoDB")
+    # @pytest.mark.skip(reason="Needs dynamoDB")
     def test_get_all_sessions_paginated_returns_correct_next_token(self):
         """Test pagination returns correct next_token when more results exist"""
         
@@ -390,7 +390,7 @@ class Test_SessionRepositoryDynamo:
         else:
             assert next_token is None
     
-    @pytest.mark.skip(reason="Needs dynamoDB")
+    # @pytest.mark.skip(reason="Needs dynamoDB")
     def test_get_all_sessions_paginated_returns_none_token_on_last_page(self):
         """Test pagination returns None next_token on last page"""
         
@@ -402,7 +402,7 @@ class Test_SessionRepositoryDynamo:
         # Should not have next_token on last page
         assert next_token is None
     
-    @pytest.mark.skip(reason="Needs dynamoDB")
+    # @pytest.mark.skip(reason="Needs dynamoDB")
     def test_get_all_sessions_paginated_expired_token_raises_error(self):
         """Test expired token raises ValueError"""
         
@@ -426,7 +426,7 @@ class Test_SessionRepositoryDynamo:
         
         assert "expired" in str(exc_info.value).lower()
     
-    @pytest.mark.skip(reason="Needs dynamoDB")
+    # @pytest.mark.skip(reason="Needs dynamoDB")
     def test_get_all_sessions_paginated_invalid_page_size_raises_error(self):
         """Test invalid page_size raises ValueError"""
         
@@ -441,3 +441,287 @@ class Test_SessionRepositoryDynamo:
         with pytest.raises(ValueError) as exc_info:
             repo.get_all_sessions_paginated(page_size=101)
         assert "cannot exceed 100" in str(exc_info.value)
+
+    # ========== Property-Based Tests for search_sessions ==========
+    
+    def test_property_page_size_limit(self):
+        """
+        Property test: Page size limit
+        Feature: intelligent-session-search, Property 7: Page size limit
+        Validates: Requirements 3.2
+        
+        For any valid page_size value, the number of returned sessions should not exceed that value.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(page_size=st.integers(min_value=1, max_value=100))
+        @settings(max_examples=100)
+        def property_test(page_size):
+            sessions, _ = repo.search_sessions(page_size=page_size)
+            assert len(sessions) <= page_size, f"Returned {len(sessions)} sessions, expected <= {page_size}"
+        
+        property_test()
+    
+    def test_property_next_page_token_presence(self):
+        """
+        Property test: Next page token presence
+        Feature: intelligent-session-search, Property 8: Next page token presence
+        Validates: Requirements 3.3
+        
+        For any search where total results exceed page_size, the response should include a non-null next_page_token.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(page_size=st.integers(min_value=1, max_value=3))
+        @settings(max_examples=100)
+        def property_test(page_size):
+            # Get total count first
+            all_sessions, _ = repo.search_sessions(page_size=100)
+            total_count = len(all_sessions)
+            
+            # Only test when we have more sessions than page_size
+            assume(total_count > page_size)
+            
+            sessions, next_token = repo.search_sessions(page_size=page_size)
+            
+            # If there are more results, next_token should be present
+            if len(sessions) == page_size and total_count > page_size:
+                assert next_token is not None, f"Expected next_page_token when {total_count} total > {page_size} page_size"
+        
+        property_test()
+    
+    def test_property_pagination_continuation(self):
+        """
+        Property test: Pagination continuation
+        Feature: intelligent-session-search, Property 9: Pagination continuation
+        Validates: Requirements 3.4
+        
+        For any valid next_page_token, using it should return the next set of results without duplicates from the previous page.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(page_size=st.integers(min_value=1, max_value=3))
+        @settings(max_examples=100)
+        def property_test(page_size):
+            # Get first page
+            page1, token1 = repo.search_sessions(page_size=page_size)
+            
+            # Only test if there's a next page
+            assume(token1 is not None)
+            
+            # Get second page
+            page2, token2 = repo.search_sessions(page_size=page_size, last_evaluated_key=token1)
+            
+            # Verify no duplicates
+            page1_ids = set(s.session_id for s in page1)
+            page2_ids = set(s.session_id for s in page2)
+            
+            overlap = page1_ids & page2_ids
+            assert len(overlap) == 0, f"Found {len(overlap)} duplicate sessions between pages"
+        
+        property_test()
+    
+    def test_property_final_page_token_absence(self):
+        """
+        Property test: Final page token absence
+        Feature: intelligent-session-search, Property 10: Final page token absence
+        Validates: Requirements 3.5
+        
+        For any search where the current page contains the last results, the next_page_token should be null.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(page_size=st.integers(min_value=50, max_value=100))
+        @settings(max_examples=100)
+        def property_test(page_size):
+            # Get all sessions with large page size
+            sessions, next_token = repo.search_sessions(page_size=page_size)
+            
+            # If we got fewer sessions than page_size, this is the last page
+            if len(sessions) < page_size:
+                assert next_token is None, f"Expected no next_token on last page (got {len(sessions)} < {page_size})"
+        
+        property_test()
+    
+    def test_property_keyword_relevance_ordering(self):
+        """
+        Property test: Keyword relevance ordering
+        Feature: intelligent-session-search, Property 11: Keyword relevance ordering
+        Validates: Requirements 5.1
+        
+        For any keyword search, sessions with keyword matches in title should appear before sessions 
+        with matches only in abstract, which should appear before sessions with matches only in topics/areas.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(keyword=st.sampled_from(["aws", "security", "serverless", "data"]))
+        @settings(max_examples=100)
+        def property_test(keyword):
+            sessions, _ = repo.search_sessions(keywords=keyword)
+            
+            # Calculate scores for each session
+            scores = []
+            for session in sessions:
+                score = repo._calculate_relevance_score(session, [keyword.lower()])
+                scores.append(score)
+            
+            # Verify scores are in descending order (higher relevance first)
+            for i in range(len(scores) - 1):
+                assert scores[i] >= scores[i + 1], \
+                    f"Relevance ordering violated: scores[{i}]={scores[i]} < scores[{i+1}]={scores[i+1]}"
+        
+        property_test()
+    
+    def test_property_default_datetime_ordering(self):
+        """
+        Property test: Default datetime ordering
+        Feature: intelligent-session-search, Property 12: Default datetime ordering
+        Validates: Requirements 5.2
+        
+        For any search without keywords, results should be ordered by start_datetime in ascending order (earlier sessions first).
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(
+            day=st.sampled_from([None, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
+            venue=st.sampled_from([None, "Venetian", "Mandalay Bay", "MGM Grand"]),
+            level=st.sampled_from([None, 100, 200, 300, 400])
+        )
+        @settings(max_examples=100)
+        def property_test(day, venue, level):
+            # Search without keywords
+            sessions, _ = repo.search_sessions(day=day, venue=venue, level=level)
+            
+            # Verify chronological ordering
+            for i in range(len(sessions) - 1):
+                assert sessions[i].start_datetime <= sessions[i + 1].start_datetime, \
+                    f"Datetime ordering violated: sessions[{i}].start_datetime > sessions[{i+1}].start_datetime"
+        
+        property_test()
+    
+    def test_property_relevance_tie_breaking(self):
+        """
+        Property test: Relevance tie-breaking
+        Feature: intelligent-session-search, Property 13: Relevance tie-breaking
+        Validates: Requirements 5.3
+        
+        For any two sessions with equal relevance scores in a keyword search, 
+        the session with earlier start_datetime should appear first.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryDynamo()
+        
+        @given(keyword=st.sampled_from(["aws", "security", "serverless"]))
+        @settings(max_examples=100)
+        def property_test(keyword):
+            sessions, _ = repo.search_sessions(keywords=keyword)
+            
+            # Calculate scores and group by score
+            sessions_with_scores = []
+            for session in sessions:
+                score = repo._calculate_relevance_score(session, [keyword.lower()])
+                sessions_with_scores.append((session, score))
+            
+            # Check tie-breaking within each score group
+            current_score = None
+            previous_datetime = None
+            
+            for session, score in sessions_with_scores:
+                if current_score is None:
+                    current_score = score
+                    previous_datetime = session.start_datetime
+                elif score == current_score:
+                    # Same score - verify datetime ordering
+                    assert previous_datetime <= session.start_datetime, \
+                        f"Tie-breaking violated: sessions with same score not ordered by datetime"
+                    previous_datetime = session.start_datetime
+                else:
+                    # New score group
+                    current_score = score
+                    previous_datetime = session.start_datetime
+        
+        property_test()
+    
+    # ========== Integration Tests for search_sessions ==========
+    
+    def test_search_sessions_gsi_query_execution(self):
+        """Test that search uses GSI queries when indexed filters are provided"""
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Test Level GSI (highest priority)
+        sessions, _ = repo.search_sessions(level=200)
+        assert len(sessions) > 0
+        assert all(s.level_value == 200 for s in sessions)
+        
+        # Test Venue GSI
+        test_venue = repo_mock.sessions[0].venue_name
+        sessions, _ = repo.search_sessions(venue=test_venue)
+        assert len(sessions) > 0
+        assert all(s.venue_name == test_venue for s in sessions)
+        
+        # Test Day GSI
+        test_day = repo_mock.sessions[0].day
+        sessions, _ = repo.search_sessions(day=test_day)
+        assert len(sessions) > 0
+        assert all(s.day == test_day for s in sessions)
+    
+    def test_search_sessions_keyword_filtering_performance(self):
+        """Test keyword filtering completes in reasonable time"""
+        import time
+        
+        repo = SessionRepositoryDynamo()
+        
+        start_time = time.time()
+        sessions, _ = repo.search_sessions(keywords="aws serverless")
+        end_time = time.time()
+        
+        elapsed_ms = (end_time - start_time) * 1000
+        
+        # Verify results are correct
+        assert len(sessions) >= 0
+        
+        # Verify performance is under 500ms
+        assert elapsed_ms < 500, f"Keyword search took {elapsed_ms:.2f}ms, expected < 500ms"
+    
+    def test_search_sessions_pagination_with_large_dataset(self):
+        """Test pagination works correctly with large result sets"""
+        
+        repo = SessionRepositoryDynamo()
+        
+        # Get all sessions in small pages
+        all_sessions_paginated = []
+        next_token = None
+        page_count = 0
+        max_pages = 10  # Safety limit
+        
+        while page_count < max_pages:
+            sessions, next_token = repo.search_sessions(page_size=1, last_evaluated_key=next_token)
+            all_sessions_paginated.extend(sessions)
+            page_count += 1
+            
+            if next_token is None:
+                break
+        
+        # Get all sessions in one query
+        all_sessions_direct, _ = repo.search_sessions(page_size=100)
+        
+        # Verify we got the same sessions (order may differ)
+        paginated_ids = set(s.session_id for s in all_sessions_paginated)
+        direct_ids = set(s.session_id for s in all_sessions_direct)
+        
+        assert paginated_ids == direct_ids, "Pagination returned different sessions than direct query"

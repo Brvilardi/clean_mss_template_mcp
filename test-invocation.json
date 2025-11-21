@@ -1,1 +1,0 @@
-{"httpMethod": "POST", "path": "/invocations", "headers": {"Content-Type": "application/json"}, "body": "{\"input\": {\"prompt\": \"Hello, can you help me find sessions about serverless?\"}}"}
