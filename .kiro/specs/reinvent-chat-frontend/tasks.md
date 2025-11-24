@@ -9,7 +9,7 @@
   - Create `.env.local` template with required environment variables
   - _Requirements: 7.1, 7.4, 9.5_
 
-- [ ] 2. Configure AWS Amplify and authentication infrastructure
+- [x] 2. Configure AWS Amplify and authentication infrastructure
   - Create `amplify_outputs.json` configuration file with Cognito and API Gateway settings
   - Configure Amplify in `main.tsx` with authentication and API settings
   - Set up Cognito user pool with custom attributes (custom:company_name, custom:company_website)
@@ -24,7 +24,7 @@
   - Implement persistent authentication with token refresh
   - _Requirements: 1.3, 1.5, 1.7, 2.5_
 
-- [ ] 4. Build authentication UI components
+- [x] 4. Build authentication UI components
   - Install and configure shadcn/ui components (Button, Input, Form, Label, Alert, Card)
   - Create `components/auth/SignUpForm.tsx` with email, password, company name, and company website fields
   - Create `components/auth/SignInForm.tsx` with email and password fields
@@ -33,7 +33,7 @@
   - Add error display for authentication failures
   - _Requirements: 1.1, 1.2, 1.4, 1.6, 2.1, 2.2, 2.3, 2.4, 8.3_
 
-- [ ] 5. Implement routing and layout structure
+- [x] 5. Implement routing and layout structure
   - Create `routes.tsx` with public and private route configuration
   - Create `components/layout/PublicLayout.tsx` for auth pages
   - Create `components/layout/PrivateLayout.tsx` with sidebar and main content area

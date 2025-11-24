@@ -14,6 +14,7 @@ from .mcp_stack import MCPStack
 from .strands_agent_stack import StrandsAgentStack
 from .template_dynamo_table import TemplateDynamoTable
 from .sessions_dynamo_table import SessionsDynamoTable
+from .cognito_stack import CognitoStack
 
 
 class TemplateStack(Stack):
@@ -21,35 +22,51 @@ class TemplateStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        # Define allowed origins for CORS (frontend origins)
+        allowed_origins = [
+            "http://localhost:5173",  # Local development
+            "http://localhost:3000",  # Alternative local port
+        ]
+        
         self.rest_api = RestApi(self, "Template_RestApi",
                                     rest_api_name="Template_RestApi",
                                     description="This is the Template RestApi",
                                     default_cors_preflight_options=
                                     {
-                                        "allow_origins": Cors.ALL_ORIGINS,
+                                        "allow_origins": allowed_origins,
                                         "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                                         "allow_headers": [
                                             *apigw.Cors.DEFAULT_HEADERS,
                                             "mcp-protocol-version",
-                                            "mcp-session-id"
+                                            "mcp-session-id",
+                                            "authorization"  # For Cognito JWT tokens
                                             ]
                                     },
                                 )
 
         api_gateway_resource = self.rest_api.root.add_resource("mss-template", default_cors_preflight_options=
         {
-            "allow_origins": Cors.ALL_ORIGINS,
+            "allow_origins": allowed_origins,
             "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": [
                 *apigw.Cors.DEFAULT_HEADERS,
                 "mcp-protocol-version",
-                "mcp-session-id"
+                "mcp-session-id",
+                "authorization"  # For Cognito JWT tokens
             ]
         }
                                                                )
 
         self.dynamo_table = TemplateDynamoTable(self, "TemplateDynamoTable")
         self.sessions_dynamo_table = SessionsDynamoTable(self, "SessionsDynamoTable")
+        
+        # Create Cognito stack for frontend authentication
+        # Pass stack name to create unique domain prefix
+        self.cognito_stack = CognitoStack(
+            self, 
+            "CognitoStack",
+            stack_name=construct_id
+        )
 
         ENVIRONMENT_VARIABLES = {
             "STAGE": "DEV",
