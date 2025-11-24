@@ -450,7 +450,253 @@ curl -X POST https://api.example.com/mss-template/delete-user \
 
 ---
 
+### 6. Search Sessions
+
+Search for re:Invent sessions with multiple filter criteria including speaker name/company.
+
+**Endpoint**: `GET /mss-template/search-sessions`
+
+**Query Parameters**:
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| day | string | No | - | Filter by day (e.g., "Monday", "Tuesday") |
+| venue | string | No | - | Filter by venue name (e.g., "Venetian", "Mandalay Bay") |
+| level | integer | No | - | Filter by level (100, 200, 300, 400) |
+| keywords | string | No | - | Space-separated keywords to search in title, abstract, topics, areas |
+| speaker | string | No | - | Filter by speaker name or company (case-insensitive, partial match) |
+| page_size | integer | No | 50 | Results per page (1-100) |
+| next_page_token | string | No | - | Pagination token from previous response |
+
+**Speaker Parameter Behavior**:
+- **Case-insensitive**: Searches for "Werner", "WERNER", or "werner" return the same results
+- **Partial matching**: Searching for "John" matches "John Doe", "Johnny Smith", etc.
+- **Searches both fields**: Searches both speaker displayName and company fields
+- **Checks all speakers**: If a session has multiple speakers, matches any of them
+- **Combines with other filters**: Can be used with day, venue, level, and keywords filters
+
+**Success Response** (200 OK):
+```json
+{
+  "sessions": [
+    {
+      "session_id": "ABC123",
+      "short_id": "ABC123",
+      "title": "Building Serverless Applications",
+      "abstract": "Learn how to build serverless applications...",
+      "day": "Monday",
+      "venue_name": "Venetian",
+      "level_value": 300,
+      "start_datetime": "2025-12-02T09:00:00.000Z",
+      "end_datetime": "2025-12-02T10:00:00.000Z",
+      "speakers": [
+        {
+          "displayName": "Werner Vogels",
+          "company": "AWS"
+        }
+      ],
+      "topics": ["Serverless", "Lambda"],
+      "areas": ["Compute"],
+      "features": ["Demo"]
+    }
+  ],
+  "next_page_token": "eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0=",
+  "total_results": 1,
+  "message": "sessions retrieved successfully"
+}
+```
+
+**Error Responses**:
+
+400 Bad Request - Invalid speaker parameter (empty or whitespace-only):
+```json
+{
+  "message": "Field speaker is not valid"
+}
+```
+
+400 Bad Request - Invalid page_size:
+```json
+{
+  "message": "Field page_size is not valid"
+}
+```
+
+400 Bad Request - Invalid level:
+```json
+{
+  "message": "Field level is not valid"
+}
+```
+
+500 Internal Server Error:
+```json
+{
+  "message": "Internal server error message"
+}
+```
+
+**Example Requests**:
+
+Search by speaker name:
+```bash
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=Werner%20Vogels" \
+  -H "Content-Type: application/json"
+```
+
+Search by company:
+```bash
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=AWS" \
+  -H "Content-Type: application/json"
+```
+
+Search by partial speaker name:
+```bash
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=John" \
+  -H "Content-Type: application/json"
+```
+
+Combine speaker with other filters:
+```bash
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=Werner&day=Monday&level=400" \
+  -H "Content-Type: application/json"
+```
+
+Combine speaker with keywords:
+```bash
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=AWS&keywords=serverless%20lambda" \
+  -H "Content-Type: application/json"
+```
+
+Search with pagination:
+```bash
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=AWS&page_size=20&next_page_token=eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0=" \
+  -H "Content-Type: application/json"
+```
+
+**Example Response**:
+```json
+{
+  "sessions": [
+    {
+      "session_id": "ABC123",
+      "short_id": "ABC123",
+      "title": "Building Serverless Applications at Scale",
+      "abstract": "Learn how to build and scale serverless applications using AWS Lambda, API Gateway, and DynamoDB...",
+      "day": "Monday",
+      "venue_name": "Venetian",
+      "level_value": 300,
+      "start_datetime": "2025-12-02T09:00:00.000Z",
+      "end_datetime": "2025-12-02T10:00:00.000Z",
+      "speakers": [
+        {
+          "displayName": "Werner Vogels",
+          "company": "AWS"
+        },
+        {
+          "displayName": "Jane Smith",
+          "company": "AWS"
+        }
+      ],
+      "topics": ["Serverless", "Lambda", "API Gateway"],
+      "areas": ["Compute", "Application Integration"],
+      "features": ["Demo", "Hands-on"]
+    },
+    {
+      "session_id": "DEF456",
+      "short_id": "DEF456",
+      "title": "Advanced Serverless Patterns",
+      "abstract": "Deep dive into advanced serverless patterns...",
+      "day": "Tuesday",
+      "venue_name": "Mandalay Bay",
+      "level_value": 400,
+      "start_datetime": "2025-12-03T14:00:00.000Z",
+      "end_datetime": "2025-12-03T15:00:00.000Z",
+      "speakers": [
+        {
+          "displayName": "John Doe",
+          "company": "AWS"
+        }
+      ],
+      "topics": ["Serverless", "Architecture"],
+      "areas": ["Architecture"],
+      "features": ["Workshop"]
+    }
+  ],
+  "next_page_token": "eyJzZXNzaW9uX2lkIjoiREVGNDU2In0=",
+  "total_results": 2,
+  "message": "sessions retrieved successfully"
+}
+```
+
+**Notes**:
+- When no filters are provided, returns all sessions (paginated)
+- Empty results return 200 OK with empty sessions array
+- Speaker search is case-insensitive and matches partial names
+- Speaker search checks both displayName and company fields
+- Speaker search checks all speakers in a session's speakers list
+- Filters can be combined for more specific searches
+- Results are ordered by start_datetime when using indexed filters (day, venue, level)
+
+---
+
 ## Data Models
+
+### Session Object
+
+```json
+{
+  "session_id": "string",
+  "short_id": "string",
+  "title": "string",
+  "abstract": "string",
+  "day": "string",
+  "venue_name": "string",
+  "level_value": "integer",
+  "start_datetime": "string (ISO 8601)",
+  "end_datetime": "string (ISO 8601)",
+  "speakers": [
+    {
+      "displayName": "string",
+      "company": "string"
+    }
+  ],
+  "topics": ["string"],
+  "areas": ["string"],
+  "features": ["string"]
+}
+```
+
+**Fields**:
+| Field | Type | Description | Constraints |
+|-------|------|-------------|-------------|
+| session_id | string | Unique session identifier | Required |
+| short_id | string | Short session code | Required |
+| title | string | Session title | Required, non-empty |
+| abstract | string | Session description | Required |
+| day | string | Day of the week | Monday-Friday |
+| venue_name | string | Venue location | Required |
+| level_value | integer | Session difficulty level | 100, 200, 300, or 400 |
+| start_datetime | string | Session start time | ISO 8601 format |
+| end_datetime | string | Session end time | ISO 8601 format |
+| speakers | array | List of speakers | Can be empty |
+| topics | array | Session topics | Can be empty |
+| areas | array | AWS service areas | Can be empty |
+| features | array | Session features | Can be empty |
+
+### Speaker Object
+
+```json
+{
+  "displayName": "string",
+  "company": "string"
+}
+```
+
+**Fields**:
+| Field | Type | Description | Constraints |
+|-------|------|-------------|-------------|
+| displayName | string | Speaker's full name | Required |
+| company | string | Speaker's company/organization | Optional |
 
 ### User Object
 
@@ -536,6 +782,56 @@ All error responses follow this format:
 - **Example Valid**: 1, 42, 1000
 - **Example Invalid**: -1, "abc", null, 3.14
 
+### Speaker Parameter Validation
+- **Type**: String
+- **Required**: No
+- **Case Sensitivity**: Case-insensitive matching
+- **Matching**: Partial string matching
+- **Search Fields**: Both displayName and company
+- **Example Valid**: "Werner", "AWS", "John Doe", "amazon"
+- **Example Invalid**: "" (empty string), "   " (whitespace-only)
+- **Behavior**: 
+  - Searches both speaker displayName and company fields
+  - Matches any speaker in a session's speakers list
+  - Case-insensitive: "Werner" matches "werner", "WERNER", "Werner"
+  - Partial match: "John" matches "John Doe", "Johnny Smith"
+
+### Day Parameter Validation
+- **Type**: String
+- **Required**: No
+- **Valid Values**: "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+- **Example Valid**: "Monday", "Tuesday"
+- **Example Invalid**: "Saturday", "monday" (case-sensitive)
+
+### Venue Parameter Validation
+- **Type**: String
+- **Required**: No
+- **Example Valid**: "Venetian", "Mandalay Bay", "MGM Grand"
+- **Note**: Must match exact venue name (case-sensitive)
+
+### Level Parameter Validation
+- **Type**: Integer
+- **Required**: No
+- **Valid Values**: 100, 200, 300, 400
+- **Example Valid**: 100, 200, 300, 400
+- **Example Invalid**: 150, 500, "300" (must be integer)
+
+### Keywords Parameter Validation
+- **Type**: String
+- **Required**: No
+- **Format**: Space-separated keywords
+- **Search Fields**: title, abstract, topics, areas
+- **Example Valid**: "serverless lambda", "security machine learning"
+- **Behavior**: Searches across multiple fields for relevance
+
+### Page Size Validation
+- **Type**: Integer
+- **Required**: No
+- **Default**: 50
+- **Range**: 1-100
+- **Example Valid**: 10, 50, 100
+- **Example Invalid**: 0, 101, -5, "50" (must be integer)
+
 ---
 
 ## Rate Limiting
@@ -586,6 +882,18 @@ curl -X POST https://api.example.com/mss-template/update-user \
 curl -X POST https://api.example.com/mss-template/delete-user \
   -H "Content-Type: application/json" \
   -d '{"user_id": 1}'
+
+# Search sessions by speaker
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=Werner%20Vogels"
+
+# Search sessions by company
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=AWS"
+
+# Search sessions with multiple filters
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=Werner&day=Monday&level=400&keywords=serverless%20lambda"
+
+# Search sessions with pagination
+curl -X GET "https://api.example.com/mss-template/search-sessions?speaker=AWS&page_size=20&next_page_token=eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0="
 ```
 
 ### Using Python
@@ -625,6 +933,43 @@ print(response.json())
 response = requests.post(
     f"{base_url}/delete-user",
     json={"user_id": 1}
+)
+print(response.json())
+
+# Search sessions by speaker
+response = requests.get(
+    f"{base_url}/search-sessions",
+    params={"speaker": "Werner Vogels"}
+)
+print(response.json())
+
+# Search sessions by company
+response = requests.get(
+    f"{base_url}/search-sessions",
+    params={"speaker": "AWS"}
+)
+print(response.json())
+
+# Search sessions with multiple filters
+response = requests.get(
+    f"{base_url}/search-sessions",
+    params={
+        "speaker": "Werner",
+        "day": "Monday",
+        "level": 400,
+        "keywords": "serverless lambda"
+    }
+)
+print(response.json())
+
+# Search sessions with pagination
+response = requests.get(
+    f"{base_url}/search-sessions",
+    params={
+        "speaker": "AWS",
+        "page_size": 20,
+        "next_page_token": "eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0="
+    }
 )
 print(response.json())
 ```
@@ -676,6 +1021,37 @@ fetch(`${baseUrl}/delete-user`, {
 })
 .then(response => response.json())
 .then(data => console.log(data));
+
+// Search sessions by speaker
+fetch(`${baseUrl}/search-sessions?speaker=Werner%20Vogels`)
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+// Search sessions by company
+fetch(`${baseUrl}/search-sessions?speaker=AWS`)
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+// Search sessions with multiple filters
+const params = new URLSearchParams({
+  speaker: 'Werner',
+  day: 'Monday',
+  level: '400',
+  keywords: 'serverless lambda'
+});
+fetch(`${baseUrl}/search-sessions?${params}`)
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+// Search sessions with pagination
+const paginationParams = new URLSearchParams({
+  speaker: 'AWS',
+  page_size: '20',
+  next_page_token: 'eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0='
+});
+fetch(`${baseUrl}/search-sessions?${paginationParams}`)
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
 
 ---
@@ -742,6 +1118,55 @@ You can import this API into Postman using the following collection structure:
           "raw": "{\"user_id\": 1}"
         },
         "url": "{{base_url}}/delete-user"
+      }
+    },
+    {
+      "name": "Search Sessions - By Speaker",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/search-sessions?speaker=Werner%20Vogels",
+          "query": [{"key": "speaker", "value": "Werner Vogels"}]
+        }
+      }
+    },
+    {
+      "name": "Search Sessions - By Company",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/search-sessions?speaker=AWS",
+          "query": [{"key": "speaker", "value": "AWS"}]
+        }
+      }
+    },
+    {
+      "name": "Search Sessions - Multiple Filters",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/search-sessions?speaker=Werner&day=Monday&level=400&keywords=serverless%20lambda",
+          "query": [
+            {"key": "speaker", "value": "Werner"},
+            {"key": "day", "value": "Monday"},
+            {"key": "level", "value": "400"},
+            {"key": "keywords", "value": "serverless lambda"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Sessions - With Pagination",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/search-sessions?speaker=AWS&page_size=20&next_page_token=eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0=",
+          "query": [
+            {"key": "speaker", "value": "AWS"},
+            {"key": "page_size", "value": "20"},
+            {"key": "next_page_token", "value": "eyJzZXNzaW9uX2lkIjoiQUJDMTIzIn0="}
+          ]
+        }
       }
     }
   ],

@@ -365,6 +365,7 @@ class SessionRepositoryDynamo(ISessionRepository):
         venue: Optional[str] = None,
         level: Optional[int] = None,
         keywords: Optional[str] = None,
+        speaker: Optional[str] = None,
         page_size: int = 50,
         last_evaluated_key: Optional[str] = None
     ) -> Tuple[List[Session], Optional[str]]:
@@ -377,6 +378,7 @@ class SessionRepositoryDynamo(ISessionRepository):
             venue: Filter by venue name
             level: Filter by level value (100, 200, 300, 400)
             keywords: Space-separated keywords to search in title, abstract, topics, areas
+            speaker: Filter by speaker name or company (case-insensitive, partial match)
             page_size: Maximum results per page (1-100, default 50)
             last_evaluated_key: Pagination token from previous request
             
@@ -406,6 +408,11 @@ class SessionRepositoryDynamo(ISessionRepository):
             except ValueError:
                 raise ValueError("Invalid or expired pagination token")
         
+        # Build speaker filter expression if provided
+        speaker_filter = None
+        if speaker is not None and speaker.strip():
+            speaker_filter = self._build_speaker_filter_expression(speaker.strip())
+        
         # Determine query strategy based on available filters
         # Priority: Level > Venue > Day (based on selectivity)
         # Note: When using offset-based pagination, we need to fetch all results
@@ -420,7 +427,8 @@ class SessionRepositoryDynamo(ISessionRepository):
                 key_name="level_value",
                 key_value=level,
                 page_size=fetch_limit,
-                exclusive_start_key=exclusive_start_key
+                exclusive_start_key=exclusive_start_key,
+                filter_expression=speaker_filter
             )
             # Apply additional filters in application
             if day is not None:
@@ -435,7 +443,8 @@ class SessionRepositoryDynamo(ISessionRepository):
                 key_name="venue_name",
                 key_value=venue,
                 page_size=fetch_limit,
-                exclusive_start_key=exclusive_start_key
+                exclusive_start_key=exclusive_start_key,
+                filter_expression=speaker_filter
             )
             # Apply additional filters in application
             if day is not None:
@@ -448,15 +457,27 @@ class SessionRepositoryDynamo(ISessionRepository):
                 key_name="day",
                 key_value=day,
                 page_size=fetch_limit,
-                exclusive_start_key=exclusive_start_key
+                exclusive_start_key=exclusive_start_key,
+                filter_expression=speaker_filter
             )
             
         else:
-            # No indexed filters - use scan with entity filter
+            # No indexed filters - scan all sessions (speaker/keywords filtering in application)
+            # Note: _scan_all_sessions will fetch ALL sessions from the table since we need to
+            # filter by speaker/keywords in application code
             sessions, last_evaluated_key_from_db = self._scan_all_sessions(
                 page_size=fetch_limit,
-                exclusive_start_key=exclusive_start_key
+                exclusive_start_key=None,  # Always start from beginning for full scan
+                filter_expression=speaker_filter
             )
+        
+        # Apply speaker filtering in application code (DynamoDB FilterExpression can't handle nested lists)
+        if speaker is not None and speaker.strip():
+            speaker_query_lower = speaker.strip().lower()
+            sessions = [
+                s for s in sessions
+                if self._session_matches_speaker(s, speaker_query_lower)
+            ]
         
         # Apply keyword filtering with relevance scoring
         if keywords is not None and keywords.strip():
@@ -510,7 +531,8 @@ class SessionRepositoryDynamo(ISessionRepository):
         key_name: str,
         key_value: any,
         page_size: int,
-        exclusive_start_key: Optional[Dict] = None
+        exclusive_start_key: Optional[Dict] = None,
+        filter_expression = None
     ) -> Tuple[List[Session], Optional[Dict]]:
         """
         Query a GSI and return matching sessions with pagination info.
@@ -521,6 +543,7 @@ class SessionRepositoryDynamo(ISessionRepository):
             key_value: Value to query for
             page_size: Maximum number of items to fetch
             exclusive_start_key: Starting point for pagination
+            filter_expression: Optional DynamoDB FilterExpression to apply
             
         Returns:
             Tuple of (List of Session entities, LastEvaluatedKey or None)
@@ -536,6 +559,9 @@ class SessionRepositoryDynamo(ISessionRepository):
         if exclusive_start_key:
             query_params['ExclusiveStartKey'] = exclusive_start_key
         
+        if filter_expression is not None:
+            query_params['FilterExpression'] = filter_expression
+        
         resp = self.dynamo.dynamo_table.query(**query_params)
         
         sessions = []
@@ -548,37 +574,62 @@ class SessionRepositoryDynamo(ISessionRepository):
     def _scan_all_sessions(
         self,
         page_size: int,
-        exclusive_start_key: Optional[Dict] = None
+        exclusive_start_key: Optional[Dict] = None,
+        filter_expression = None
     ) -> Tuple[List[Session], Optional[Dict]]:
         """
-        Scan all sessions with entity filter.
+        Scan all sessions with entity filter and optional additional filters.
+        
+        When speaker or keywords are the only filters, we need to scan the entire table
+        because DynamoDB can't filter nested structures efficiently. This method will
+        continue scanning until it retrieves all sessions from the table.
         
         Args:
-            page_size: Maximum number of items to fetch
-            exclusive_start_key: Starting point for pagination
+            page_size: Maximum number of items to fetch per scan operation
+            exclusive_start_key: Starting point for pagination (not used in full scan)
+            filter_expression: Optional DynamoDB FilterExpression to apply
             
         Returns:
-            Tuple of (List of Session entities, LastEvaluatedKey or None)
+            Tuple of (List of Session entities, None for last_evaluated_key since we scan all)
         """
-        scan_params = {
-            'Limit': page_size * 2,  # Fetch more to account for potential filtering
-            'FilterExpression': 'entity = :entity_type',
-            'ExpressionAttributeValues': {
-                ':entity_type': 'session'
-            }
-        }
+        from boto3.dynamodb.conditions import Attr
         
-        if exclusive_start_key:
-            scan_params['ExclusiveStartKey'] = exclusive_start_key
+        # Start with entity filter
+        entity_filter = Attr('entity').eq('session')
         
-        resp = self.dynamo.dynamo_table.scan(**scan_params)
+        # Combine with additional filter if provided
+        if filter_expression is not None:
+            combined_filter = entity_filter & filter_expression
+        else:
+            combined_filter = entity_filter
         
+        # Scan all sessions from the table
         sessions = []
-        for item in resp.get('Items', []):
-            sessions.append(SessionDynamoDTO.from_dynamo(item).to_entity())
+        last_evaluated_key = exclusive_start_key
         
-        last_evaluated_key = resp.get('LastEvaluatedKey')
-        return sessions, last_evaluated_key
+        # Keep scanning until we've retrieved all sessions
+        while True:
+            scan_params = {
+                'FilterExpression': combined_filter
+            }
+            
+            if last_evaluated_key:
+                scan_params['ExclusiveStartKey'] = last_evaluated_key
+            
+            resp = self.dynamo.dynamo_table.scan(**scan_params)
+            
+            # Convert items to sessions
+            for item in resp.get('Items', []):
+                sessions.append(SessionDynamoDTO.from_dynamo(item).to_entity())
+            
+            # Check if there are more items to scan
+            last_evaluated_key = resp.get('LastEvaluatedKey')
+            if not last_evaluated_key:
+                break
+        
+        # Return all sessions with None for pagination key
+        # (pagination will be handled in application code after filtering)
+        return sessions, None
     
     def _calculate_relevance_score(self, session: Session, keywords: List[str]) -> int:
         """
@@ -616,3 +667,48 @@ class SessionRepositoryDynamo(ISessionRepository):
                     break
         
         return score
+    
+    def _build_speaker_filter_expression(self, speaker_query: str):
+        """
+        Build DynamoDB filter expression for speaker search.
+        
+        Note: DynamoDB's FilterExpression has limitations with nested list structures.
+        The contains() function doesn't support searching within list items' nested fields.
+        Therefore, we return None here and handle speaker filtering in application code
+        after fetching results from DynamoDB.
+        
+        Args:
+            speaker_query: Search term for speaker name or company
+            
+        Returns:
+            None (speaker filtering must be done in application code)
+        """
+        # DynamoDB FilterExpression cannot efficiently search within nested list structures
+        # like speakers[*].displayName or speakers[*].company
+        # We must filter in application code after fetching from DynamoDB
+        return None
+    
+    def _session_matches_speaker(self, session: Session, speaker_query_lower: str) -> bool:
+        """
+        Check if a session matches the speaker query (case-insensitive partial match).
+        Searches both displayName and company fields for all speakers.
+        
+        Args:
+            session: Session entity to check
+            speaker_query_lower: Lowercase speaker search query
+            
+        Returns:
+            True if any speaker's displayName or company contains the query
+        """
+        for speaker in session.speakers:
+            # Check displayName (case-insensitive partial match)
+            display_name = speaker.get('displayName', '')
+            if display_name and speaker_query_lower in display_name.lower():
+                return True
+            
+            # Check company (case-insensitive partial match)
+            company = speaker.get('company', '')
+            if company and speaker_query_lower in company.lower():
+                return True
+        
+        return False

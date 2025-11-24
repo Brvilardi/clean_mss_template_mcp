@@ -139,3 +139,72 @@ class Test_SearchSessionsController:
         assert "pagination" in response.body
         assert "page_size" in response.body["pagination"]
         assert "next_page_token" in response.body["pagination"]
+    
+    def test_search_sessions_controller_with_speaker(self):
+        """Test controller with valid speaker parameter returns 200"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={'speaker': 'Werner'})
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 200
+        assert "sessions" in response.body
+        assert "pagination" in response.body
+    
+    def test_search_sessions_controller_invalid_speaker_empty(self):
+        """Test controller with invalid speaker (empty) returns 400"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={'speaker': ''})
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 400
+        assert "speaker" in response.body
+    
+    def test_search_sessions_controller_speaker_with_other_filters(self):
+        """Test controller with speaker combined with other filters"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={
+            'speaker': 'Werner',
+            'day': 'Monday',
+            'venue': 'Venetian',
+            'level': '300',
+            'keywords': 'serverless'
+        })
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 200
+        assert "sessions" in response.body
+        assert "pagination" in response.body
+    
+    def test_search_sessions_controller_speaker_matching_sessions(self):
+        """Test response includes sessions with matching speakers"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={'speaker': 'AWS'})
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 200
+        assert "sessions" in response.body
+        
+        # Verify all returned sessions have a matching speaker
+        for session in response.body["sessions"]:
+            found_match = False
+            for speaker in session.get("speakers", []):
+                if "aws" in speaker.get("displayName", "").lower() or "aws" in speaker.get("company", "").lower():
+                    found_match = True
+                    break
+            assert found_match, f"Session {session.get('session_id')} does not have a matching speaker"

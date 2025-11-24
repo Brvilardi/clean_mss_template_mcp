@@ -17,6 +17,7 @@ class SearchSessionsController:
             venue = request.data.get('venue')
             level_str = request.data.get('level')
             keywords = request.data.get('keywords')
+            speaker = request.data.get('speaker')
             page_size_str = request.data.get('page_size')
             next_page_token = request.data.get('next_page_token')
             
@@ -42,6 +43,7 @@ class SearchSessionsController:
                 venue=venue,
                 level=level,
                 keywords=keywords,
+                speaker=speaker,
                 page_size=page_size,
                 last_evaluated_key=next_page_token
             )

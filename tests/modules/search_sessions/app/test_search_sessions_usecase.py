@@ -151,3 +151,45 @@ class Test_SearchSessionsUsecase:
         for level in valid_levels:
             sessions, next_token = usecase(level=level)
             assert isinstance(sessions, list)
+    
+    def test_search_sessions_invalid_speaker_empty_string(self):
+        """Test invalid speaker (empty string) raises EntityError"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        with pytest.raises(EntityError):
+            usecase(speaker="")
+    
+    def test_search_sessions_invalid_speaker_whitespace_only(self):
+        """Test invalid speaker (whitespace-only) raises EntityError"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        with pytest.raises(EntityError):
+            usecase(speaker="   ")
+        
+        with pytest.raises(EntityError):
+            usecase(speaker="\t\n")
+    
+    def test_search_sessions_valid_speaker(self):
+        """Test valid speaker parameter"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        sessions, next_token = usecase(speaker="John Doe")
+        assert isinstance(sessions, list)
+        assert next_token is None or isinstance(next_token, str)
+    
+    def test_search_sessions_speaker_with_other_filters(self):
+        """Test speaker combined with other filters"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        sessions, next_token = usecase(
+            speaker="John",
+            day="Monday",
+            venue="Venetian",
+            level=300
+        )
+        assert isinstance(sessions, list)
+        assert next_token is None or isinstance(next_token, str)

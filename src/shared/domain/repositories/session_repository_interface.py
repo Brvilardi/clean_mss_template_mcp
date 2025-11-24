@@ -127,6 +127,7 @@ class ISessionRepository(ABC):
         venue: Optional[str] = None,
         level: Optional[int] = None,
         keywords: Optional[str] = None,
+        speaker: Optional[str] = None,
         page_size: int = 50,
         last_evaluated_key: Optional[str] = None
     ) -> Tuple[List[Session], Optional[str]]:
@@ -138,6 +139,7 @@ class ISessionRepository(ABC):
             venue: Filter by venue name
             level: Filter by level value (100, 200, 300, 400)
             keywords: Space-separated keywords to search in title, abstract, topics, areas
+            speaker: Filter by speaker name or company (case-insensitive, partial match)
             page_size: Maximum results per page (1-100, default 50)
             last_evaluated_key: Pagination token from previous request
             

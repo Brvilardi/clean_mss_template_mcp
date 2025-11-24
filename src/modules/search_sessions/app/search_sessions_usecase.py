@@ -15,6 +15,7 @@ class SearchSessionsUsecase:
         venue: Optional[str] = None,
         level: Optional[int] = None,
         keywords: Optional[str] = None,
+        speaker: Optional[str] = None,
         page_size: int = 50,
         last_evaluated_key: Optional[str] = None
     ) -> Tuple[List[Session], Optional[str]]:
@@ -26,6 +27,7 @@ class SearchSessionsUsecase:
             venue: Filter by venue name
             level: Filter by level value (100, 200, 300, 400)
             keywords: Space-separated keywords to search in title, abstract, topics, areas
+            speaker: Filter by speaker name or company (case-insensitive, partial match)
             page_size: Maximum results per page (1-100, default 50)
             last_evaluated_key: Pagination token from previous request
             
@@ -52,6 +54,11 @@ class SearchSessionsUsecase:
             if level not in valid_levels:
                 raise EntityError("level")
         
+        # Validate speaker values (non-empty strings)
+        if speaker is not None:
+            if not isinstance(speaker, str) or len(speaker.strip()) == 0:
+                raise EntityError("speaker")
+        
         # Validate page_size (1-100, default 50)
         if not isinstance(page_size, int):
             raise EntityError("page_size")
@@ -64,6 +71,7 @@ class SearchSessionsUsecase:
             venue=venue,
             level=level,
             keywords=keywords,
+            speaker=speaker,
             page_size=page_size,
             last_evaluated_key=last_evaluated_key
         )

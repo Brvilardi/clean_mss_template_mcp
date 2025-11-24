@@ -82,3 +82,27 @@ class Test_SearchSessionsUsecase_Properties:
         
         with pytest.raises(EntityError):
             usecase(venue=invalid_venue)
+    
+    @given(
+        invalid_speaker=st.one_of(
+            st.just(""),
+            st.just("   "),
+            st.just("\t\n"),
+            st.text().filter(lambda x: len(x.strip()) == 0 and len(x) > 0),
+            st.integers(),
+            st.floats()
+        )
+    )
+    def test_property_invalid_speaker_parameter_rejection(self, invalid_speaker):
+        """
+        Feature: enhanced-session-search, Property 13: Invalid speaker parameter rejection
+        Validates: Requirements 3.4, 6.3
+        
+        For any invalid speaker parameter (empty string, whitespace-only, or non-string), 
+        the search should raise EntityError.
+        """
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        with pytest.raises(EntityError):
+            usecase(speaker=invalid_speaker)

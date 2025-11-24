@@ -56,6 +56,7 @@ The following filters are directly supported by the API and should ALWAYS be use
 - **venue**: "Mandalay Bay", "Venetian", "MGM Grand", "Caesars Forum"
 - **level**: 100, 200, 300, 400
 - **keywords**: Search terms for title, abstract, topics, areas of interest
+- **speaker**: Speaker name or company (case-insensitive partial match, searches both displayName and company fields)
 
 ### CRITICAL: Filter vs Keyword Separation
 
@@ -83,10 +84,21 @@ The following filters are directly supported by the API and should ALWAYS be use
    - ❌ WRONG: `search_sessions(keywords="machine learning Tuesday")`
    - Why: "Tuesday" is a day filter, not content
 
+5. User: "Sessions by Werner Vogels"
+   - ✅ CORRECT: `search_sessions(speaker="Werner Vogels")`
+   - ❌ WRONG: `search_sessions(keywords="Werner Vogels")`
+   - Why: Speaker names should use the speaker filter for accurate matching
+
+6. User: "AWS speakers talking about serverless"
+   - ✅ CORRECT: `search_sessions(speaker="AWS", keywords="serverless")`
+   - ❌ WRONG: `search_sessions(keywords="AWS serverless")`
+   - Why: "AWS" is a company name, use speaker filter; "serverless" is content
+
 **Filter Value Recognition:**
 - **Venues**: Mandalay Bay, Venetian, MGM Grand, Caesars Forum
 - **Days**: Monday, Tuesday, Wednesday, Thursday, Friday
 - **Levels**: 100/Foundational, 200/Intermediate, 300/Advanced, 400/Expert
+- **Speakers**: Person names or company names (e.g., "Werner Vogels", "AWS", "Amazon")
 - **Keywords**: Everything else (topics, technologies, concepts, etc.)
 
 **Why this matters:**
@@ -98,9 +110,10 @@ The following filters are directly supported by the API and should ALWAYS be use
 ### Tool Selection Strategy:
 
 1. **Primary Tool - search_sessions**: Use for ALL session discovery tasks
-   - Supports all available filters: day, venue, level, keywords
+   - Supports all available filters: day, venue, level, keywords, speaker
    - Combines multiple filters in a single query (most efficient)
    - Returns relevance-ranked results when keywords are used
+   - Speaker filter searches both displayName and company fields with case-insensitive partial matching
    - Built-in pagination support
    - **ALWAYS prefer this over individual filter tools**
 
@@ -113,11 +126,11 @@ The following filters are directly supported by the API and should ALWAYS be use
 
 ### Handling Unsupported Filters (AI Reasoning Fallback):
 
-When users request filters that are NOT in the available list above (e.g., time of day, duration, speaker name, recording status, specific topics not in keywords):
+When users request filters that are NOT in the available list above (e.g., time of day, duration, recording status, specific topics not in keywords):
 
 1. **First**: Use available filters to narrow results as much as possible
    - Example: User asks "sessions about AI in the morning" → Use keywords="AI" first
-   - Example: User asks "sessions by Werner Vogels" → Fetch all sessions first
+   - Example: User asks "recorded sessions about security" → Use keywords="security" first
 
 2. **Then**: Fetch the filtered data (or all data if no applicable filters)
    - Use `search_sessions` with applicable filters
@@ -138,13 +151,13 @@ When users request filters that are NOT in the available list above (e.g., time 
   4. Explain: "I found X security sessions and filtered to show only morning sessions (before 12 PM)"
 
 - User: "Find sessions by Werner Vogels"
-  1. Use `get_all_sessions_paginated()` (no applicable filters)
-  2. Analyze speaker lists in results
-  3. Present only sessions with Werner Vogels as speaker
-  4. Explain: "I searched all sessions and found X sessions featuring Werner Vogels"
+  1. Use `search_sessions(speaker="Werner Vogels")` (speaker filter available!)
+  2. Return results directly
+  3. No additional filtering needed
+  4. Explain: "I found X sessions featuring Werner Vogels"
 
-- User: "Sessions about serverless on Monday at Venetian"
-  1. Use `search_sessions(keywords="serverless", day="Monday", venue="Venetian")` (all filters available!)
+- User: "Sessions about serverless on Monday at Venetian by AWS speakers"
+  1. Use `search_sessions(keywords="serverless", day="Monday", venue="Venetian", speaker="AWS")` (all filters available!)
   2. Return results directly
   3. No additional filtering needed
 

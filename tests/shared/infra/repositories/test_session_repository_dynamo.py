@@ -725,3 +725,327 @@ class Test_SessionRepositoryDynamo:
         direct_ids = set(s.session_id for s in all_sessions_direct)
         
         assert paginated_ids == direct_ids, "Pagination returned different sessions than direct query"
+    
+    # ========== Property-Based Tests for Enhanced Session Search ==========
+    
+    def test_property_venue_filtering_correctness(self):
+        """
+        Property test: Venue filtering correctness
+        Feature: enhanced-session-search, Property 1: Venue filtering correctness
+        Validates: Requirements 1.1
+        
+        For any venue name and set of sessions, filtering by that venue should return 
+        only sessions where venue_name equals that venue.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Get all unique venues from mock data
+        unique_venues = list(set(s.venue_name for s in repo_mock.sessions))
+        
+        @given(venue=st.sampled_from(unique_venues))
+        @settings(max_examples=100)
+        def property_test(venue):
+            # Get sessions filtered by venue
+            sessions = repo.get_sessions_by_venue(venue)
+            
+            # Verify all returned sessions have the correct venue
+            for session in sessions:
+                assert session.venue_name == venue, \
+                    f"Session {session.session_id} has venue '{session.venue_name}', expected '{venue}'"
+        
+        property_test()
+    
+    def test_property_day_filtering_correctness(self):
+        """
+        Property test: Day filtering correctness
+        Feature: enhanced-session-search, Property 2: Day filtering correctness
+        Validates: Requirements 1.2
+        
+        For any day name and set of sessions, filtering by that day should return 
+        only sessions where day equals that day.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Get all unique days from mock data
+        unique_days = list(set(s.day for s in repo_mock.sessions))
+        
+        @given(day=st.sampled_from(unique_days))
+        @settings(max_examples=100)
+        def property_test(day):
+            # Get sessions filtered by day
+            sessions = repo.get_sessions_by_day(day)
+            
+            # Verify all returned sessions have the correct day
+            for session in sessions:
+                assert session.day == day, \
+                    f"Session {session.session_id} has day '{session.day}', expected '{day}'"
+        
+        property_test()
+    
+    def test_property_level_filtering_correctness(self):
+        """
+        Property test: Level filtering correctness
+        Feature: enhanced-session-search, Property 3: Level filtering correctness
+        Validates: Requirements 1.3
+        
+        For any level value and set of sessions, filtering by that level should return 
+        only sessions where level_value equals that level.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Get all unique levels from mock data
+        unique_levels = list(set(s.level_value for s in repo_mock.sessions))
+        
+        @given(level=st.sampled_from(unique_levels))
+        @settings(max_examples=100)
+        def property_test(level):
+            # Get sessions filtered by level
+            sessions = repo.get_sessions_by_level(level)
+            
+            # Verify all returned sessions have the correct level
+            for session in sessions:
+                assert session.level_value == level, \
+                    f"Session {session.session_id} has level {session.level_value}, expected {level}"
+        
+        property_test()
+    
+    def test_property_combined_filter_correctness(self):
+        """
+        Property test: Combined filter correctness
+        Feature: enhanced-session-search, Property 4: Combined filter correctness
+        Validates: Requirements 1.4, 1.5
+        
+        For any combination of venue, day, and level filters, all returned sessions 
+        should match all provided filter criteria.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        from itertools import product
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Get all unique values from mock data
+        unique_venues = list(set(s.venue_name for s in repo_mock.sessions))
+        unique_days = list(set(s.day for s in repo_mock.sessions))
+        unique_levels = list(set(s.level_value for s in repo_mock.sessions))
+        
+        @given(
+            venue=st.sampled_from(unique_venues),
+            day=st.sampled_from(unique_days),
+            level=st.sampled_from(unique_levels)
+        )
+        @settings(max_examples=100)
+        def property_test(venue, day, level):
+            # Test venue + day combination
+            sessions, _ = repo.search_sessions(venue=venue, day=day)
+            for session in sessions:
+                assert session.venue_name == venue, \
+                    f"Session {session.session_id} has venue '{session.venue_name}', expected '{venue}'"
+                assert session.day == day, \
+                    f"Session {session.session_id} has day '{session.day}', expected '{day}'"
+            
+            # Test venue + level combination
+            sessions, _ = repo.search_sessions(venue=venue, level=level)
+            for session in sessions:
+                assert session.venue_name == venue, \
+                    f"Session {session.session_id} has venue '{session.venue_name}', expected '{venue}'"
+                assert session.level_value == level, \
+                    f"Session {session.session_id} has level {session.level_value}, expected {level}"
+            
+            # Test day + level combination
+            sessions, _ = repo.search_sessions(day=day, level=level)
+            for session in sessions:
+                assert session.day == day, \
+                    f"Session {session.session_id} has day '{session.day}', expected '{day}'"
+                assert session.level_value == level, \
+                    f"Session {session.session_id} has level {session.level_value}, expected {level}"
+            
+            # Test all three filters combined
+            sessions, _ = repo.search_sessions(venue=venue, day=day, level=level)
+            for session in sessions:
+                assert session.venue_name == venue, \
+                    f"Session {session.session_id} has venue '{session.venue_name}', expected '{venue}'"
+                assert session.day == day, \
+                    f"Session {session.session_id} has day '{session.day}', expected '{day}'"
+                assert session.level_value == level, \
+                    f"Session {session.session_id} has level {session.level_value}, expected {level}"
+        
+        property_test()
+    
+    def test_property_gsi_ordering_preservation(self):
+        """
+        Property test: GSI ordering preservation
+        Feature: enhanced-session-search, Property 5: GSI ordering preservation
+        Validates: Requirements 1.6
+        
+        For any GSI query (venue, day, or level), the returned sessions should be 
+        ordered by start_datetime in ascending order.
+        """
+        from hypothesis import given, strategies as st, settings, assume
+        
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Get all unique values from mock data
+        unique_venues = list(set(s.venue_name for s in repo_mock.sessions))
+        unique_days = list(set(s.day for s in repo_mock.sessions))
+        unique_levels = list(set(s.level_value for s in repo_mock.sessions))
+        
+        @given(
+            filter_type=st.sampled_from(['venue', 'day', 'level']),
+            venue=st.sampled_from(unique_venues),
+            day=st.sampled_from(unique_days),
+            level=st.sampled_from(unique_levels)
+        )
+        @settings(max_examples=100)
+        def property_test(filter_type, venue, day, level):
+            # Get sessions based on filter type
+            if filter_type == 'venue':
+                sessions = repo.get_sessions_by_venue(venue)
+            elif filter_type == 'day':
+                sessions = repo.get_sessions_by_day(day)
+            else:  # level
+                sessions = repo.get_sessions_by_level(level)
+            
+            # Skip if no sessions returned
+            assume(len(sessions) > 1)
+            
+            # Verify ordering by start_datetime
+            for i in range(len(sessions) - 1):
+                assert sessions[i].start_datetime <= sessions[i + 1].start_datetime, \
+                    f"Ordering violated: sessions[{i}].start_datetime ({sessions[i].start_datetime}) > " \
+                    f"sessions[{i+1}].start_datetime ({sessions[i+1].start_datetime})"
+        
+        property_test()
+
+    # @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_search_sessions_with_speaker_filter(self):
+        """
+        Integration test: Speaker filtering with DynamoDB
+        Test speaker filter returns only matching sessions
+        Validates: Requirements 2.1, 2.2, 5.4
+        """
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Find a speaker name from mock data
+        test_speaker = None
+        for session in repo_mock.sessions:
+            if session.speakers and len(session.speakers) > 0:
+                test_speaker = session.speakers[0].get('displayName', '')
+                if test_speaker:
+                    break
+        
+        # Skip test if no speakers found in mock data
+        if not test_speaker:
+            pytest.skip("No speakers found in mock data")
+        
+        # Search with speaker filter
+        sessions, _ = repo.search_sessions(speaker=test_speaker)
+        
+        # Verify all sessions have a matching speaker
+        for session in sessions:
+            found_match = False
+            for speaker in session.speakers:
+                display_name = speaker.get('displayName', '').lower()
+                company = speaker.get('company', '').lower()
+                search_term = test_speaker.lower()
+                
+                if search_term in display_name or search_term in company:
+                    found_match = True
+                    break
+            
+            assert found_match, \
+                f"Session {session.session_id} does not have a speaker matching '{test_speaker}'"
+    
+    # @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_search_sessions_speaker_with_gsi_query(self):
+        """
+        Integration test: Speaker filter with GSI queries
+        Test speaker filter works correctly when combined with indexed filters
+        Validates: Requirements 2.1, 2.2, 5.4
+        """
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Find a speaker and venue from mock data
+        test_speaker = None
+        test_venue = None
+        
+        for session in repo_mock.sessions:
+            if session.speakers and len(session.speakers) > 0:
+                test_speaker = session.speakers[0].get('displayName', '')
+                test_venue = session.venue_name
+                if test_speaker and test_venue:
+                    break
+        
+        # Skip test if no speakers found in mock data
+        if not test_speaker or not test_venue:
+            pytest.skip("No speakers or venue found in mock data")
+        
+        # Search with speaker + venue filter (should use GSI-Venue + speaker FilterExpression)
+        sessions, _ = repo.search_sessions(speaker=test_speaker, venue=test_venue)
+        
+        # Verify all sessions match both filters
+        for session in sessions:
+            # Check venue
+            assert session.venue_name == test_venue, \
+                f"Session {session.session_id} has venue '{session.venue_name}', expected '{test_venue}'"
+            
+            # Check speaker
+            found_match = False
+            for speaker in session.speakers:
+                display_name = speaker.get('displayName', '').lower()
+                company = speaker.get('company', '').lower()
+                search_term = test_speaker.lower()
+                
+                if search_term in display_name or search_term in company:
+                    found_match = True
+                    break
+            
+            assert found_match, \
+                f"Session {session.session_id} does not have a speaker matching '{test_speaker}'"
+    
+    # @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_search_sessions_speaker_case_insensitive(self):
+        """
+        Integration test: Speaker case-insensitive matching
+        Test speaker search works with different casings
+        Validates: Requirements 2.2, 5.4
+        """
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Find a speaker name from mock data
+        test_speaker = None
+        for session in repo_mock.sessions:
+            if session.speakers and len(session.speakers) > 0:
+                test_speaker = session.speakers[0].get('displayName', '')
+                if test_speaker and len(test_speaker) > 3:
+                    break
+        
+        # Skip test if no speakers found in mock data
+        if not test_speaker:
+            pytest.skip("No speakers found in mock data")
+        
+        # Search with different casings
+        sessions_lower, _ = repo.search_sessions(speaker=test_speaker.lower())
+        sessions_upper, _ = repo.search_sessions(speaker=test_speaker.upper())
+        sessions_title, _ = repo.search_sessions(speaker=test_speaker.title())
+        
+        # All should return the same sessions (order may differ)
+        lower_ids = set(s.session_id for s in sessions_lower)
+        upper_ids = set(s.session_id for s in sessions_upper)
+        title_ids = set(s.session_id for s in sessions_title)
+        
+        assert lower_ids == upper_ids == title_ids, \
+            "Case-insensitive matching failed: different casings returned different results"

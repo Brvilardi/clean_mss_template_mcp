@@ -314,6 +314,7 @@ class SessionRepositoryMock(ISessionRepository):
         venue: Optional[str] = None,
         level: Optional[int] = None,
         keywords: Optional[str] = None,
+        speaker: Optional[str] = None,
         page_size: int = 50,
         last_evaluated_key: Optional[str] = None
     ) -> Tuple[List[Session], Optional[str]]:
@@ -325,6 +326,7 @@ class SessionRepositoryMock(ISessionRepository):
             venue: Filter by venue name
             level: Filter by level value (100, 200, 300, 400)
             keywords: Space-separated keywords to search in title, abstract, topics, areas
+            speaker: Filter by speaker name or company (case-insensitive, partial match)
             page_size: Maximum results per page (1-100, default 50)
             last_evaluated_key: Pagination token from previous request
             
@@ -350,6 +352,14 @@ class SessionRepositoryMock(ISessionRepository):
         
         if level is not None:
             filtered_sessions = [s for s in filtered_sessions if s.level_value == level]
+        
+        # Apply speaker filtering (case-insensitive partial matching)
+        if speaker is not None and speaker.strip():
+            speaker_lower = speaker.lower()
+            filtered_sessions = [
+                s for s in filtered_sessions
+                if self._matches_speaker(s, speaker_lower)
+            ]
         
         # Apply keyword filtering with relevance scoring
         if keywords is not None and keywords.strip():
@@ -385,6 +395,31 @@ class SessionRepositoryMock(ISessionRepository):
             next_token = pagination_helper.encode_token(next_key)
         
         return page_sessions, next_token
+    
+    def _matches_speaker(self, session: Session, speaker_query: str) -> bool:
+        """
+        Check if any speaker in the session matches the speaker query.
+        Performs case-insensitive partial matching on displayName and company fields.
+        
+        Args:
+            session: Session entity to check
+            speaker_query: Lowercase speaker search term
+            
+        Returns:
+            True if any speaker matches, False otherwise
+        """
+        for speaker in session.speakers:
+            # Check displayName field
+            display_name = speaker.get('displayName', '')
+            if speaker_query in display_name.lower():
+                return True
+            
+            # Check company field
+            company = speaker.get('company', '')
+            if speaker_query in company.lower():
+                return True
+        
+        return False
     
     def _calculate_relevance_score(self, session: Session, keywords: List[str]) -> int:
         """

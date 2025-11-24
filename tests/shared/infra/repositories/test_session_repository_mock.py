@@ -724,3 +724,498 @@ class Test_SessionRepositoryMock:
         assert len(sessions_mixed) == 1
         assert sessions_upper[0].session_id == sessions_lower[0].session_id
         assert sessions_upper[0].session_id == sessions_mixed[0].session_id
+    
+    # ========== Property-Based Tests for Speaker Filtering ==========
+    
+    def test_search_sessions_property_speaker_displayname_matching(self):
+        """
+        Property test: Speaker displayName matching
+        Feature: enhanced-session-search, Property 6: Speaker displayName matching
+        Validates: Requirements 2.1
+        
+        For any speaker name query and set of sessions, all returned sessions
+        should have at least one speaker whose displayName contains that query string.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Extract all speaker names from mock data
+        speaker_names = []
+        for session in repo.sessions:
+            for speaker in session.speakers:
+                name = speaker.get('displayName', '')
+                if name:
+                    # Add full name and partial names
+                    speaker_names.append(name)
+                    # Add individual words from name
+                    speaker_names.extend(name.split())
+        
+        speaker_names = list(set(speaker_names))  # Remove duplicates
+        
+        @given(speaker_query=st.sampled_from(speaker_names))
+        @settings(max_examples=100)
+        def property_test(speaker_query):
+            sessions, _ = repo.search_sessions(speaker=speaker_query)
+            
+            # Verify all returned sessions have a matching speaker
+            for session in sessions:
+                found_match = False
+                for speaker in session.speakers:
+                    display_name = speaker.get('displayName', '')
+                    if speaker_query.lower() in display_name.lower():
+                        found_match = True
+                        break
+                
+                assert found_match, f"Session {session.session_id} doesn't have speaker matching '{speaker_query}'"
+        
+        property_test()
+    
+    def test_search_sessions_property_speaker_case_insensitive_matching(self):
+        """
+        Property test: Speaker case-insensitive matching
+        Feature: enhanced-session-search, Property 7: Speaker case-insensitive matching
+        Validates: Requirements 2.2
+        
+        For any speaker name with different casings, the search should return the same sessions.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        speaker_queries = ["Parvesh", "Jane", "John", "Alice", "Bob", "Carol", "David", "AWS"]
+        
+        @given(speaker_query=st.sampled_from(speaker_queries))
+        @settings(max_examples=100)
+        def property_test(speaker_query):
+            # Search with different casings
+            sessions_lower, _ = repo.search_sessions(speaker=speaker_query.lower())
+            sessions_upper, _ = repo.search_sessions(speaker=speaker_query.upper())
+            sessions_mixed, _ = repo.search_sessions(speaker=speaker_query.capitalize())
+            
+            # All should return same session IDs
+            ids_lower = set(s.session_id for s in sessions_lower)
+            ids_upper = set(s.session_id for s in sessions_upper)
+            ids_mixed = set(s.session_id for s in sessions_mixed)
+            
+            assert ids_lower == ids_upper, f"Case sensitivity issue: {speaker_query.lower()} != {speaker_query.upper()}"
+            assert ids_lower == ids_mixed, f"Case sensitivity issue: {speaker_query.lower()} != {speaker_query.capitalize()}"
+        
+        property_test()
+    
+    def test_search_sessions_property_speaker_partial_name_matching(self):
+        """
+        Property test: Speaker partial name matching
+        Feature: enhanced-session-search, Property 8: Speaker partial name matching
+        Validates: Requirements 2.3
+        
+        For any speaker's full name and any substring of that name, searching for
+        the substring should return sessions containing that speaker.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Get all speaker full names
+        full_names = []
+        for session in repo.sessions:
+            for speaker in session.speakers:
+                name = speaker.get('displayName', '')
+                if name and len(name) > 3:
+                    full_names.append(name)
+        
+        @given(
+            full_name=st.sampled_from(full_names),
+            substring_start=st.integers(min_value=0, max_value=10),
+            substring_length=st.integers(min_value=2, max_value=15)
+        )
+        @settings(max_examples=100)
+        def property_test(full_name, substring_start, substring_length):
+            # Extract substring
+            if substring_start >= len(full_name):
+                return  # Skip if start is beyond name length
+            
+            substring = full_name[substring_start:substring_start + substring_length]
+            if len(substring) < 2:
+                return  # Skip very short substrings
+            
+            # Search for substring
+            sessions, _ = repo.search_sessions(speaker=substring)
+            
+            # Find sessions that should contain this speaker
+            expected_session_ids = []
+            for session in repo.sessions:
+                for speaker in session.speakers:
+                    if full_name == speaker.get('displayName', ''):
+                        expected_session_ids.append(session.session_id)
+                        break
+            
+            # Verify all expected sessions are in results
+            result_ids = [s.session_id for s in sessions]
+            for expected_id in expected_session_ids:
+                assert expected_id in result_ids, f"Session {expected_id} with speaker '{full_name}' not found when searching for '{substring}'"
+        
+        property_test()
+    
+    def test_search_sessions_property_speaker_company_matching(self):
+        """
+        Property test: Speaker company matching
+        Feature: enhanced-session-search, Property 9: Speaker company matching
+        Validates: Requirements 2.4
+        
+        For any company name query and set of sessions, all returned sessions
+        should have at least one speaker whose company contains that query string.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Extract all company names from mock data
+        companies = []
+        for session in repo.sessions:
+            for speaker in session.speakers:
+                company = speaker.get('company', '')
+                if company:
+                    companies.append(company)
+        
+        companies = list(set(companies))  # Remove duplicates
+        
+        @given(company_query=st.sampled_from(companies))
+        @settings(max_examples=100)
+        def property_test(company_query):
+            sessions, _ = repo.search_sessions(speaker=company_query)
+            
+            # Verify all returned sessions have a matching speaker company
+            for session in sessions:
+                found_match = False
+                for speaker in session.speakers:
+                    company = speaker.get('company', '')
+                    if company_query.lower() in company.lower():
+                        found_match = True
+                        break
+                
+                assert found_match, f"Session {session.session_id} doesn't have speaker with company matching '{company_query}'"
+        
+        property_test()
+    
+    def test_search_sessions_property_speaker_combined_with_other_filters(self):
+        """
+        Property test: Speaker combined with other filters
+        Feature: enhanced-session-search, Property 10: Speaker combined with other filters
+        Validates: Requirements 2.5
+        
+        For any speaker query combined with other filters, all returned sessions
+        should match all provided criteria.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        valid_days = ["Thursday", "Friday", "Saturday", "Sunday"]
+        valid_venues = ["Mandalay Bay", "Venetian", "MGM Grand", "Wynn", "Caesars Forum"]
+        valid_levels = [100, 200, 300, 400]
+        speaker_queries = ["AWS", "Amazon", "Chopra", "Smith", "Johnson"]
+        
+        @given(
+            speaker=st.sampled_from(speaker_queries),
+            day=st.one_of(st.none(), st.sampled_from(valid_days)),
+            venue=st.one_of(st.none(), st.sampled_from(valid_venues)),
+            level=st.one_of(st.none(), st.sampled_from(valid_levels))
+        )
+        @settings(max_examples=100)
+        def property_test(speaker, day, venue, level):
+            sessions, _ = repo.search_sessions(
+                speaker=speaker,
+                day=day,
+                venue=venue,
+                level=level
+            )
+            
+            # Verify all returned sessions match all provided filters
+            for session in sessions:
+                # Check speaker match
+                found_speaker = False
+                for spk in session.speakers:
+                    if (speaker.lower() in spk.get('displayName', '').lower() or
+                        speaker.lower() in spk.get('company', '').lower()):
+                        found_speaker = True
+                        break
+                assert found_speaker, f"Session {session.session_id} doesn't match speaker '{speaker}'"
+                
+                # Check other filters
+                if day is not None:
+                    assert session.day == day, f"Session day {session.day} doesn't match filter {day}"
+                
+                if venue is not None:
+                    assert session.venue_name == venue, f"Session venue {session.venue_name} doesn't match filter {venue}"
+                
+                if level is not None:
+                    assert session.level_value == level, f"Session level {session.level_value} doesn't match filter {level}"
+        
+        property_test()
+    
+    def test_search_sessions_property_speaker_searches_both_fields(self):
+        """
+        Property test: Speaker searches both fields
+        Feature: enhanced-session-search, Property 11: Speaker searches both fields
+        Validates: Requirements 4.4
+        
+        For any search term that appears in either displayName or company of any speaker,
+        that session should be included in results.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Collect terms that appear in either field
+        search_terms = set()
+        for session in repo.sessions:
+            for speaker in session.speakers:
+                name = speaker.get('displayName', '')
+                company = speaker.get('company', '')
+                if name:
+                    search_terms.update(name.split())
+                if company:
+                    search_terms.update(company.split())
+        
+        search_terms = list(search_terms)
+        
+        @given(search_term=st.sampled_from(search_terms))
+        @settings(max_examples=100)
+        def property_test(search_term):
+            sessions, _ = repo.search_sessions(speaker=search_term)
+            
+            # Find all sessions that should match (in either field)
+            expected_ids = set()
+            for session in repo.sessions:
+                for speaker in session.speakers:
+                    name = speaker.get('displayName', '')
+                    company = speaker.get('company', '')
+                    if (search_term.lower() in name.lower() or
+                        search_term.lower() in company.lower()):
+                        expected_ids.add(session.session_id)
+                        break
+            
+            # Verify all expected sessions are in results
+            result_ids = set(s.session_id for s in sessions)
+            assert expected_ids == result_ids, f"Missing sessions for term '{search_term}': expected={expected_ids}, got={result_ids}"
+        
+        property_test()
+    
+    def test_search_sessions_property_speaker_checks_all_speakers(self):
+        """
+        Property test: Speaker checks all speakers
+        Feature: enhanced-session-search, Property 12: Speaker checks all speakers
+        Validates: Requirements 4.5
+        
+        For any session with multiple speakers, if the search term matches any speaker
+        (not just the first), that session should be included in results.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Find sessions with multiple speakers and collect their names
+        multi_speaker_sessions = [s for s in repo.sessions if len(s.speakers) > 1]
+        speaker_names_from_multi = []
+        
+        for session in multi_speaker_sessions:
+            for idx, speaker in enumerate(session.speakers):
+                name = speaker.get('displayName', '')
+                if name and idx > 0:  # Focus on non-first speakers
+                    speaker_names_from_multi.extend(name.split())
+        
+        if not speaker_names_from_multi:
+            # If no multi-speaker sessions, use any speaker names
+            for session in repo.sessions:
+                for speaker in session.speakers:
+                    name = speaker.get('displayName', '')
+                    if name:
+                        speaker_names_from_multi.extend(name.split())
+        
+        speaker_names_from_multi = list(set(speaker_names_from_multi))
+        
+        @given(speaker_query=st.sampled_from(speaker_names_from_multi))
+        @settings(max_examples=100)
+        def property_test(speaker_query):
+            sessions, _ = repo.search_sessions(speaker=speaker_query)
+            
+            # Find all sessions where ANY speaker matches
+            expected_ids = set()
+            for session in repo.sessions:
+                for speaker in session.speakers:
+                    name = speaker.get('displayName', '')
+                    company = speaker.get('company', '')
+                    if (speaker_query.lower() in name.lower() or
+                        speaker_query.lower() in company.lower()):
+                        expected_ids.add(session.session_id)
+                        break
+            
+            # Verify all expected sessions are in results
+            result_ids = set(s.session_id for s in sessions)
+            for expected_id in expected_ids:
+                assert expected_id in result_ids, f"Session {expected_id} with matching speaker not found"
+        
+        property_test()
+    
+    # ========== Unit Tests for Speaker Filtering ==========
+    
+    def test_search_sessions_by_speaker_displayname(self):
+        """Test speaker filtering by displayName"""
+        repo = SessionRepositoryMock()
+        
+        # Search for a speaker by name
+        sessions, _ = repo.search_sessions(speaker="Parvesh")
+        
+        assert len(sessions) >= 1
+        # Verify all sessions have a matching speaker
+        for session in sessions:
+            found_match = False
+            for speaker in session.speakers:
+                if "parvesh" in speaker.get('displayName', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+    
+    def test_search_sessions_by_speaker_company(self):
+        """Test speaker filtering by company"""
+        repo = SessionRepositoryMock()
+        
+        # Search for a speaker by company
+        sessions, _ = repo.search_sessions(speaker="AWS")
+        
+        assert len(sessions) >= 1
+        # Verify all sessions have a matching speaker
+        for session in sessions:
+            found_match = False
+            for speaker in session.speakers:
+                if "aws" in speaker.get('company', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+    
+    def test_search_sessions_speaker_case_insensitive(self):
+        """Test speaker search is case-insensitive"""
+        repo = SessionRepositoryMock()
+        
+        # Search with different casings
+        sessions1, _ = repo.search_sessions(speaker="chopra")
+        sessions2, _ = repo.search_sessions(speaker="CHOPRA")
+        sessions3, _ = repo.search_sessions(speaker="Chopra")
+        
+        # Should return same results
+        assert len(sessions1) == len(sessions2) == len(sessions3)
+        ids1 = [s.session_id for s in sessions1]
+        ids2 = [s.session_id for s in sessions2]
+        ids3 = [s.session_id for s in sessions3]
+        assert ids1 == ids2 == ids3
+    
+    def test_search_sessions_speaker_partial_match(self):
+        """Test speaker search with partial name"""
+        repo = SessionRepositoryMock()
+        
+        # Search with partial name
+        sessions, _ = repo.search_sessions(speaker="Smith")
+        
+        assert len(sessions) >= 1
+        # Verify results contain speakers with "Smith" in name
+        for session in sessions:
+            found_match = False
+            for speaker in session.speakers:
+                if "smith" in speaker.get('displayName', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+    
+    def test_search_sessions_speaker_combined_with_other_filters(self):
+        """Test speaker combined with other filters"""
+        repo = SessionRepositoryMock()
+        
+        # Search with speaker and day filter
+        sessions, _ = repo.search_sessions(speaker="AWS", day="Friday")
+        
+        # Verify all sessions match both criteria
+        for session in sessions:
+            assert session.day == "Friday"
+            found_match = False
+            for speaker in session.speakers:
+                if "aws" in speaker.get('company', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+    
+    def test_search_sessions_speaker_empty_query_returns_all(self):
+        """Test empty speaker query returns all sessions"""
+        repo = SessionRepositoryMock()
+        
+        # Search with empty speaker string
+        sessions1, _ = repo.search_sessions(speaker="")
+        sessions2, _ = repo.search_sessions(speaker="   ")
+        sessions_all, _ = repo.search_sessions()
+        
+        # Empty speaker should be ignored
+        assert len(sessions1) == len(sessions_all)
+        assert len(sessions2) == len(sessions_all)
+    
+    def test_search_sessions_speaker_no_match_returns_empty(self):
+        """Test speaker search with no matches returns empty list"""
+        repo = SessionRepositoryMock()
+        
+        # Search for non-existent speaker
+        sessions, _ = repo.search_sessions(speaker="NonExistentSpeaker12345")
+        
+        assert len(sessions) == 0
+        assert sessions == []
+    
+    def test_search_sessions_speaker_searches_both_displayname_and_company(self):
+        """Test speaker search checks both displayName and company fields"""
+        repo = SessionRepositoryMock()
+        
+        # Search for "Amazon" which appears in company field
+        sessions_company, _ = repo.search_sessions(speaker="Amazon")
+        
+        # Search for a name that appears in displayName
+        sessions_name, _ = repo.search_sessions(speaker="Jane")
+        
+        # Both should return results
+        assert len(sessions_company) >= 1
+        assert len(sessions_name) >= 1
+        
+        # Verify company search found company matches
+        for session in sessions_company:
+            found_match = False
+            for speaker in session.speakers:
+                if "amazon" in speaker.get('company', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+        
+        # Verify name search found name matches
+        for session in sessions_name:
+            found_match = False
+            for speaker in session.speakers:
+                if "jane" in speaker.get('displayName', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+    
+    def test_search_sessions_speaker_checks_all_speakers_in_list(self):
+        """Test speaker search checks all speakers in the speakers list"""
+        repo = SessionRepositoryMock()
+        
+        # Find a session with multiple speakers
+        multi_speaker_session = None
+        for session in repo.sessions:
+            if len(session.speakers) > 1:
+                multi_speaker_session = session
+                break
+        
+        assert multi_speaker_session is not None, "No multi-speaker session found in mock data"
+        
+        # Search for the second speaker's name
+        second_speaker_name = multi_speaker_session.speakers[1].get('displayName', '').split()[0]
+        sessions, _ = repo.search_sessions(speaker=second_speaker_name)
+        
+        # Verify the multi-speaker session is in results
+        session_ids = [s.session_id for s in sessions]
+        assert multi_speaker_session.session_id in session_ids
