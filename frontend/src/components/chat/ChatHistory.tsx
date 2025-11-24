@@ -21,30 +21,48 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
   }, [messages]);
 
   return (
-    <ScrollArea className="flex-1 px-4 py-6" ref={scrollAreaRef}>
+    <ScrollArea 
+      className="flex-1 px-2 sm:px-4 py-4 sm:py-6" 
+      ref={scrollAreaRef}
+      role="log"
+      aria-label="Chat conversation history"
+      aria-live="polite"
+      aria-atomic="false"
+    >
       {messages.length === 0 && !isLoading ? (
-        <div className="flex flex-col items-center justify-center h-full text-center">
+        <div 
+          className="flex flex-col items-center justify-center h-full text-center px-4"
+          role="region"
+          aria-label="Welcome message and suggestions"
+        >
           <div className="max-w-md space-y-4">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <div className="mb-4">
+              <img 
+                src="/dati-logo.png" 
+                alt="Dati company logo" 
+                className="h-16 w-16 sm:h-20 sm:w-20 mx-auto object-contain bg-white p-2 rounded-lg"
+              />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-semibold" style={{ color: '#9ca3af' }}>
               Welcome to re:Invent Planner
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-sm sm:text-base" style={{ color: '#9ca3af' }}>
               Ask me anything about AWS re:Invent sessions, speakers, or help building your personalized schedule.
             </p>
             <div className="space-y-2 text-left">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <p className="text-xs sm:text-sm font-medium" style={{ color: '#9ca3af' }}>
                 Try asking:
               </p>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                <li>• "What sessions are available on December 3rd?"</li>
-                <li>• "Show me all AI/ML sessions"</li>
-                <li>• "Find sessions by Werner Vogels"</li>
+              <ul className="text-xs sm:text-sm space-y-1" style={{ color: '#9ca3af' }} role="list">
+                <li><span aria-hidden="true">• </span>"What sessions are available on December 3rd?"</li>
+                <li><span aria-hidden="true">• </span>"Show me all AI/ML sessions"</li>
+                <li><span aria-hidden="true">• </span>"Find sessions by Werner Vogels"</li>
               </ul>
             </div>
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2 sm:space-y-4">
           {messages.map((message) => (
             <ChatMessage
               key={message.id}
@@ -54,16 +72,21 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
           ))}
           
           {isLoading && (
-            <div className="flex gap-3 mb-4">
-              <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
-              <div className="flex flex-col gap-2 max-w-[70%]">
-                <Skeleton className="h-16 w-full rounded-lg" />
-                <Skeleton className="h-4 w-20" />
+            <div 
+              className="flex gap-2 sm:gap-3 mb-3 sm:mb-4 px-2 sm:px-0"
+              role="status"
+              aria-label="Assistant is typing"
+            >
+              <Skeleton className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0" />
+              <div className="flex flex-col gap-2 max-w-[85%] sm:max-w-[70%]">
+                <Skeleton className="h-12 sm:h-16 w-full rounded-lg" />
+                <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
               </div>
+              <span className="sr-only">Assistant is typing a response</span>
             </div>
           )}
           
-          <div ref={bottomRef} />
+          <div ref={bottomRef} aria-hidden="true" />
         </div>
       )}
     </ScrollArea>

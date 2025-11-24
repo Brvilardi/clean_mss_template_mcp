@@ -1,12 +1,15 @@
+import { lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { SignIn } from './pages/auth/SignIn';
-import { SignUp } from './pages/auth/SignUp';
-import { ConfirmSignUp } from './pages/auth/ConfirmSignUp';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { PrivateLayout } from './components/layout/PrivateLayout';
-import { Dashboard } from './pages/Dashboard';
-import { Chat } from './pages/Chat';
-import { Settings } from './pages/Settings';
+
+// Lazy load pages for code splitting
+const SignIn = lazy(() => import('./pages/auth/SignIn').then(module => ({ default: module.SignIn })));
+const SignUp = lazy(() => import('./pages/auth/SignUp').then(module => ({ default: module.SignUp })));
+const ConfirmSignUp = lazy(() => import('./pages/auth/ConfirmSignUp').then(module => ({ default: module.ConfirmSignUp })));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
+const Chat = lazy(() => import('./pages/Chat').then(module => ({ default: module.Chat })));
+const Settings = lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 
 export const router = createBrowserRouter([
   {

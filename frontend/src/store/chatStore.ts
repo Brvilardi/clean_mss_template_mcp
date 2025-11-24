@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import type { Message } from '../types/chat';
-import { AgentService } from '../services/agentService';
+import { AgentService, type AgentError } from '../services/agentService';
+
+// Cache configuration
+const STORAGE_KEY = 'reinvent-chat-history';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CachedData {
+  messages: Message[];
+  currentSessionId: string | null;
+  timestamp: number;
+}
 
 interface ChatState {
   // State
@@ -8,13 +18,75 @@ interface ChatState {
   currentSessionId: string | null;
   isLoading: boolean;
   error: string | null;
+  errorSuggestions: string[];
+  isRetryable: boolean;
 
   // Actions
   sendMessage: (content: string) => Promise<void>;
+  retryLastMessage: () => Promise<void>;
   clearMessages: () => void;
   startNewSession: () => void;
-  setError: (error: string | null) => void;
+  setError: (error: string | null, suggestions?: string[], isRetryable?: boolean) => void;
+  clearError: () => void;
+  loadFromCache: () => void;
+  saveToCache: () => void;
+  clearCache: () => void;
 }
+
+// Cache utility functions
+const loadFromLocalStorage = (): CachedData | null => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+
+    const data: CachedData = JSON.parse(stored);
+    
+    // Check if cache is expired
+    const now = Date.now();
+    if (now - data.timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+
+    // Validate data structure
+    if (!data.messages || !Array.isArray(data.messages)) {
+      return null;
+    }
+
+    // Convert timestamp strings back to Date objects
+    data.messages = data.messages.map(msg => ({
+      ...msg,
+      timestamp: new Date(msg.timestamp)
+    }));
+
+    return data;
+  } catch (error) {
+    console.error('Failed to load from localStorage:', error);
+    localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
+};
+
+const saveToLocalStorage = (messages: Message[], sessionId: string | null): void => {
+  try {
+    const data: CachedData = {
+      messages,
+      currentSessionId: sessionId,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Failed to save to localStorage:', error);
+  }
+};
+
+const clearLocalStorage = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('Failed to clear localStorage:', error);
+  }
+};
 
 export const useChatStore = create<ChatState>((set, get) => ({
   // Initial state
@@ -22,10 +94,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
   currentSessionId: null,
   isLoading: false,
   error: null,
+  errorSuggestions: [],
+  isRetryable: false,
 
   // Send message action with optimistic updates
   sendMessage: async (content: string) => {
     const state = get();
+    
+    // Check network connectivity first
+    if (!AgentService.isOnline()) {
+      set({
+        error: 'No internet connection. Please check your network.',
+        errorSuggestions: [
+          'Check your WiFi or mobile data connection',
+          'Try refreshing the page once connected'
+        ],
+        isRetryable: true
+      });
+      return;
+    }
     
     // Create optimistic user message
     const optimisticMessage: Message = {
@@ -41,7 +128,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set(state => ({
       messages: [...state.messages, optimisticMessage],
       isLoading: true,
-      error: null
+      error: null,
+      errorSuggestions: [],
+      isRetryable: false
     }));
 
     try {
@@ -77,6 +166,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }));
 
     } catch (error) {
+      const agentError = error as AgentError;
+      
       // Update optimistic message to 'error' status
       set(state => ({
         messages: state.messages.map(msg =>
@@ -85,44 +176,104 @@ export const useChatStore = create<ChatState>((set, get) => ({
             : msg
         ),
         isLoading: false,
-        error: error instanceof Error ? error.message : 'An unexpected error occurred'
+        error: agentError.message || 'An unexpected error occurred',
+        errorSuggestions: agentError.suggestions || [],
+        isRetryable: agentError.isRetryable ?? true
       }));
     }
   },
 
+  // Retry the last failed message
+  retryLastMessage: async () => {
+    const state = get();
+    
+    // Find the last user message with error status
+    const lastErrorMessage = [...state.messages]
+      .reverse()
+      .find(msg => msg.role === 'user' && msg.status === 'error');
+    
+    if (!lastErrorMessage) {
+      return;
+    }
+
+    // Remove the failed message and retry
+    set(state => ({
+      messages: state.messages.filter(msg => msg.id !== lastErrorMessage.id),
+      error: null,
+      errorSuggestions: [],
+      isRetryable: false
+    }));
+
+    // Retry sending the message
+    await get().sendMessage(lastErrorMessage.content);
+  },
+
   // Clear all messages
   clearMessages: () => {
-    // Clear localStorage when clearing messages
-    try {
-      localStorage.removeItem('reinvent-chat-history');
-    } catch (error) {
-      console.error('Failed to clear localStorage:', error);
-    }
+    clearLocalStorage();
     
     set({ 
       messages: [], 
       currentSessionId: null,
-      error: null 
+      error: null,
+      errorSuggestions: [],
+      isRetryable: false
     });
   },
 
   // Start a new session
   startNewSession: () => {
-    // Clear localStorage when starting new session
-    try {
-      localStorage.removeItem('reinvent-chat-history');
-    } catch (error) {
-      console.error('Failed to clear localStorage:', error);
-    }
+    clearLocalStorage();
     
     set({
       messages: [],
       currentSessionId: crypto.randomUUID(),
       error: null,
+      errorSuggestions: [],
+      isRetryable: false,
       isLoading: false
     });
   },
 
-  // Set error message
-  setError: (error: string | null) => set({ error })
+  // Set error message with suggestions
+  setError: (error: string | null, suggestions: string[] = [], isRetryable: boolean = false) => {
+    set({ 
+      error, 
+      errorSuggestions: suggestions,
+      isRetryable 
+    });
+  },
+
+  // Clear error
+  clearError: () => {
+    set({ 
+      error: null, 
+      errorSuggestions: [],
+      isRetryable: false 
+    });
+  },
+
+  // Load conversation from cache
+  loadFromCache: () => {
+    const cached = loadFromLocalStorage();
+    if (cached) {
+      set({
+        messages: cached.messages,
+        currentSessionId: cached.currentSessionId
+      });
+    }
+  },
+
+  // Save conversation to cache
+  saveToCache: () => {
+    const state = get();
+    if (state.messages.length > 0) {
+      saveToLocalStorage(state.messages, state.currentSessionId);
+    }
+  },
+
+  // Clear cache
+  clearCache: () => {
+    clearLocalStorage();
+  }
 }));

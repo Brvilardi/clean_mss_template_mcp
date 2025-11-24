@@ -1,4 +1,18 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Skeleton } from '../ui/skeleton';
+
+// Loading fallback for auth pages
+function AuthLoadingFallback() {
+  return (
+    <div className="w-full space-y-4">
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-24" />
+    </div>
+  );
+}
 
 export function PublicLayout() {
   return (
@@ -12,7 +26,9 @@ export function PublicLayout() {
             AI-powered conference planning assistant
           </p>
         </div>
-        <Outlet />
+        <Suspense fallback={<AuthLoadingFallback />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   );

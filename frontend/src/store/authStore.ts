@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { AuthService } from '../services/authService';
 import type { User, SignUpData } from '../types/auth';
+import { useChatStore } from './chatStore';
 
 interface AuthState {
   user: User | null;
@@ -125,6 +126,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     try {
       await AuthService.signOut();
+      
+      // Clear chat cache on sign out
+      useChatStore.getState().clearCache();
       
       set({
         user: null,
