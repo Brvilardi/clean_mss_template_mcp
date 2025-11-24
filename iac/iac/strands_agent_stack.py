@@ -6,7 +6,7 @@ from aws_cdk import (
 )
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 from constructs import Construct
-from aws_cdk.aws_apigateway import Resource, LambdaIntegration
+from aws_cdk.aws_apigateway import Resource, LambdaIntegration, Cors
 
 
 class StrandsAgentStack(Construct):
@@ -55,7 +55,22 @@ class StrandsAgentStack(Construct):
         )
 
         # Create API Gateway resource with proxy for all sub-paths
-        agent_resource = api_gateway_resource.add_resource("agent")
+        agent_resource = api_gateway_resource.add_resource(
+            "agent",
+            default_cors_preflight_options={
+                "allow_origins": Cors.ALL_ORIGINS,
+                "allow_methods": Cors.ALL_METHODS,
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Amz-Date",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent"
+                ],
+                "allow_credentials": False
+            }
+        )
         agent_resource.add_method(
             method,
             integration=LambdaIntegration(function)
@@ -64,7 +79,20 @@ class StrandsAgentStack(Construct):
         # Add proxy resource to handle all sub-paths like /agent/ping, /agent/invocations
         agent_resource.add_proxy(
             default_integration=LambdaIntegration(function),
-            any_method=True
+            any_method=True,
+            default_cors_preflight_options={
+                "allow_origins": Cors.ALL_ORIGINS,
+                "allow_methods": Cors.ALL_METHODS,
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Amz-Date",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent"
+                ],
+                "allow_credentials": False
+            }
         )
 
         return function

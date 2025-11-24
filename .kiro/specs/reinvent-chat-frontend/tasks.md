@@ -42,7 +42,7 @@
   - Add responsive mobile layout for sidebar
   - _Requirements: 5.2, 6.4_
 
-- [ ] 6. Create agent service and chat store
+- [x] 6. Create agent service and chat store
   - Create `services/agentService.ts` with API integration to Strands Agent endpoint
   - Implement `sendMessage()` method with proper request/response handling
   - Create error transformation for user-friendly messages
@@ -51,7 +51,7 @@
   - Implement `clearMessages()` and `startNewSession()` actions
   - _Requirements: 3.1, 3.3, 3.4, 6.2, 8.1, 8.2, 8.4_
 
-- [ ] 7. Build chat interface components
+- [x] 7. Build chat interface components
   - Install shadcn/ui components (ScrollArea, Avatar, Badge, Skeleton, Textarea)
   - Create `components/chat/MessageBubble.tsx` for individual message display
   - Create `components/chat/ChatMessage.tsx` with user/assistant styling
@@ -61,7 +61,7 @@
   - Implement empty message validation
   - _Requirements: 3.1, 3.2, 3.5, 4.1, 4.2, 4.5, 5.4, 5.5_
 
-- [ ] 8. Implement main chat page
+- [x] 8. Implement main chat page
   - Create `pages/Chat.tsx` with full-height layout
   - Integrate ChatHistory and ChatInput components
   - Implement message sending with loading states

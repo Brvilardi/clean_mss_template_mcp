@@ -33,7 +33,7 @@ class TemplateStack(Stack):
                                     description="This is the Template RestApi",
                                     default_cors_preflight_options=
                                     {
-                                        "allow_origins": allowed_origins,
+                                        "allow_origins": apigw.Cors.ALL_ORIGINS,
                                         "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                                         "allow_headers": [
                                             *apigw.Cors.DEFAULT_HEADERS,

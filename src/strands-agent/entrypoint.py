@@ -7,6 +7,7 @@ including request/response handling, error management, and health checks.
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
@@ -99,6 +100,18 @@ app = FastAPI(
     version=Config.AGENT_VERSION,
     description="AI assistant for AWS re:Invent conference planning",
     lifespan=lifespan
+)
+
+# Configure CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
