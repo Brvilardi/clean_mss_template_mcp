@@ -11,22 +11,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
-import logging
-import sys
 import os
 import time
 from contextlib import asynccontextmanager
 
+from aws_lambda_powertools import Logger, Metrics
+from aws_lambda_powertools.metrics import MetricUnit
+
 from agent import create_agent
 from config import Config
 
-# Configure structured logging
-logging.basicConfig(
-    level=getattr(logging, Config.LOG_LEVEL),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stderr
-)
-logger = logging.getLogger("reinvent-agent")
+# Initialize Powertools Logger and Metrics
+logger = Logger(service="reinvent-agent", level=Config.LOG_LEVEL)
+metrics = Metrics(namespace="ReinventAgent", service="agent-invocations")
 
 # Global agent instance
 agent = None
@@ -42,11 +39,11 @@ async def lifespan(app: FastAPI):
     global agent, agent_initialization_error
     
     # Startup: Initialize agent
-    logger.info("Initializing re:Invent Planner Agent", extra={
-        "mcp_endpoint": Config.MCP_ENDPOINT,
-        "model": Config.MODEL_NAME,
-        "environment": Config.ENVIRONMENT
-    })
+    logger.info("Initializing re:Invent Planner Agent",
+        mcp_endpoint=Config.MCP_ENDPOINT,
+        model=Config.MODEL_NAME,
+        environment=Config.ENVIRONMENT
+    )
     
     try:
         # Validate configuration
@@ -60,17 +57,17 @@ async def lifespan(app: FastAPI):
         for attempt in range(max_retries):
             try:
                 agent = create_agent(mcp_endpoint=Config.MCP_ENDPOINT)
-                logger.info("Agent initialized successfully", extra={
-                    "attempt": attempt + 1,
-                    "max_retries": max_retries
-                })
+                logger.info("Agent initialized successfully",
+                    attempt=attempt + 1,
+                    max_retries=max_retries
+                )
                 break
             except Exception as e:
                 if attempt < max_retries - 1:
-                    logger.warning(f"Agent initialization attempt {attempt + 1} failed, retrying...", extra={
-                        "error": str(e),
-                        "retry_delay": retry_delay
-                    })
+                    logger.warning(f"Agent initialization attempt {attempt + 1} failed, retrying...",
+                        error=str(e),
+                        retry_delay=retry_delay
+                    )
                     time.sleep(retry_delay)
                     retry_delay *= 2  # Exponential backoff
                 else:
@@ -81,10 +78,10 @@ async def lifespan(app: FastAPI):
         
     except Exception as e:
         agent_initialization_error = str(e)
-        logger.error("Failed to initialize agent", extra={
-            "error": str(e),
-            "error_type": type(e).__name__
-        })
+        logger.error("Failed to initialize agent",
+            error=str(e),
+            error_type=type(e).__name__
+        )
         # Don't raise - allow app to start but return errors on requests
     
     yield
@@ -168,9 +165,10 @@ async def invoke_agent(request: InvocationRequest):
     
     # Check if agent is initialized
     if agent is None:
-        logger.error("Agent invocation attempted but agent not initialized", extra={
-            "initialization_error": agent_initialization_error
-        })
+        logger.error("Agent invocation attempted but agent not initialized",
+            initialization_error=agent_initialization_error
+        )
+        metrics.add_metric(name="AgentUnavailable", unit=MetricUnit.Count, value=1)
         raise HTTPException(
             status_code=503,
             detail={
@@ -206,10 +204,14 @@ async def invoke_agent(request: InvocationRequest):
                 }
             )
         
-        logger.info("Processing agent invocation", extra={
-            "prompt_length": len(user_message),
-            "session_id": request.session_id
-        })
+        logger.info("Processing agent invocation",
+            prompt_length=len(user_message),
+            session_id=request.session_id,
+            user_message_preview=user_message[:100] + "..." if len(user_message) > 100 else user_message
+        )
+        
+        # Add metric for invocation
+        metrics.add_metric(name="InvocationStarted", unit=MetricUnit.Count, value=1)
         
         # Process query through agent with retry logic for tool invocations
         max_retries = 2
@@ -223,17 +225,113 @@ async def invoke_agent(request: InvocationRequest):
                 # Extract response text from agent result
                 response_text = result.message['content'][0]['text']
                 
-                logger.info("Agent invocation successful", extra={
-                    "response_length": len(response_text),
-                    "attempt": attempt + 1,
-                    "duration_seconds": time.time() - request_start_time
-                })
+                # Extract and log token usage
+                usage = result.message.get('usage', {})
+                input_tokens = usage.get('input_tokens', 0)
+                output_tokens = usage.get('output_tokens', 0)
+                total_tokens = input_tokens + output_tokens
+                
+                # Log tool usage details with inputs and results
+                tool_calls = []
+                tool_results = []
+                
+                if hasattr(result, 'history') and result.history:
+                    for turn in result.history:
+                        # Capture tool calls (from assistant)
+                        if turn.get('role') == 'assistant':
+                            content = turn.get('content', [])
+                            for item in content:
+                                if item.get('type') == 'tool_use':
+                                    tool_call = {
+                                        'id': item.get('id'),
+                                        'tool': item.get('name'),
+                                        'input': item.get('input', {})
+                                    }
+                                    tool_calls.append(tool_call)
+                                    
+                                    # Log individual tool call
+                                    logger.info(f"Tool called: {item.get('name')}",
+                                        tool_name=item.get('name'),
+                                        tool_id=item.get('id'),
+                                        parameters=item.get('input', {})
+                                    )
+                                    
+                                    # Add metric for tool usage
+                                    metrics.add_metric(name="ToolCalled", unit=MetricUnit.Count, value=1)
+                                    metrics.add_dimension(name="ToolName", value=item.get('name', 'unknown'))
+                        
+                        # Capture tool results (from user role with tool_result)
+                        elif turn.get('role') == 'user':
+                            content = turn.get('content', [])
+                            for item in content:
+                                if item.get('type') == 'tool_result':
+                                    tool_result = {
+                                        'tool_use_id': item.get('tool_use_id'),
+                                        'content': item.get('content', [])
+                                    }
+                                    tool_results.append(tool_result)
+                                    
+                                    # Extract result summary
+                                    result_text = ""
+                                    if isinstance(item.get('content'), list):
+                                        for content_item in item.get('content', []):
+                                            if content_item.get('type') == 'text':
+                                                result_text = content_item.get('text', '')[:500]  # First 500 chars
+                                    
+                                    # Log individual tool result
+                                    logger.info(f"Tool result received",
+                                        tool_use_id=item.get('tool_use_id'),
+                                        result_preview=result_text + "..." if len(result_text) == 500 else result_text,
+                                        is_error=item.get('is_error', False)
+                                    )
+                                    
+                                    # Add metric for tool errors
+                                    if item.get('is_error', False):
+                                        metrics.add_metric(name="ToolError", unit=MetricUnit.Count, value=1)
+                
+                duration = round(time.time() - request_start_time, 2)
+                
+                logger.info("Agent invocation successful",
+                    response_length=len(response_text),
+                    attempt=attempt + 1,
+                    duration_seconds=duration,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    total_tokens=total_tokens,
+                    tool_calls_count=len(tool_calls),
+                    tool_results_count=len(tool_results),
+                    tools_used=[t['tool'] for t in tool_calls]
+                )
+                
+                # Add comprehensive metrics
+                metrics.add_metric(name="InvocationSuccess", unit=MetricUnit.Count, value=1)
+                metrics.add_metric(name="ResponseTime", unit=MetricUnit.Milliseconds, value=duration * 1000)
+                metrics.add_metric(name="InputTokens", unit=MetricUnit.Count, value=input_tokens)
+                metrics.add_metric(name="OutputTokens", unit=MetricUnit.Count, value=output_tokens)
+                metrics.add_metric(name="TotalTokens", unit=MetricUnit.Count, value=total_tokens)
+                metrics.add_metric(name="ToolCallsCount", unit=MetricUnit.Count, value=len(tool_calls))
+                
+                # Log detailed tool execution summary for debugging
+                if tool_calls:
+                    logger.debug("Tool execution summary",
+                        tool_calls=tool_calls,
+                        tool_results=tool_results
+                    )
                 
                 response = {
                     "message": response_text,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "model": Config.MODEL_NAME,
-                    "session_id": request.session_id
+                    "session_id": request.session_id,
+                    "usage": {
+                        "input_tokens": input_tokens,
+                        "output_tokens": output_tokens,
+                        "total_tokens": total_tokens
+                    },
+                    "metadata": {
+                        "tool_calls_count": len(tool_calls),
+                        "duration_seconds": round(time.time() - request_start_time, 2)
+                    }
                 }
                 
                 return InvocationResponse(output=response)
@@ -247,12 +345,13 @@ async def invoke_agent(request: InvocationRequest):
                 is_retryable = any(err in error_type for err in retryable_errors)
                 
                 if is_retryable and attempt < max_retries:
-                    logger.warning(f"Tool invocation failed (attempt {attempt + 1}), retrying...", extra={
-                        "error": str(tool_error),
-                        "error_type": error_type,
-                        "attempt": attempt + 1,
-                        "max_retries": max_retries
-                    })
+                    logger.warning(f"Tool invocation failed (attempt {attempt + 1}), retrying...",
+                        error=str(tool_error),
+                        error_type=error_type,
+                        attempt=attempt + 1,
+                        max_retries=max_retries
+                    )
+                    metrics.add_metric(name="InvocationRetry", unit=MetricUnit.Count, value=1)
                     time.sleep(1 * (attempt + 1))  # Progressive delay
                     continue
                 else:
@@ -260,12 +359,16 @@ async def invoke_agent(request: InvocationRequest):
                     break
         
         # If we get here, all retries failed
-        logger.error("Agent invocation failed after retries", extra={
-            "error": str(last_error),
-            "error_type": type(last_error).__name__,
-            "attempts": max_retries + 1,
-            "duration_seconds": time.time() - request_start_time
-        })
+        logger.error("Agent invocation failed after retries",
+            error=str(last_error),
+            error_type=type(last_error).__name__,
+            attempts=max_retries + 1,
+            duration_seconds=time.time() - request_start_time
+        )
+        
+        # Add failure metrics
+        metrics.add_metric(name="InvocationFailure", unit=MetricUnit.Count, value=1)
+        metrics.add_dimension(name="ErrorType", value=type(last_error).__name__)
         
         # Provide user-friendly error message based on error type
         error_type = type(last_error).__name__
@@ -309,11 +412,14 @@ async def invoke_agent(request: InvocationRequest):
     
     except Exception as e:
         # Catch-all for unexpected errors
-        logger.error("Unexpected error during agent invocation", extra={
-            "error": str(e),
-            "error_type": type(e).__name__,
-            "duration_seconds": time.time() - request_start_time
-        })
+        logger.error("Unexpected error during agent invocation",
+            error=str(e),
+            error_type=type(e).__name__,
+            duration_seconds=time.time() - request_start_time
+        )
+        
+        metrics.add_metric(name="UnexpectedError", unit=MetricUnit.Count, value=1)
+        metrics.add_dimension(name="ErrorType", value=type(e).__name__)
         
         raise HTTPException(
             status_code=500,
@@ -351,9 +457,9 @@ async def ping():
     
     if agent is None and agent_initialization_error:
         health_status["error"] = agent_initialization_error
-        logger.warning("Health check: Agent not initialized", extra={
-            "error": agent_initialization_error
-        })
+        logger.warning("Health check: Agent not initialized",
+            error=agent_initialization_error
+        )
     
     return health_status
 
@@ -365,12 +471,14 @@ async def global_exception_handler(request: Request, exc: Exception):
     
     Logs the error and returns a user-friendly error response.
     """
-    logger.error("Unhandled exception", extra={
-        "error": str(exc),
-        "error_type": type(exc).__name__,
-        "path": request.url.path,
-        "method": request.method
-    })
+    logger.error("Unhandled exception",
+        error=str(exc),
+        error_type=type(exc).__name__,
+        path=request.url.path,
+        method=request.method
+    )
+    
+    metrics.add_metric(name="UnhandledException", unit=MetricUnit.Count, value=1)
     
     return JSONResponse(
         status_code=500,
@@ -387,11 +495,11 @@ async def global_exception_handler(request: Request, exc: Exception):
 if __name__ == "__main__":
     import uvicorn
     
-    logger.info("Starting re:Invent Planner Agent server", extra={
-        "host": "0.0.0.0",
-        "port": 8080,
-        "environment": Config.ENVIRONMENT
-    })
+    logger.info("Starting re:Invent Planner Agent server",
+        host="0.0.0.0",
+        port=8080,
+        environment=Config.ENVIRONMENT
+    )
     
     uvicorn.run(
         app,

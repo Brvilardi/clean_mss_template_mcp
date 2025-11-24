@@ -34,7 +34,7 @@ class Config:
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
     
     # Logging Configuration
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "DEBUG")
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
     @classmethod
     def is_production(cls) -> bool:

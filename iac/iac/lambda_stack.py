@@ -46,7 +46,11 @@ class LambdaStack(Construct):
                                                  compatible_runtimes=[lambda_.Runtime.PYTHON_3_14]
                                                  )
 
-        self.lambda_power_tools = lambda_.LayerVersion.from_layer_version_arn(self, "Lambda_Power_Tools", layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:68")
+        # Powertools layer for ARM64 - version 68 is for Python 3.13+
+        self.lambda_power_tools = lambda_.LayerVersion.from_layer_version_arn(
+            self, "Lambda_Power_Tools", 
+            layer_version_arn="arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:68"
+        )
         
         self.external_dependencies_layer = PythonLayerVersion(
             self, "External_Dependencies_Layer",

@@ -103,7 +103,7 @@ class TemplateStack(Stack):
             self,
             api_gateway_resource=api_gateway_resource,
             environment_variables=ENVIRONMENT_VARIABLES,
-            dependencies_layer=self.lambda_stack.external_dependencies_layer,
+            powertools_layer=self.lambda_stack.lambda_power_tools,
             region=self.region
         )
         

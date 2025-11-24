@@ -102,10 +102,19 @@ class StrandsAgentStack(Construct):
         scope: Construct,
         api_gateway_resource: Resource,
         environment_variables: dict,
-        dependencies_layer,
+        powertools_layer,
         region: str
     ) -> None:
         super().__init__(scope, "StrandsAgent")
+
+        # Create agent-specific dependencies layer
+        self.agent_dependencies_layer = PythonLayerVersion(
+            self, "Agent_Dependencies_Layer",
+            entry="./lambda_agent_dependencies",
+            compatible_runtimes=[lambda_.Runtime.PYTHON_3_14],
+            compatible_architectures=[lambda_.Architecture.ARM_64],
+            description="Layer with Strands Agent dependencies (strands, fastapi, pydantic v2)"
+        )
 
         # Get Lambda Web Adapter layer
         self.lambda_web_adapter_layer = PythonLayerVersion.from_layer_version_arn(
@@ -113,10 +122,12 @@ class StrandsAgentStack(Construct):
             StrandsAgentStack.LAMBDA_WEB_ADAPTER_LAYER_ARN(region)
         )
 
-        # Combine layers - dependencies layer first, then Lambda Web Adapter
+        # Combine layers - powertools, Lambda Web Adapter, then agent dependencies LAST
+        # IMPORTANT: Agent dependencies must be last so Python finds the correct Pydantic v2
         self.layers = []
-        self.layers.append(dependencies_layer)
+        self.layers.append(powertools_layer)
         self.layers.append(self.lambda_web_adapter_layer)
+        self.layers.append(self.agent_dependencies_layer)
 
         # Configure environment variables for Lambda Web Adapter
         envs = environment_variables.copy()
