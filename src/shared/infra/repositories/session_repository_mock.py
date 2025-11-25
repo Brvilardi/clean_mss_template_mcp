@@ -315,6 +315,7 @@ class SessionRepositoryMock(ISessionRepository):
         level: Optional[int] = None,
         keywords: Optional[str] = None,
         speaker: Optional[str] = None,
+        session_type: Optional[str] = None,
         page_size: int = 50,
         last_evaluated_key: Optional[str] = None
     ) -> Tuple[List[Session], Optional[str]]:
@@ -327,6 +328,7 @@ class SessionRepositoryMock(ISessionRepository):
             level: Filter by level value (100, 200, 300, 400)
             keywords: Space-separated keywords to search in title, abstract, topics, areas
             speaker: Filter by speaker name or company (case-insensitive, partial match)
+            session_type: Filter by session type (case-insensitive, partial match)
             page_size: Maximum results per page (1-100, default 50)
             last_evaluated_key: Pagination token from previous request
             
@@ -359,6 +361,14 @@ class SessionRepositoryMock(ISessionRepository):
             filtered_sessions = [
                 s for s in filtered_sessions
                 if self._matches_speaker(s, speaker_lower)
+            ]
+        
+        # Apply session_type filtering (case-insensitive partial matching)
+        if session_type is not None and session_type.strip():
+            session_type_lower = session_type.lower()
+            filtered_sessions = [
+                s for s in filtered_sessions
+                if session_type_lower in s.session_type.lower()
             ]
         
         # Apply keyword filtering with relevance scoring

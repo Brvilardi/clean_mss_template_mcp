@@ -1049,3 +1049,107 @@ class Test_SessionRepositoryDynamo:
         
         assert lower_ids == upper_ids == title_ids, \
             "Case-insensitive matching failed: different casings returned different results"
+    
+    # ========== Integration Tests for session_type filtering ==========
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_search_sessions_with_session_type_filter(self):
+        """
+        Integration test: Session type filtering with DynamoDB
+        Test session_type filter returns only matching sessions
+        Validates: Requirements 1.1, 1.2
+        """
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Find a session_type from mock data
+        test_session_type = None
+        for session in repo_mock.sessions:
+            if session.session_type:
+                test_session_type = session.session_type
+                break
+        
+        # Skip test if no session_type found in mock data
+        if not test_session_type:
+            pytest.skip("No session_type found in mock data")
+        
+        # Search with session_type filter
+        sessions, _ = repo.search_sessions(session_type=test_session_type)
+        
+        # Verify all sessions have matching session_type (case-insensitive partial match)
+        for session in sessions:
+            assert test_session_type.lower() in session.session_type.lower(), \
+                f"Session {session.session_id} has session_type '{session.session_type}', " \
+                f"expected to contain '{test_session_type}'"
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_search_sessions_session_type_with_gsi_query(self):
+        """
+        Integration test: Session type filter with GSI queries
+        Test session_type filter works correctly when combined with indexed filters
+        Validates: Requirements 1.1, 1.2, 1.4
+        """
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Find a session_type and venue from mock data
+        test_session_type = None
+        test_venue = None
+        
+        for session in repo_mock.sessions:
+            if session.session_type and session.venue_name:
+                test_session_type = session.session_type
+                test_venue = session.venue_name
+                break
+        
+        # Skip test if no session_type or venue found in mock data
+        if not test_session_type or not test_venue:
+            pytest.skip("No session_type or venue found in mock data")
+        
+        # Search with session_type + venue filter (should use GSI-Venue + session_type FilterExpression)
+        sessions, _ = repo.search_sessions(session_type=test_session_type, venue=test_venue)
+        
+        # Verify all sessions match both filters
+        for session in sessions:
+            # Check venue
+            assert session.venue_name == test_venue, \
+                f"Session {session.session_id} has venue '{session.venue_name}', expected '{test_venue}'"
+            
+            # Check session_type (case-insensitive partial match)
+            assert test_session_type.lower() in session.session_type.lower(), \
+                f"Session {session.session_id} has session_type '{session.session_type}', " \
+                f"expected to contain '{test_session_type}'"
+    
+    @pytest.mark.skip(reason="Needs dynamoDB")
+    def test_search_sessions_session_type_case_insensitive(self):
+        """
+        Integration test: Session type case-insensitive matching
+        Test session_type search works with different casings
+        Validates: Requirements 1.2
+        """
+        repo = SessionRepositoryDynamo()
+        repo_mock = SessionRepositoryMock()
+        
+        # Find a session_type from mock data
+        test_session_type = None
+        for session in repo_mock.sessions:
+            if session.session_type and len(session.session_type) > 3:
+                test_session_type = session.session_type
+                break
+        
+        # Skip test if no session_type found in mock data
+        if not test_session_type:
+            pytest.skip("No session_type found in mock data")
+        
+        # Search with different casings
+        sessions_lower, _ = repo.search_sessions(session_type=test_session_type.lower())
+        sessions_upper, _ = repo.search_sessions(session_type=test_session_type.upper())
+        sessions_title, _ = repo.search_sessions(session_type=test_session_type.title())
+        
+        # All should return the same sessions (order may differ)
+        lower_ids = set(s.session_id for s in sessions_lower)
+        upper_ids = set(s.session_id for s in sessions_upper)
+        title_ids = set(s.session_id for s in sessions_title)
+        
+        assert lower_ids == upper_ids == title_ids, \
+            "Case-insensitive matching failed: different casings returned different results"

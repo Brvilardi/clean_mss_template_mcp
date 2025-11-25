@@ -193,3 +193,46 @@ class Test_SearchSessionsUsecase:
         )
         assert isinstance(sessions, list)
         assert next_token is None or isinstance(next_token, str)
+    
+    def test_search_sessions_invalid_session_type_empty_string(self):
+        """Test invalid session_type (empty string) raises EntityError"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        with pytest.raises(EntityError):
+            usecase(session_type="")
+    
+    def test_search_sessions_invalid_session_type_whitespace_only(self):
+        """Test invalid session_type (whitespace-only) raises EntityError"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        with pytest.raises(EntityError):
+            usecase(session_type="   ")
+        
+        with pytest.raises(EntityError):
+            usecase(session_type="\t\n")
+    
+    def test_search_sessions_valid_session_type(self):
+        """Test valid session_type parameter"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        sessions, next_token = usecase(session_type="Workshop")
+        assert isinstance(sessions, list)
+        assert next_token is None or isinstance(next_token, str)
+    
+    def test_search_sessions_session_type_with_other_filters(self):
+        """Test session_type combined with other filters"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        sessions, next_token = usecase(
+            session_type="Breakout Session",
+            day="Monday",
+            venue="Venetian",
+            level=300,
+            keywords="security"
+        )
+        assert isinstance(sessions, list)
+        assert next_token is None or isinstance(next_token, str)

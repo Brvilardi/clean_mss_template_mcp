@@ -1219,3 +1219,288 @@ class Test_SessionRepositoryMock:
         # Verify the multi-speaker session is in results
         session_ids = [s.session_id for s in sessions]
         assert multi_speaker_session.session_id in session_ids
+    
+    # ========== Property-Based Tests for Session Type Filtering ==========
+    
+    def test_search_sessions_property_session_type_exact_matching(self):
+        """
+        Property test: Session type exact matching
+        Feature: session-type-filter, Property 1: Session type exact matching
+        Validates: Requirements 1.1, 1.2
+        
+        For any session_type value and set of sessions, filtering by that session_type
+        should return only sessions where session_type equals that value (case-insensitive).
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Extract all unique session types from mock data
+        session_types = list(set(s.session_type for s in repo.sessions))
+        
+        @given(session_type=st.sampled_from(session_types))
+        @settings(max_examples=100)
+        def property_test(session_type):
+            sessions, _ = repo.search_sessions(session_type=session_type)
+            
+            # Verify all returned sessions have matching session_type (case-insensitive)
+            for session in sessions:
+                assert session_type.lower() in session.session_type.lower(), \
+                    f"Session {session.session_id} type '{session.session_type}' doesn't match filter '{session_type}'"
+            
+            # Verify we found all sessions with this type
+            expected_sessions = [
+                s for s in repo.sessions
+                if session_type.lower() in s.session_type.lower()
+            ]
+            assert len(sessions) == len(expected_sessions), \
+                f"Expected {len(expected_sessions)} sessions, got {len(sessions)}"
+        
+        property_test()
+    
+    def test_search_sessions_property_session_type_partial_matching(self):
+        """
+        Property test: Session type partial matching
+        Feature: session-type-filter, Property 2: Session type partial matching
+        Validates: Requirements 1.3
+        
+        For any session's session_type and any substring of that session_type,
+        searching for the substring should return sessions with that type.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        # Get all session types
+        session_types = list(set(s.session_type for s in repo.sessions))
+        
+        @given(
+            session_type=st.sampled_from(session_types),
+            substring_start=st.integers(min_value=0, max_value=10),
+            substring_length=st.integers(min_value=2, max_value=15)
+        )
+        @settings(max_examples=100)
+        def property_test(session_type, substring_start, substring_length):
+            # Extract substring
+            if substring_start >= len(session_type):
+                return  # Skip if start is beyond type length
+            
+            substring = session_type[substring_start:substring_start + substring_length]
+            if len(substring) < 2:
+                return  # Skip very short substrings
+            
+            # Search for substring
+            sessions, _ = repo.search_sessions(session_type=substring)
+            
+            # Find sessions that should contain this type
+            expected_session_ids = []
+            for session in repo.sessions:
+                if substring.lower() in session.session_type.lower():
+                    expected_session_ids.append(session.session_id)
+            
+            # Verify all expected sessions are in results
+            result_ids = [s.session_id for s in sessions]
+            for expected_id in expected_session_ids:
+                assert expected_id in result_ids, \
+                    f"Session {expected_id} with type containing '{substring}' not found in results"
+        
+        property_test()
+
+    def test_search_sessions_property_session_type_combined_with_other_filters(self):
+        """
+        Property test: Session type combined with other filters
+        Feature: session-type-filter, Property 3: Session type combined with other filters
+        Validates: Requirements 1.4
+        
+        For any session_type query combined with other filters (day, venue, level, keywords, speaker),
+        all returned sessions should match all provided criteria.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        valid_days = ["Thursday", "Friday", "Saturday", "Sunday"]
+        valid_venues = ["Mandalay Bay", "Venetian", "MGM Grand", "Wynn", "Caesars Forum"]
+        valid_levels = [100, 200, 300, 400]
+        session_types = list(set(s.session_type for s in repo.sessions))
+        
+        @given(
+            session_type=st.sampled_from(session_types),
+            day=st.one_of(st.none(), st.sampled_from(valid_days)),
+            venue=st.one_of(st.none(), st.sampled_from(valid_venues)),
+            level=st.one_of(st.none(), st.sampled_from(valid_levels))
+        )
+        @settings(max_examples=100)
+        def property_test(session_type, day, venue, level):
+            sessions, _ = repo.search_sessions(
+                session_type=session_type,
+                day=day,
+                venue=venue,
+                level=level
+            )
+            
+            # Verify all returned sessions match all provided filters
+            for session in sessions:
+                # Check session_type match
+                assert session_type.lower() in session.session_type.lower(), \
+                    f"Session {session.session_id} type '{session.session_type}' doesn't match filter '{session_type}'"
+                
+                # Check other filters
+                if day is not None:
+                    assert session.day == day, f"Session day {session.day} doesn't match filter {day}"
+                
+                if venue is not None:
+                    assert session.venue_name == venue, f"Session venue {session.venue_name} doesn't match filter {venue}"
+                
+                if level is not None:
+                    assert session.level_value == level, f"Session level {session.level_value} doesn't match filter {level}"
+        
+        property_test()
+
+    def test_search_sessions_property_session_type_case_insensitive_matching(self):
+        """
+        Property test: Session type case-insensitive matching
+        Feature: session-type-filter, Property 5: Session type case-insensitive matching
+        Validates: Requirements 1.2
+        
+        For any session_type with different casings (e.g., "Workshop", "WORKSHOP", "workshop"),
+        the search should return the same sessions.
+        """
+        from hypothesis import given, strategies as st, settings
+        
+        repo = SessionRepositoryMock()
+        
+        session_types = list(set(s.session_type for s in repo.sessions))
+        
+        @given(session_type=st.sampled_from(session_types))
+        @settings(max_examples=100)
+        def property_test(session_type):
+            # Search with different casings
+            sessions_lower, _ = repo.search_sessions(session_type=session_type.lower())
+            sessions_upper, _ = repo.search_sessions(session_type=session_type.upper())
+            sessions_mixed, _ = repo.search_sessions(session_type=session_type.capitalize())
+            
+            # All should return same session IDs
+            ids_lower = set(s.session_id for s in sessions_lower)
+            ids_upper = set(s.session_id for s in sessions_upper)
+            ids_mixed = set(s.session_id for s in sessions_mixed)
+            
+            assert ids_lower == ids_upper, \
+                f"Case sensitivity issue: {session_type.lower()} != {session_type.upper()}"
+            assert ids_lower == ids_mixed, \
+                f"Case sensitivity issue: {session_type.lower()} != {session_type.capitalize()}"
+        
+        property_test()
+
+    # ========== Unit Tests for Session Type Filtering ==========
+    
+    def test_search_sessions_by_session_type_exact(self):
+        """Test session_type filtering returns only matching sessions"""
+        repo = SessionRepositoryMock()
+        
+        # Search for "Workshop" sessions
+        sessions, _ = repo.search_sessions(session_type="Workshop")
+        
+        assert len(sessions) >= 1
+        # Verify all sessions have matching session_type
+        for session in sessions:
+            assert "workshop" in session.session_type.lower()
+    
+    def test_search_sessions_by_session_type_case_insensitive(self):
+        """Test session_type search is case-insensitive"""
+        repo = SessionRepositoryMock()
+        
+        # Search with different casings
+        sessions1, _ = repo.search_sessions(session_type="workshop")
+        sessions2, _ = repo.search_sessions(session_type="WORKSHOP")
+        sessions3, _ = repo.search_sessions(session_type="Workshop")
+        
+        # Should return same results
+        assert len(sessions1) == len(sessions2) == len(sessions3)
+        ids1 = [s.session_id for s in sessions1]
+        ids2 = [s.session_id for s in sessions2]
+        ids3 = [s.session_id for s in sessions3]
+        assert ids1 == ids2 == ids3
+    
+    def test_search_sessions_by_session_type_partial_match(self):
+        """Test session_type search with partial string matching"""
+        repo = SessionRepositoryMock()
+        
+        # Search with partial type "Break" (should match "Breakout Session")
+        sessions, _ = repo.search_sessions(session_type="Break")
+        
+        assert len(sessions) >= 1
+        # Verify results contain sessions with "Break" in type
+        for session in sessions:
+            assert "break" in session.session_type.lower()
+    
+    def test_search_sessions_session_type_combined_with_other_filters(self):
+        """Test session_type combined with other filters"""
+        repo = SessionRepositoryMock()
+        
+        # Search with session_type and day filter
+        sessions, _ = repo.search_sessions(session_type="Breakout", day="Friday")
+        
+        # Verify all sessions match both criteria
+        for session in sessions:
+            assert session.day == "Friday"
+            assert "breakout" in session.session_type.lower()
+    
+    def test_search_sessions_session_type_empty_query_returns_all(self):
+        """Test empty session_type query returns all sessions"""
+        repo = SessionRepositoryMock()
+        
+        # Search with empty session_type string
+        sessions1, _ = repo.search_sessions(session_type="")
+        sessions2, _ = repo.search_sessions(session_type="   ")
+        sessions_all, _ = repo.search_sessions()
+        
+        # Empty session_type should be ignored
+        assert len(sessions1) == len(sessions_all)
+        assert len(sessions2) == len(sessions_all)
+    
+    def test_search_sessions_session_type_no_match_returns_empty(self):
+        """Test session_type search with no matches returns empty list"""
+        repo = SessionRepositoryMock()
+        
+        # Search for non-existent session type
+        sessions, _ = repo.search_sessions(session_type="NonExistentType12345")
+        
+        assert len(sessions) == 0
+        assert sessions == []
+    
+    def test_search_sessions_session_type_with_speaker_filter(self):
+        """Test session_type combined with speaker filter"""
+        repo = SessionRepositoryMock()
+        
+        # Search with session_type and speaker filter
+        sessions, _ = repo.search_sessions(session_type="Breakout", speaker="AWS")
+        
+        # Verify all sessions match both criteria
+        for session in sessions:
+            assert "breakout" in session.session_type.lower()
+            found_match = False
+            for speaker in session.speakers:
+                if "aws" in speaker.get('company', '').lower():
+                    found_match = True
+                    break
+            assert found_match
+    
+    def test_search_sessions_session_type_with_keywords(self):
+        """Test session_type combined with keywords filter"""
+        repo = SessionRepositoryMock()
+        
+        # Search with session_type and keywords
+        sessions, _ = repo.search_sessions(session_type="Workshop", keywords="security")
+        
+        # Verify all sessions match both criteria
+        for session in sessions:
+            assert "workshop" in session.session_type.lower()
+            # Verify keyword appears in at least one field
+            found = (
+                "security" in session.title.lower() or
+                "security" in session.abstract.lower() or
+                any("security" in topic.lower() for topic in session.topics) or
+                any("security" in area.lower() for area in session.areas_of_interest)
+            )
+            assert found

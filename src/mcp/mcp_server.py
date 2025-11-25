@@ -562,6 +562,7 @@ def search_sessions(
     level: int = None,
     keywords: str = None,
     speaker: str = None,
+    session_type: str = None,
     page_size: int = 50,
     next_page_token: str = None
 ) -> Dict[str, Any]:
@@ -571,8 +572,9 @@ def search_sessions(
     Performs an intelligent search across sessions using any combination of
     filters. Supports keyword search across title, abstract, topics, and
     areas of interest. Supports speaker search across speaker names and
-    companies. Results are ordered by relevance when keywords are provided,
-    otherwise by start time.
+    companies. Supports session type filtering by format (e.g., "Breakout Session",
+    "Workshop", "Chalk Talk"). Results are ordered by relevance when keywords are
+    provided, otherwise by start time.
     
     Args:
         day: Filter by day (e.g., "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
@@ -581,6 +583,8 @@ def search_sessions(
         keywords: Space-separated keywords to search (e.g., "security machine learning")
         speaker: Filter by speaker name or company (case-insensitive partial match, 
                  searches both displayName and company fields, e.g., "Werner Vogels", "AWS")
+        session_type: Filter by session format (case-insensitive partial match,
+                      e.g., "Breakout Session", "Workshop", "Chalk Talk", "Lightning Talk")
         page_size: Number of results per page (1-100, default: 50)
         next_page_token: Pagination token from previous response (optional)
     
@@ -601,6 +605,7 @@ def search_sessions(
                     "session_id": "abc123",
                     "short_id": "SEC301",
                     "title": "Advanced Security Practices",
+                    "session_type": "Breakout Session",
                     "venue_name": "Venetian",
                     "day": "Monday",
                     "level": "Advanced",
@@ -627,14 +632,15 @@ def search_sessions(
     - Keywords search across title, abstract, topics, and areas of interest
     - Speaker search is case-insensitive and supports partial matching
     - Speaker search checks both speaker names and company affiliations
+    - Session type search is case-insensitive and supports partial matching
     - Results with keyword matches in title appear first
     """
     try:
         logger.info(
             f"Tool invoked: search_sessions with "
             f"day={day}, venue={venue}, level={level}, "
-            f"keywords={keywords}, speaker={speaker}, page_size={page_size}, "
-            f"has_token={next_page_token is not None}"
+            f"keywords={keywords}, speaker={speaker}, session_type={session_type}, "
+            f"page_size={page_size}, has_token={next_page_token is not None}"
         )
         
         # Validate page_size
@@ -659,6 +665,8 @@ def search_sessions(
             params["keywords"] = keywords
         if speaker:
             params["speaker"] = speaker
+        if session_type:
+            params["session_type"] = session_type
         if next_page_token:
             params["next_page_token"] = next_page_token
         

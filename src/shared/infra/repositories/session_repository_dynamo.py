@@ -366,6 +366,7 @@ class SessionRepositoryDynamo(ISessionRepository):
         level: Optional[int] = None,
         keywords: Optional[str] = None,
         speaker: Optional[str] = None,
+        session_type: Optional[str] = None,
         page_size: int = 50,
         last_evaluated_key: Optional[str] = None
     ) -> Tuple[List[Session], Optional[str]]:
@@ -379,6 +380,7 @@ class SessionRepositoryDynamo(ISessionRepository):
             level: Filter by level value (100, 200, 300, 400)
             keywords: Space-separated keywords to search in title, abstract, topics, areas
             speaker: Filter by speaker name or company (case-insensitive, partial match)
+            session_type: Filter by session type (case-insensitive, partial match)
             page_size: Maximum results per page (1-100, default 50)
             last_evaluated_key: Pagination token from previous request
             
@@ -413,6 +415,20 @@ class SessionRepositoryDynamo(ISessionRepository):
         if speaker is not None and speaker.strip():
             speaker_filter = self._build_speaker_filter_expression(speaker.strip())
         
+        # Build session_type filter expression if provided
+        session_type_filter = None
+        if session_type is not None and session_type.strip():
+            session_type_filter = self._build_session_type_filter_expression(session_type.strip())
+        
+        # Combine filter expressions
+        combined_filter = None
+        if speaker_filter is not None and session_type_filter is not None:
+            combined_filter = speaker_filter & session_type_filter
+        elif speaker_filter is not None:
+            combined_filter = speaker_filter
+        elif session_type_filter is not None:
+            combined_filter = session_type_filter
+        
         # Determine query strategy based on available filters
         # Priority: Level > Venue > Day (based on selectivity)
         # Note: When using offset-based pagination, we need to fetch all results
@@ -428,7 +444,7 @@ class SessionRepositoryDynamo(ISessionRepository):
                 key_value=level,
                 page_size=fetch_limit,
                 exclusive_start_key=exclusive_start_key,
-                filter_expression=speaker_filter
+                filter_expression=combined_filter
             )
             # Apply additional filters in application
             if day is not None:
@@ -444,7 +460,7 @@ class SessionRepositoryDynamo(ISessionRepository):
                 key_value=venue,
                 page_size=fetch_limit,
                 exclusive_start_key=exclusive_start_key,
-                filter_expression=speaker_filter
+                filter_expression=combined_filter
             )
             # Apply additional filters in application
             if day is not None:
@@ -458,17 +474,17 @@ class SessionRepositoryDynamo(ISessionRepository):
                 key_value=day,
                 page_size=fetch_limit,
                 exclusive_start_key=exclusive_start_key,
-                filter_expression=speaker_filter
+                filter_expression=combined_filter
             )
             
         else:
-            # No indexed filters - scan all sessions (speaker/keywords filtering in application)
+            # No indexed filters - scan all sessions (speaker/session_type/keywords filtering in application)
             # Note: _scan_all_sessions will fetch ALL sessions from the table since we need to
-            # filter by speaker/keywords in application code
+            # filter by speaker/session_type/keywords in application code
             sessions, last_evaluated_key_from_db = self._scan_all_sessions(
                 page_size=fetch_limit,
                 exclusive_start_key=None,  # Always start from beginning for full scan
-                filter_expression=speaker_filter
+                filter_expression=combined_filter
             )
         
         # Apply speaker filtering in application code (DynamoDB FilterExpression can't handle nested lists)
@@ -477,6 +493,14 @@ class SessionRepositoryDynamo(ISessionRepository):
             sessions = [
                 s for s in sessions
                 if self._session_matches_speaker(s, speaker_query_lower)
+            ]
+        
+        # Apply session_type filtering in application code (DynamoDB FilterExpression case-sensitivity)
+        if session_type is not None and session_type.strip():
+            session_type_query_lower = session_type.strip().lower()
+            sessions = [
+                s for s in sessions
+                if self._session_matches_session_type(s, session_type_query_lower)
             ]
         
         # Apply keyword filtering with relevance scoring
@@ -712,3 +736,53 @@ class SessionRepositoryDynamo(ISessionRepository):
                 return True
         
         return False
+    
+    def _build_session_type_filter_expression(self, session_type_query: str):
+        """
+        Build DynamoDB filter expression for session_type search.
+        
+        DynamoDB's contains() function is case-sensitive, so we create multiple
+        filter conditions for different case variations (original, UPPER, lower, Title Case).
+        
+        Args:
+            session_type_query: Search term for session type
+            
+        Returns:
+            FilterExpression for DynamoDB query/scan
+        """
+        from boto3.dynamodb.conditions import Attr
+        
+        # Create filter expression with multiple case variations
+        query_lower = session_type_query.lower()
+        query_upper = session_type_query.upper()
+        query_title = session_type_query.title()
+        
+        # Start with original query
+        filter_expr = Attr('session_type').contains(session_type_query)
+        
+        # Add lowercase variation if different
+        if query_lower != session_type_query:
+            filter_expr = filter_expr | Attr('session_type').contains(query_lower)
+        
+        # Add uppercase variation if different
+        if query_upper != session_type_query:
+            filter_expr = filter_expr | Attr('session_type').contains(query_upper)
+        
+        # Add title case variation if different
+        if query_title != session_type_query:
+            filter_expr = filter_expr | Attr('session_type').contains(query_title)
+        
+        return filter_expr
+    
+    def _session_matches_session_type(self, session: Session, session_type_query_lower: str) -> bool:
+        """
+        Check if a session matches the session_type query (case-insensitive partial match).
+        
+        Args:
+            session: Session entity to check
+            session_type_query_lower: Lowercase session_type search query
+            
+        Returns:
+            True if session_type contains the query (case-insensitive)
+        """
+        return session_type_query_lower in session.session_type.lower()

@@ -18,6 +18,7 @@ class SearchSessionsController:
             level_str = request.data.get('level')
             keywords = request.data.get('keywords')
             speaker = request.data.get('speaker')
+            session_type = request.data.get('session_type')
             page_size_str = request.data.get('page_size')
             next_page_token = request.data.get('next_page_token')
             
@@ -44,6 +45,7 @@ class SearchSessionsController:
                 level=level,
                 keywords=keywords,
                 speaker=speaker,
+                session_type=session_type,
                 page_size=page_size,
                 last_evaluated_key=next_page_token
             )

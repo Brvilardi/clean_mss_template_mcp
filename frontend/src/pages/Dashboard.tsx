@@ -153,7 +153,7 @@ export function Dashboard() {
               );
             })}
           </div>
-        </div>
+        </section>
 
         {/* Tips Section */}
         <Card className="shadow-md" role="region" aria-labelledby="tips-heading">

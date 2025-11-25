@@ -208,3 +208,68 @@ class Test_SearchSessionsController:
                     found_match = True
                     break
             assert found_match, f"Session {session.get('session_id')} does not have a matching speaker"
+    
+    def test_search_sessions_controller_with_session_type(self):
+        """Test controller with valid session_type parameter returns 200"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={'session_type': 'Workshop'})
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 200
+        assert "sessions" in response.body
+        assert "pagination" in response.body
+    
+    def test_search_sessions_controller_invalid_session_type_empty(self):
+        """Test controller with invalid session_type (empty) returns 400"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={'session_type': ''})
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 400
+        assert "session_type" in response.body
+    
+    def test_search_sessions_controller_session_type_with_other_filters(self):
+        """Test controller with session_type combined with other filters"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={
+            'session_type': 'Breakout Session',
+            'day': 'Monday',
+            'venue': 'Venetian',
+            'level': '300',
+            'keywords': 'serverless'
+        })
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 200
+        assert "sessions" in response.body
+        assert "pagination" in response.body
+    
+    def test_search_sessions_controller_session_type_matching_sessions(self):
+        """Test response includes sessions with matching session_type"""
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo=repo)
+        controller = SearchSessionsController(usecase=usecase)
+        
+        request = HttpRequest(query_params={'session_type': 'Breakout'})
+        
+        response = controller(request=request)
+        
+        assert response.status_code == 200
+        assert "sessions" in response.body
+        
+        # Verify all returned sessions have a matching session_type
+        for session in response.body["sessions"]:
+            session_type = session.get("session_type", "")
+            assert "breakout" in session_type.lower(), f"Session {session.get('session_id')} does not have matching session_type"

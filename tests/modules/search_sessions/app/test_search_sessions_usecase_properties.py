@@ -106,3 +106,27 @@ class Test_SearchSessionsUsecase_Properties:
         
         with pytest.raises(EntityError):
             usecase(speaker=invalid_speaker)
+    
+    @given(
+        invalid_session_type=st.one_of(
+            st.just(""),
+            st.just("   "),
+            st.just("\t\n"),
+            st.text().filter(lambda x: len(x.strip()) == 0 and len(x) > 0),
+            st.integers(),
+            st.floats()
+        )
+    )
+    def test_property_invalid_session_type_parameter_rejection(self, invalid_session_type):
+        """
+        Feature: session-type-filter, Property 4: Invalid session_type parameter rejection
+        Validates: Requirements 2.4, 2.5
+        
+        For any invalid session_type parameter (empty string, whitespace-only, or non-string), 
+        the search should raise EntityError.
+        """
+        repo = SessionRepositoryMock()
+        usecase = SearchSessionsUsecase(repo)
+        
+        with pytest.raises(EntityError):
+            usecase(session_type=invalid_session_type)

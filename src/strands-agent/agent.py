@@ -57,6 +57,7 @@ The following filters are directly supported by the API and should ALWAYS be use
 - **level**: 100, 200, 300, 400
 - **keywords**: Search terms for title, abstract, topics, areas of interest
 - **speaker**: Speaker name or company (case-insensitive partial match, searches both displayName and company fields)
+- **session_type**: Session format (case-insensitive partial match, e.g., "Breakout Session", "Workshop", "Chalk Talk", "Lightning Talk")
 
 ### CRITICAL: Filter vs Keyword Separation
 
@@ -94,11 +95,22 @@ The following filters are directly supported by the API and should ALWAYS be use
    - ❌ WRONG: `search_sessions(keywords="AWS serverless")`
    - Why: "AWS" is a company name, use speaker filter; "serverless" is content
 
+7. User: "Show me workshops about machine learning"
+   - ✅ CORRECT: `search_sessions(session_type="Workshop", keywords="machine learning")`
+   - ❌ WRONG: `search_sessions(keywords="workshop machine learning")`
+   - Why: "Workshop" is a session type, use session_type filter; "machine learning" is content
+
+8. User: "Find chalk talks on Monday"
+   - ✅ CORRECT: `search_sessions(session_type="Chalk Talk", day="Monday")`
+   - ❌ WRONG: `search_sessions(keywords="chalk talk", day="Monday")`
+   - Why: "Chalk Talk" is a session format, use session_type filter
+
 **Filter Value Recognition:**
 - **Venues**: Mandalay Bay, Venetian, MGM Grand, Caesars Forum
 - **Days**: Monday, Tuesday, Wednesday, Thursday, Friday
 - **Levels**: 100/Foundational, 200/Intermediate, 300/Advanced, 400/Expert
 - **Speakers**: Person names or company names (e.g., "Werner Vogels", "AWS", "Amazon")
+- **Session Types**: Breakout Session, Workshop, Chalk Talk, Lightning Talk, Keynote, etc.
 - **Keywords**: Everything else (topics, technologies, concepts, etc.)
 
 **Why this matters:**
@@ -110,10 +122,11 @@ The following filters are directly supported by the API and should ALWAYS be use
 ### Tool Selection Strategy:
 
 1. **Primary Tool - search_sessions**: Use for ALL session discovery tasks
-   - Supports all available filters: day, venue, level, keywords, speaker
+   - Supports all available filters: day, venue, level, keywords, speaker, session_type
    - Combines multiple filters in a single query (most efficient)
    - Returns relevance-ranked results when keywords are used
    - Speaker filter searches both displayName and company fields with case-insensitive partial matching
+   - Session type filter searches session format with case-insensitive partial matching
    - Built-in pagination support
    - **ALWAYS prefer this over individual filter tools**
 
@@ -158,6 +171,11 @@ When users request filters that are NOT in the available list above (e.g., time 
 
 - User: "Sessions about serverless on Monday at Venetian by AWS speakers"
   1. Use `search_sessions(keywords="serverless", day="Monday", venue="Venetian", speaker="AWS")` (all filters available!)
+  2. Return results directly
+  3. No additional filtering needed
+
+- User: "Find workshops about security at advanced level"
+  1. Use `search_sessions(session_type="Workshop", keywords="security", level=300)` (all filters available!)
   2. Return results directly
   3. No additional filtering needed
 
