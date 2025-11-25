@@ -15,12 +15,14 @@ export class AgentService {
    */
   static async sendMessage(
     prompt: string,
-    sessionId?: string
+    sessionId?: string,
+    actorId?: string
   ): Promise<AgentInvocationResponse> {
     try {
       const request: AgentInvocationRequest = {
         input: { prompt },
-        ...(sessionId && { session_id: sessionId })
+        ...(sessionId && { session_id: sessionId }),
+        ...(actorId && { actor_id: actorId })
       };
 
       const response = await post({

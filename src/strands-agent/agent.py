@@ -4,12 +4,16 @@ re:Invent Planner Agent
 This module provides the main agent implementation for helping users organize
 their AWS re:Invent conference agenda using the Strands framework.
 """
-
+from bedrock_agentcore.memory import MemoryClient
+from bedrock_agentcore.memory.integrations.strands.config import AgentCoreMemoryConfig
+from bedrock_agentcore.memory.integrations.strands.session_manager import AgentCoreMemorySessionManager
 from strands import Agent
 from strands.models import BedrockModel
 from strands.tools.mcp import MCPClient
+from strands.session.file_session_manager import FileSessionManager
 from mcp.client.streamable_http import streamablehttp_client
 import os
+from typing import Optional
 
 # System prompt with embedded venue knowledge and best practices
 SYSTEM_PROMPT = """You are a helpful AI assistant for AWS re:Invent conference planning.
@@ -341,12 +345,19 @@ When presenting session recommendations, ALWAYS use this engaging format with em
 - Focused on maximizing conference value"""
 
 
-def create_agent(mcp_endpoint: str) -> Agent:
+def create_agent(
+    mcp_endpoint: str,
+    memory_id: str,
+    session_id: Optional[str] = None,
+    actor_id: Optional[str] = None
+) -> Agent:
     """
     Create and configure the re:Invent planning agent.
     
     Args:
         mcp_endpoint: URL of the MCP server endpoint
+        session_id: Optional session identifier for conversation persistence
+        actor_id: Optional user identifier for cross-session memory
         
     Returns:
         Configured Strands Agent instance
@@ -364,13 +375,29 @@ def create_agent(mcp_endpoint: str) -> Agent:
         temperature=0.1,
         region_name=os.getenv("AWS_REGION", "us-east-1")
     )
+
+    session_manager = None
+    print(f"session_id: {session_id} | actor_id: {actor_id}")
+    if session_id or actor_id:
+        agentcore_memory_config = AgentCoreMemoryConfig(
+            memory_id=memory_id,
+            session_id=session_id,
+            actor_id=actor_id or "default"
+        )
+
+        # Create session manager
+        session_manager = AgentCoreMemorySessionManager(
+            agentcore_memory_config=agentcore_memory_config,
+            region_name="us-east-1"
+        )
     
     # Create agent with MCP tools and system prompt
     # Using experimental managed MCP integration - agent handles lifecycle
     agent = Agent(
         model=model,
         tools=[mcp_client],
-        system_prompt=SYSTEM_PROMPT
+        system_prompt=SYSTEM_PROMPT,
+        session_manager=session_manager
     )
     
     return agent

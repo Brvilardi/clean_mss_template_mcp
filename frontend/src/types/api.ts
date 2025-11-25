@@ -4,6 +4,7 @@ export interface AgentInvocationRequest {
     prompt: string;
   };
   session_id?: string;
+  actor_id?: string;
 }
 
 // Response from Strands Agent
@@ -13,6 +14,7 @@ export interface AgentInvocationResponse {
     timestamp: string;
     model: string;
     session_id?: string;
+    actor_id?: string;
   };
 }
 

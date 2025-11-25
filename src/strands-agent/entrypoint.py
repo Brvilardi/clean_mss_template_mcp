@@ -25,8 +25,7 @@ from config import Config
 logger = Logger(service="reinvent-agent", level=Config.LOG_LEVEL)
 metrics = Metrics(namespace="ReinventAgent", service="agent-invocations")
 
-# Global agent instance
-agent = None
+# Configuration validation error (if any)
 agent_initialization_error = None
 
 
@@ -34,12 +33,12 @@ agent_initialization_error = None
 async def lifespan(app: FastAPI):
     """
     Lifespan context manager for FastAPI application.
-    Handles agent initialization on startup and cleanup on shutdown.
+    Validates configuration on startup.
     """
-    global agent, agent_initialization_error
+    global agent_initialization_error
     
-    # Startup: Initialize agent
-    logger.info("Initializing re:Invent Planner Agent",
+    # Startup: Validate configuration
+    logger.info("Starting re:Invent Planner Agent",
         mcp_endpoint=Config.MCP_ENDPOINT,
         model=Config.MODEL_NAME,
         environment=Config.ENVIRONMENT
@@ -50,35 +49,11 @@ async def lifespan(app: FastAPI):
         if not Config.validate():
             raise ValueError("Invalid configuration. Check MCP_ENDPOINT, AWS_REGION, and MODEL_NAME.")
         
-        # Create agent with retry logic
-        max_retries = 3
-        retry_delay = 2
-        
-        for attempt in range(max_retries):
-            try:
-                agent = create_agent(mcp_endpoint=Config.MCP_ENDPOINT)
-                logger.info("Agent initialized successfully",
-                    attempt=attempt + 1,
-                    max_retries=max_retries
-                )
-                break
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    logger.warning(f"Agent initialization attempt {attempt + 1} failed, retrying...",
-                        error=str(e),
-                        retry_delay=retry_delay
-                    )
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
-                else:
-                    raise
-        
-        if agent is None:
-            raise RuntimeError("Failed to initialize agent after all retry attempts")
+        logger.info("Configuration validated successfully")
         
     except Exception as e:
         agent_initialization_error = str(e)
-        logger.error("Failed to initialize agent",
+        logger.error("Configuration validation failed",
             error=str(e),
             error_type=type(e).__name__
         )
@@ -88,7 +63,6 @@ async def lifespan(app: FastAPI):
     
     # Shutdown: Cleanup
     logger.info("Shutting down re:Invent Planner Agent")
-    agent = None
 
 
 # Create FastAPI app with lifespan
@@ -128,6 +102,10 @@ class InvocationRequest(BaseModel):
         None,
         description="Optional session ID for conversation continuity"
     )
+    actor_id: Optional[str] = Field(
+        None,
+        description="Optional user/actor ID for cross-session memory"
+    )
 
 
 class InvocationResponse(BaseModel):
@@ -159,7 +137,7 @@ async def invoke_agent(request: InvocationRequest):
     and retry logic for tool invocations.
     
     Args:
-        request: InvocationRequest containing user prompt
+        request: InvocationRequest containing user prompt, session_id, and actor_id
         
     Returns:
         InvocationResponse with agent's response
@@ -169,18 +147,18 @@ async def invoke_agent(request: InvocationRequest):
     """
     request_start_time = time.time()
     
-    # Check if agent is initialized
-    if agent is None:
-        logger.error("Agent invocation attempted but agent not initialized",
+    # Check if configuration is valid
+    if agent_initialization_error:
+        logger.error("Agent invocation attempted but configuration is invalid",
             initialization_error=agent_initialization_error
         )
-        metrics.add_metric(name="AgentUnavailable", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="ConfigurationInvalid", unit=MetricUnit.Count, value=1)
         raise HTTPException(
             status_code=503,
             detail={
                 "error": {
                     "type": "ServiceUnavailable",
-                    "message": "Agent is not available. Please try again later.",
+                    "message": "Agent configuration is invalid. Please check configuration.",
                     "details": agent_initialization_error,
                     "suggestions": [
                         "Check that the MCP server is accessible",
@@ -190,6 +168,31 @@ async def invoke_agent(request: InvocationRequest):
                 }
             }
         )
+    
+    # Extract session_id and actor_id from request
+    session_id = request.session_id
+    actor_id = request.actor_id
+    
+    # Use defaults if not provided
+    # if not session_id:
+    #     session_id = f"session_{int(time.time() * 1000)}"
+    #     logger.info("No session_id provided, using generated default",
+    #         session_id=session_id
+    #     )
+    #
+    # if not actor_id:
+    #     actor_id = "anonymous"
+    #     logger.info("No actor_id provided, using default",
+    #         actor_id=actor_id
+    #     )
+    
+    # Log session information
+    logger.info("Processing request with session context",
+        session_id=session_id,
+        actor_id=actor_id,
+        has_session_id=request.session_id is not None,
+        has_actor_id=request.actor_id is not None
+    )
     
     try:
         # Extract user message from request
@@ -212,12 +215,48 @@ async def invoke_agent(request: InvocationRequest):
         
         logger.info("Processing agent invocation",
             prompt_length=len(user_message),
-            session_id=request.session_id,
+            session_id=session_id,
+            actor_id=actor_id,
             user_message_preview=user_message[:100] + "..." if len(user_message) > 100 else user_message
         )
         
         # Add metric for invocation
         metrics.add_metric(name="InvocationStarted", unit=MetricUnit.Count, value=1)
+        
+        # Create agent with session context
+        try:
+            agent = create_agent(
+                mcp_endpoint=Config.MCP_ENDPOINT,
+                memory_id=Config.MEMORY_ID,
+                session_id=session_id,
+                actor_id=actor_id
+            )
+            logger.info("Agent created successfully with session context",
+                session_id=session_id,
+                actor_id=actor_id
+            )
+        except Exception as e:
+            logger.error("Failed to create agent",
+                error=str(e),
+                error_type=type(e).__name__,
+                session_id=session_id,
+                actor_id=actor_id
+            )
+            metrics.add_metric(name="AgentCreationFailure", unit=MetricUnit.Count, value=1)
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": {
+                        "type": "AgentCreationError",
+                        "message": "Failed to create agent instance. Please try again.",
+                        "details": str(e) if not Config.is_production() else None,
+                        "suggestions": [
+                            "Try again in a few moments",
+                            "Contact support if the issue persists"
+                        ]
+                    }
+                }
+            )
         
         # Process query through agent with retry logic for tool invocations
         max_retries = 2
@@ -328,7 +367,8 @@ async def invoke_agent(request: InvocationRequest):
                     "message": response_text,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "model": Config.MODEL_NAME,
-                    "session_id": request.session_id,
+                    "session_id": session_id,
+                    "actor_id": actor_id,
                     "usage": {
                         "input_tokens": input_tokens,
                         "output_tokens": output_tokens,
@@ -369,7 +409,9 @@ async def invoke_agent(request: InvocationRequest):
             error=str(last_error),
             error_type=type(last_error).__name__,
             attempts=max_retries + 1,
-            duration_seconds=time.time() - request_start_time
+            duration_seconds=time.time() - request_start_time,
+            session_id=session_id,
+            actor_id=actor_id
         )
         
         # Add failure metrics
@@ -421,7 +463,9 @@ async def invoke_agent(request: InvocationRequest):
         logger.error("Unexpected error during agent invocation",
             error=str(e),
             error_type=type(e).__name__,
-            duration_seconds=time.time() - request_start_time
+            duration_seconds=time.time() - request_start_time,
+            session_id=session_id if 'session_id' in locals() else None,
+            actor_id=actor_id if 'actor_id' in locals() else None
         )
         
         metrics.add_metric(name="UnexpectedError", unit=MetricUnit.Count, value=1)
@@ -448,22 +492,22 @@ async def ping():
     """
     Health check endpoint for Lambda.
     
-    Returns agent status and basic health information.
+    Returns configuration status and basic health information.
     
     Returns:
         Dictionary with status and health information
     """
     health_status = {
-        "status": "healthy" if agent is not None else "unhealthy",
-        "agent_initialized": agent is not None,
+        "status": "healthy" if not agent_initialization_error else "unhealthy",
+        "configuration_valid": agent_initialization_error is None,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": Config.AGENT_VERSION,
         "environment": Config.ENVIRONMENT
     }
     
-    if agent is None and agent_initialization_error:
+    if agent_initialization_error:
         health_status["error"] = agent_initialization_error
-        logger.warning("Health check: Agent not initialized",
+        logger.warning("Health check: Configuration invalid",
             error=agent_initialization_error
         )
     

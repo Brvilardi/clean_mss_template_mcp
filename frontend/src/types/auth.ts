@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: string; // Cognito sub (user ID)
   email: string;
   companyName: string;
   companyWebsite: string;

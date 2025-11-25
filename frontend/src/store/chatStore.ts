@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Message } from '../types/chat';
 import { AgentService, type AgentError } from '../services/agentService';
+import { useAuthStore } from './authStore';
 
 // Cache configuration
 const STORAGE_KEY = 'reinvent-chat-history';
@@ -114,6 +115,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
     
+    // Get current user's Cognito sub ID for actor_id
+    const authState = useAuthStore.getState();
+    const actorId = authState.user?.id;
+    
+    // Generate session_id if not exists
+    const sessionId = state.currentSessionId || crypto.randomUUID();
+    
     // Create optimistic user message
     const optimisticMessage: Message = {
       id: crypto.randomUUID(),
@@ -121,12 +129,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
       role: 'user',
       timestamp: new Date(),
       status: 'sending',
-      sessionId: state.currentSessionId || undefined
+      sessionId: sessionId
     };
 
     // Add optimistic message to UI immediately
     set(state => ({
       messages: [...state.messages, optimisticMessage],
+      currentSessionId: sessionId,
       isLoading: true,
       error: null,
       errorSuggestions: [],
@@ -134,10 +143,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
 
     try {
-      // Send to API
+      // Send to API with session_id and actor_id
       const response = await AgentService.sendMessage(
         content,
-        state.currentSessionId || undefined
+        sessionId,
+        actorId
       );
 
       // Update optimistic message to 'sent' status
@@ -156,12 +166,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
         role: 'assistant',
         timestamp: new Date(response.output.timestamp),
         status: 'sent',
-        sessionId: response.output.session_id
+        sessionId: response.output.session_id || sessionId
       };
 
       set(state => ({
         messages: [...state.messages, assistantMessage],
-        currentSessionId: response.output.session_id || state.currentSessionId,
+        currentSessionId: response.output.session_id || sessionId,
         isLoading: false
       }));
 

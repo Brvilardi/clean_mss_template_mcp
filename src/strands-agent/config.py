@@ -8,6 +8,9 @@ including MCP server endpoints, model settings, and deployment configuration.
 import os
 from typing import Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 class Config:
     """Configuration for the re:Invent agent."""
@@ -28,6 +31,9 @@ class Config:
     # Use Haiku for faster responses (3-5x faster than Sonnet)
     # For better quality, use: us.anthropic.claude-3-5-sonnet-20241022-v2:0
     MODEL_NAME: str = os.getenv("MODEL_NAME", "anthropic.claude-3-haiku-20240307-v1:0")
+
+    # Memory Configuration
+    MEMORY_ID: str = os.getenv("MEMORY_ID", "local")
     
     # Deployment Configuration
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")

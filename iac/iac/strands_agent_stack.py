@@ -7,7 +7,7 @@ from aws_cdk import (
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 from constructs import Construct
 from aws_cdk.aws_apigateway import Resource, LambdaIntegration, Cors
-
+from aws_cdk import aws_bedrockagentcore as agentcore
 
 class StrandsAgentStack(Construct):
     """CDK stack for Strands re:Invent agent deployed as Lambda function with Lambda Web Adapter."""
@@ -107,6 +107,29 @@ class StrandsAgentStack(Construct):
     ) -> None:
         super().__init__(scope, "StrandsAgent")
 
+
+        # Create AgentCore Memory
+        self.memory = agentcore.CfnMemory(
+            self, "SessionsAgentMemory",
+            name="SessionsMemory",
+            description="Memory with built-in LTM strategies",
+            event_expiry_duration=20,
+            memory_strategies=[
+                agentcore.CfnMemory.MemoryStrategyProperty(
+                    summary_memory_strategy=agentcore.CfnMemory.SummaryMemoryStrategyProperty(
+                        name="SummaryMemory",
+                        namespaces=["/strategies/{memoryStrategyId}/actors/{actorId}/sessions/{sessionId}"]
+                    ),
+                ),
+                agentcore.CfnMemory.MemoryStrategyProperty(
+                    semantic_memory_strategy=agentcore.CfnMemory.SemanticMemoryStrategyProperty(
+                        name="SemanticMemory",
+                        namespaces=["/strategies/{memoryStrategyId}/actors/{actorId}"]
+                    )
+                )
+            ],
+        )
+
         # Create agent-specific dependencies layer
         self.agent_dependencies_layer = PythonLayerVersion(
             self, "Agent_Dependencies_Layer",
@@ -134,6 +157,7 @@ class StrandsAgentStack(Construct):
         envs['AWS_LAMBDA_EXEC_WRAPPER'] = "/opt/bootstrap"  # Lambda Web Adapter bootstrap
         envs['AWS_LWA_PORT'] = "8000"  # Port for FastAPI
         envs['AWS_LWA_REMOVE_BASE_PATH'] = "/mss-template/agent"  # Remove API Gateway base path including /agent
+        envs['MEMORY_ID'] = self.memory.attr_memory_id
 
         # Create Lambda function with API Gateway integration
         self.agent_function = self.create_lambda_api_gateway_integration(
@@ -157,7 +181,11 @@ class StrandsAgentStack(Construct):
             iam.PolicyStatement(
                 actions=[
                     "bedrock:InvokeModel",
-                    "bedrock:InvokeModelWithResponseStream"
+                    "bedrock:InvokeModelWithResponseStream",
+                    "bedrock-agentcore:ListEvents",
+                    "bedrock-agentcore:CreateEvent",
+                    "bedrock-agentcore:GetEvent",
+                    "bedrock-agentcore:DeleteEvent"
                 ],
                 resources=["*"]
             )
