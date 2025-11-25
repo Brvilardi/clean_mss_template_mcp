@@ -43,10 +43,10 @@ export function SignUp() {
               <span className="text-2xl font-bold text-white">re:</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-2xl font-bold text-center text-slate-800 dark:text-slate-800">
             Create an account
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-slate-700 dark:text-slate-600">
             Sign up for re:Invent Planner
           </CardDescription>
         </CardHeader>
@@ -54,7 +54,7 @@ export function SignUp() {
           <SignUpForm onSuccess={handleSuccess} onError={handleError} />
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-sm text-center text-muted-foreground">
+          <div className="text-sm text-center text-slate-700 dark:text-slate-500">
             Already have an account?{' '}
             <Button
               variant="link"

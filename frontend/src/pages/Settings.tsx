@@ -43,7 +43,7 @@ export function Settings() {
   };
 
   return (
-    <div className="h-full overflow-auto bg-dati-background">
+    <div className="h-full overflow-auto bg-background">
       <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -53,9 +53,9 @@ export function Settings() {
               alt="Dati Logo" 
               className="h-8 w-8 sm:h-10 sm:w-10 object-contain bg-white p-1.5 rounded"
             />
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Settings</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Settings</h1>
           </div>
-          <p className="text-gray-300 text-base sm:text-lg ml-0 sm:ml-14">
+          <p className="text-muted-foreground text-base sm:text-lg ml-0 sm:ml-14">
             Manage your account and preferences
           </p>
         </div>

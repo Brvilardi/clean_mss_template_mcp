@@ -105,7 +105,7 @@ export function ConfirmSignUpForm({
       )}
 
       {successMessage && (
-        <Alert className="border-green-500/50 bg-green-50 text-green-900">
+        <Alert className="border-green-500/50 bg-green-50 text-green-900 dark:bg-green-900/20 dark:text-green-400">
           <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
@@ -114,7 +114,7 @@ export function ConfirmSignUpForm({
         <p className="text-sm text-muted-foreground">
           Verification code sent to
         </p>
-        <p className="font-semibold">{email}</p>
+        <p className="font-semibold text-foreground">{email}</p>
         <p className="text-sm text-muted-foreground">
           Enter the 6-digit code below
         </p>

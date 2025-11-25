@@ -62,10 +62,10 @@ export function SignIn() {
               <span className="text-2xl font-bold text-white">re:</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-2xl font-bold text-center text-slate-800 dark:text-slate-500">
             Welcome back
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-slate-700 dark:text-slate-400">
             Sign in to your re:Invent Planner account
           </CardDescription>
         </CardHeader>
@@ -78,7 +78,7 @@ export function SignIn() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           {needsConfirmation && (
-            <div className="text-sm text-center text-muted-foreground">
+            <div className="text-sm text-center text-slate-700 dark:text-slate-400">
               Need to verify your email?{' '}
               <Button
                 variant="link"
@@ -89,7 +89,7 @@ export function SignIn() {
               </Button>
             </div>
           )}
-          <div className="text-sm text-center text-muted-foreground">
+          <div className="text-sm text-center text-slate-700 dark:text-slate-400">
             Don't have an account?{' '}
             <Button
               variant="link"

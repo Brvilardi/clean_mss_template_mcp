@@ -38,15 +38,36 @@ def find_output_by_prefix(outputs: dict, prefix: str) -> str:
     return None
 
 
-def generate_amplify_config(outputs: dict, region: str) -> dict:
-    """Generate amplify_outputs.json from stack outputs."""
+def generate_amplify_config(
+    outputs: dict = None, 
+    region: str = None, 
+    cloudfront_url: str = None,
+    user_pool_id: str = None,
+    user_pool_client_id: str = None,
+    identity_pool_id: str = None,
+    user_pool_domain: str = None,
+    api_gateway_url: str = None
+) -> dict:
+    """
+    Generate amplify_outputs.json from stack outputs or direct parameters.
     
-    # Extract values from outputs (handle CDK-generated key suffixes)
-    user_pool_id = find_output_by_prefix(outputs, 'CognitoStackUserPoolId') or outputs.get('UserPoolId')
-    user_pool_client_id = find_output_by_prefix(outputs, 'CognitoStackUserPoolClientId') or outputs.get('UserPoolClientId')
-    identity_pool_id = find_output_by_prefix(outputs, 'CognitoStackIdentityPoolId') or outputs.get('IdentityPoolId')
-    user_pool_domain = find_output_by_prefix(outputs, 'CognitoStackUserPoolDomain') or outputs.get('UserPoolDomain')
-    api_gateway_url = outputs.get('ApiGatewayBaseUrl')
+    Can be called in two modes:
+    1. With outputs dict (reads from CloudFormation stack)
+    2. With direct parameters (for CDK synthesis-time generation)
+    """
+    
+    # If direct parameters provided, use them
+    if all([user_pool_id, user_pool_client_id, identity_pool_id, user_pool_domain, api_gateway_url, region]):
+        pass  # Use provided parameters
+    # Otherwise extract from outputs dict
+    elif outputs:
+        user_pool_id = find_output_by_prefix(outputs, 'CognitoStackUserPoolId') or outputs.get('UserPoolId')
+        user_pool_client_id = find_output_by_prefix(outputs, 'CognitoStackUserPoolClientId') or outputs.get('UserPoolClientId')
+        identity_pool_id = find_output_by_prefix(outputs, 'CognitoStackIdentityPoolId') or outputs.get('IdentityPoolId')
+        user_pool_domain = find_output_by_prefix(outputs, 'CognitoStackUserPoolDomain') or outputs.get('UserPoolDomain')
+        api_gateway_url = outputs.get('ApiGatewayBaseUrl')
+    else:
+        raise ValueError("Must provide either outputs dict or all direct parameters")
     
     if not all([user_pool_id, user_pool_client_id, identity_pool_id, user_pool_domain, api_gateway_url]):
         missing = [k for k, v in {
@@ -57,6 +78,15 @@ def generate_amplify_config(outputs: dict, region: str) -> dict:
             'ApiGatewayBaseUrl': api_gateway_url
         }.items() if not v]
         raise ValueError(f"Missing required outputs: {', '.join(missing)}")
+    
+    # Determine redirect URLs based on CloudFront URL
+    # Use CloudFront URL for production, localhost for local development
+    if cloudfront_url:
+        redirect_sign_in = f"{cloudfront_url}/"
+        redirect_sign_out = f"{cloudfront_url}/"
+    else:
+        redirect_sign_in = "http://localhost:5173/"
+        redirect_sign_out = "http://localhost:5173/"
     
     config = {
         "version": "1",
@@ -72,8 +102,8 @@ def generate_amplify_config(outputs: dict, region: str) -> dict:
                     "openid",
                     "profile"
                 ],
-                "redirect_sign_in": "http://localhost:5173/",
-                "redirect_sign_out": "http://localhost:5173/",
+                "redirect_sign_in": redirect_sign_in,
+                "redirect_sign_out": redirect_sign_out,
                 "response_type": "code"
             },
             "password_policy": {
@@ -117,27 +147,73 @@ def main():
     )
     parser.add_argument(
         '--stack-name',
-        required=True,
-        help='CloudFormation stack name'
+        help='CloudFormation stack name (required for stack mode)'
     )
     parser.add_argument(
         '--region',
-        required=True,
-        help='AWS region'
+        help='AWS region (required)'
     )
     parser.add_argument(
         '--output',
         default='../frontend/amplify_outputs.json',
         help='Output file path (default: ../frontend/amplify_outputs.json)'
     )
+    parser.add_argument(
+        '--cloudfront-url',
+        help='CloudFront distribution URL for OAuth redirect URLs (e.g., https://d123456.cloudfront.net)'
+    )
+    # Direct parameter mode (for CDK synthesis)
+    parser.add_argument('--user-pool-id', help='Cognito User Pool ID')
+    parser.add_argument('--user-pool-client-id', help='Cognito User Pool Client ID')
+    parser.add_argument('--identity-pool-id', help='Cognito Identity Pool ID')
+    parser.add_argument('--user-pool-domain', help='Cognito User Pool Domain')
+    parser.add_argument('--api-gateway-url', help='API Gateway base URL')
     
     args = parser.parse_args()
     
-    print(f"Fetching outputs from stack: {args.stack_name}")
-    outputs = get_stack_outputs(args.stack_name, args.region)
+    # Check if using direct parameter mode
+    direct_params = all([
+        args.user_pool_id,
+        args.user_pool_client_id,
+        args.identity_pool_id,
+        args.user_pool_domain,
+        args.api_gateway_url,
+        args.region
+    ])
     
-    print("Generating amplify_outputs.json...")
-    config = generate_amplify_config(outputs, args.region)
+    if direct_params:
+        # Direct parameter mode (CDK synthesis)
+        print("Using direct parameters mode...")
+        cloudfront_url = args.cloudfront_url
+        config = generate_amplify_config(
+            region=args.region,
+            cloudfront_url=cloudfront_url,
+            user_pool_id=args.user_pool_id,
+            user_pool_client_id=args.user_pool_client_id,
+            identity_pool_id=args.identity_pool_id,
+            user_pool_domain=args.user_pool_domain,
+            api_gateway_url=args.api_gateway_url
+        )
+    else:
+        # CloudFormation stack mode
+        if not args.stack_name:
+            raise ValueError("--stack-name is required when not using direct parameters")
+        
+        print(f"Fetching outputs from stack: {args.stack_name}")
+        outputs = get_stack_outputs(args.stack_name, args.region)
+        
+        # If CloudFront URL not provided via CLI, try to get it from stack outputs
+        cloudfront_url = args.cloudfront_url
+        if not cloudfront_url:
+            cloudfront_url = find_output_by_prefix(outputs, 'FrontendStackCloudFrontDistributionURL')
+        
+        print("Generating amplify_outputs.json...")
+        if cloudfront_url:
+            print(f"Using CloudFront URL for OAuth redirects: {cloudfront_url}")
+        else:
+            print("Using localhost URLs for OAuth redirects (local development)")
+        
+        config = generate_amplify_config(outputs, args.region, cloudfront_url)
     
     # Write to file
     output_path = Path(__file__).parent / args.output

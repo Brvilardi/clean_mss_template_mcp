@@ -65,10 +65,10 @@ export function ConfirmSignUp() {
               <span className="text-2xl font-bold text-white">re:</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-2xl font-bold text-center text-slate-800 dark:text-slate-500">
             Verify your email
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-slate-700 dark:text-slate-400">
             Complete your registration
           </CardDescription>
         </CardHeader>

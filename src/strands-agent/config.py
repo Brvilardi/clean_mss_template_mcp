@@ -36,6 +36,9 @@ class Config:
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
+    # CORS Configuration
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "")
+    
     @classmethod
     def is_production(cls) -> bool:
         """

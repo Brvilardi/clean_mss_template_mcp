@@ -16,6 +16,7 @@ class CognitoStack(Construct):
         scope: Construct,
         construct_id: str,
         stack_name: str,
+        cloudfront_url: str = None,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id)
@@ -23,6 +24,28 @@ class CognitoStack(Construct):
         # Create unique domain prefix using stack name
         # Remove special characters and convert to lowercase
         domain_prefix = f"reinvent-planner-{stack_name.lower().replace('_', '-')}"
+        
+        # Build callback and logout URLs
+        # Always include localhost for local development
+        callback_urls = [
+            "http://localhost:5173/",
+            "http://localhost:5173/app/dashboard"
+        ]
+        logout_urls = [
+            "http://localhost:5173/",
+            "http://localhost:5173/signin"
+        ]
+        
+        # Add CloudFront URLs if provided (for production deployment)
+        if cloudfront_url:
+            callback_urls.extend([
+                f"{cloudfront_url}/",
+                f"{cloudfront_url}/app/dashboard"
+            ])
+            logout_urls.extend([
+                f"{cloudfront_url}/",
+                f"{cloudfront_url}/signin"
+            ])
 
         # Create User Pool with custom attributes
         self.user_pool = cognito.UserPool(
@@ -83,14 +106,8 @@ class CognitoStack(Construct):
                     cognito.OAuthScope.OPENID,
                     cognito.OAuthScope.PROFILE
                 ],
-                callback_urls=[
-                    "http://localhost:5173/",
-                    "http://localhost:5173/app/dashboard"
-                ],
-                logout_urls=[
-                    "http://localhost:5173/",
-                    "http://localhost:5173/signin"
-                ]
+                callback_urls=callback_urls,
+                logout_urls=logout_urls
             ),
             prevent_user_existence_errors=True,
             generate_secret=False,  # Public client for SPA

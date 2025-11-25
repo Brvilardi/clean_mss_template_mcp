@@ -737,6 +737,256 @@ aws dynamodb list-tables --query 'TableNames[?contains(@, `user_mss_template`)]'
 
 ---
 
+## Frontend Deployment
+
+### Prerequisites
+
+1. **Node.js and npm** installed (v18+ recommended)
+2. **Frontend built** before CDK deployment
+
+### Deployment Process
+
+#### Option 1: Manual Deployment (Recommended for First Time)
+
+**Step 1: Generate Amplify Configuration**
+
+After deploying the backend stack, generate the Amplify configuration:
+
+```bash
+cd iac
+python scripts/generate_amplify_config.py \
+  --stack-name <your-stack-name> \
+  --region <your-region>
+```
+
+This creates `frontend/amplify_outputs.json` with Cognito and API Gateway settings.
+
+**Step 2: Build Frontend**
+
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+This creates the `frontend/dist/` directory with production-ready assets.
+
+**Step 3: Deploy Stack with Frontend**
+
+```bash
+cd iac
+cdk deploy
+```
+
+The FrontendStack will:
+- Create S3 bucket for static hosting
+- Create CloudFront distribution
+- Deploy frontend assets from `dist/` directory
+- Invalidate CloudFront cache
+
+**Step 4: Get CloudFront URL**
+
+After deployment, note the CloudFront URL from the outputs:
+
+```
+Outputs:
+FrontendStackCloudFrontDistributionURL = https://d123456789.cloudfront.net
+```
+
+**Step 5: Update Cognito OAuth URLs (First Deployment Only)**
+
+After first deployment, you need to update Cognito with the CloudFront URL:
+
+1. Get the CloudFront URL from CDK outputs
+2. Update the stack with CloudFront URL:
+
+```bash
+# Modify iac/iac/template_stack.py to pass cloudfront_url to CognitoStack
+# Then redeploy
+cdk deploy
+```
+
+Or manually update in AWS Console:
+1. Go to Cognito User Pools
+2. Select your user pool
+3. Go to "App integration" → "App clients"
+4. Edit the app client
+5. Add CloudFront URL to callback and logout URLs:
+   - `https://d123456789.cloudfront.net/`
+   - `https://d123456789.cloudfront.net/app/dashboard`
+
+**Step 6: Regenerate Amplify Config with CloudFront URL**
+
+```bash
+cd iac
+python scripts/generate_amplify_config.py \
+  --stack-name <your-stack-name> \
+  --region <your-region> \
+  --cloudfront-url https://d123456789.cloudfront.net
+```
+
+**Step 7: Rebuild and Redeploy Frontend**
+
+```bash
+cd frontend
+npm run build
+cd ../iac
+cdk deploy
+```
+
+#### Option 2: Using Build Script
+
+Use the provided build script:
+
+```bash
+cd iac
+./scripts/build_and_deploy_frontend.sh
+```
+
+This script:
+- Checks for `amplify_outputs.json`
+- Installs npm dependencies
+- Builds the frontend
+- Validates the build output
+
+Then deploy:
+
+```bash
+cdk deploy
+```
+
+#### Option 3: Direct Parameter Mode (Advanced)
+
+Generate Amplify config without CloudFormation stack:
+
+```bash
+cd iac
+python scripts/generate_amplify_config.py \
+  --region us-east-1 \
+  --user-pool-id us-east-1_XXXXXXXXX \
+  --user-pool-client-id XXXXXXXXXXXXXXXXXXXXXXXXXX \
+  --identity-pool-id us-east-1:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX \
+  --user-pool-domain your-domain.auth.us-east-1.amazoncognito.com \
+  --api-gateway-url https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/prod/mss-template \
+  --cloudfront-url https://d123456789.cloudfront.net
+```
+
+### Environment Variables
+
+The frontend uses these environment variables (configured in `amplify_outputs.json`):
+
+- **User Pool ID**: Cognito user pool identifier
+- **User Pool Client ID**: Cognito app client identifier
+- **Identity Pool ID**: Cognito identity pool identifier
+- **User Pool Domain**: Cognito hosted UI domain
+- **API Gateway URL**: Backend API endpoint
+- **CloudFront URL**: Frontend distribution URL (for OAuth redirects)
+
+### Testing Frontend Deployment
+
+1. **Access the Application**:
+   ```
+   https://d123456789.cloudfront.net
+   ```
+
+2. **Test Sign Up**:
+   - Navigate to sign-up page
+   - Enter email, password, company name, and website
+   - Verify email confirmation
+
+3. **Test Sign In**:
+   - Sign in with verified credentials
+   - Verify redirect to dashboard
+
+4. **Test Chat Interface**:
+   - Navigate to chat page
+   - Send a message to the agent
+   - Verify response is received
+
+### Updating Frontend
+
+To update the frontend after code changes:
+
+```bash
+# 1. Build frontend
+cd frontend
+npm run build
+
+# 2. Deploy (CDK will detect changes and update S3 + invalidate CloudFront)
+cd ../iac
+cdk deploy
+```
+
+### Frontend Deployment Troubleshooting
+
+#### Issue: amplify_outputs.json not found
+
+**Solution**: Generate it first:
+```bash
+cd iac
+python scripts/generate_amplify_config.py --stack-name <name> --region <region>
+```
+
+#### Issue: OAuth redirect mismatch
+
+**Error**: "redirect_uri_mismatch" or "invalid_request"
+
+**Solution**: Ensure CloudFront URL is added to Cognito callback URLs:
+1. Check Cognito User Pool app client settings
+2. Verify callback URLs include CloudFront URL
+3. Regenerate amplify_outputs.json with `--cloudfront-url` parameter
+
+#### Issue: CloudFront shows 403 Forbidden
+
+**Cause**: S3 bucket permissions or missing index.html
+
+**Solution**:
+1. Verify frontend was built: `ls frontend/dist/index.html`
+2. Redeploy: `cd iac && cdk deploy`
+3. Check CloudFront error responses are configured for SPA routing
+
+#### Issue: API calls fail with CORS errors
+
+**Cause**: API Gateway CORS not configured or CloudFront URL not allowed
+
+**Solution**:
+1. Verify API Gateway CORS settings in `template_stack.py`
+2. Add CloudFront URL to allowed origins if needed
+3. Redeploy backend: `cd iac && cdk deploy`
+
+#### Issue: Changes not visible after deployment
+
+**Cause**: CloudFront cache not invalidated
+
+**Solution**: CDK automatically invalidates cache. If needed, manually invalidate:
+```bash
+aws cloudfront create-invalidation \
+  --distribution-id <distribution-id> \
+  --paths "/*"
+```
+
+### Frontend Cost Estimation
+
+**CloudFront** (per month):
+- First 10 TB: $0.085/GB
+- Typical small app: ~$5-10/month
+
+**S3 Storage**:
+- ~10 MB for React app: $0.023/month
+- Negligible cost
+
+**Total Frontend Cost**: ~$5-10/month for typical usage
+
+### Frontend Security Best Practices
+
+1. **Use HTTPS only** (CloudFront enforces this)
+2. **Enable CloudFront security headers**
+3. **Implement Content Security Policy (CSP)**
+4. **Use Cognito for authentication** (already configured)
+5. **Validate all user inputs** on frontend and backend
+6. **Keep dependencies updated**: `npm audit fix`
+7. **Use environment-specific configs** (dev vs prod)
+
 ## Next Steps
 
 After successful deployment:
@@ -744,7 +994,7 @@ After successful deployment:
 1. **Set up monitoring alerts** in CloudWatch
 2. **Configure backup strategy** for DynamoDB
 3. **Implement authentication** for API endpoints
-4. **Add custom domain** to API Gateway
+4. **Add custom domain** to API Gateway and CloudFront
 5. **Set up SSL certificate** with AWS Certificate Manager
 6. **Configure WAF rules** for security
 7. **Implement rate limiting** with API Gateway usage plans

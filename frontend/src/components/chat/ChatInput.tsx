@@ -63,12 +63,7 @@ export function ChatInput({
           disabled={disabled}
           aria-label="Type your message"
           aria-describedby="chat-input-help"
-          className="min-h-[50px] sm:min-h-[60px] max-h-[150px] sm:max-h-[200px] resize-none text-sm sm:text-base focus:ring-2 focus:ring-dati-primary focus:ring-offset-2"
-          style={{ 
-            backgroundColor: '#2a2a2a',
-            borderColor: '#444',
-            color: '#9ca3af',
-          }}
+          className="min-h-[50px] sm:min-h-[60px] max-h-[150px] sm:max-h-[200px] resize-none text-sm sm:text-base bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
           rows={2}
         />
         <Button
@@ -84,7 +79,7 @@ export function ChatInput({
       </div>
       <p 
         id="chat-input-help" 
-        className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center mt-2"
+        className="text-xs sm:text-sm text-muted-foreground text-center mt-2"
         role="status"
         aria-live="polite"
       >

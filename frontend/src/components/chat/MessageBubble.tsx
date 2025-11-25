@@ -53,14 +53,14 @@ export function MessageBubble({ content, isUser, timestamp, status }: MessageBub
           "rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 break-words shadow-sm",
           isUser 
             ? "bg-dati-accent-1 text-white" 
-            : "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+            : "bg-muted text-foreground"
         )}>
           <p className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed">{content}</p>
         </div>
         
         <div className="flex items-center gap-2 px-1">
           <time 
-            className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400"
+            className="text-[10px] sm:text-xs text-muted-foreground"
             dateTime={timestamp.toISOString()}
           >
             {formatTime(timestamp)}

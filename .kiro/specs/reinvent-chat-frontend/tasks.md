@@ -132,23 +132,95 @@
   - Implement focus management for modals and navigation
   - _Requirements: 5.4_
 
-- [ ] 15. Create deployment configuration
-  - Create production `amplify_outputs.json` with production endpoints
-  - Configure environment-specific settings
-  - Set up S3 bucket for static hosting (via CDK)
-  - Configure CloudFront distribution (via CDK)
-  - Add build scripts to package.json
-  - Create deployment documentation
-  - _Requirements: 7.1, 7.4, 7.5_
-
-- [ ] 16. Update IAC for frontend deployment
-  - Create new CDK stack for frontend infrastructure
-  - Add S3 bucket with static website hosting configuration
-  - Add CloudFront distribution with S3 origin
-  - Configure CloudFront with proper caching policies
-  - Add Route53 DNS configuration (if custom domain needed)
-  - Output CloudFront URL and S3 bucket name
+- [x] 15. Create FrontendStack CDK construct for S3 + CloudFront deployment
+- [x] 15.1 Create `iac/iac/frontend_stack.py` as a Construct class
+  - Import required CDK modules: aws_s3, aws_cloudfront, aws_cloudfront_origins, aws_s3_deployment, CfnOutput
+  - Define __init__ method accepting scope, construct_id, stack_name, region
   - _Requirements: 7.1_
+- [x] 15.2 Add S3 bucket for static website hosting
+  - Create S3 bucket with website hosting enabled
+  - Set index document to "index.html"
+  - Set error document to "index.html" (for SPA routing)
+  - Configure RemovalPolicy.DESTROY for dev/test
+  - Enable auto_delete_objects=True for cleanup
+  - Block public access but allow CloudFront access via OAI
+  - _Requirements: 7.4_
+- [x] 15.3 Add CloudFront Origin Access Identity (OAI)
+  - Create OAI for secure S3 access
+  - Grant S3 bucket read permissions to OAI
+  - _Requirements: 7.4_
+- [x] 15.4 Add CloudFront distribution
+  - Create distribution with S3 origin using OAI
+  - Set default root object to "index.html"
+  - Configure custom error responses:
+    - 404 → /index.html (200 status) for SPA routing
+    - 403 → /index.html (200 status) for SPA routing
+  - Set price class to PRICE_CLASS_200 (covers North America, Europe, Asia, Middle East, Africa, and South America)
+  - Enable compression (compress=True)
+  - Configure default cache behavior with caching optimized for static content
+  - _Requirements: 7.4, 7.5_
+- [x] 15.5 Add CfnOutputs for frontend URLs and bucket
+  - Output CloudFront distribution domain name
+  - Output CloudFront distribution URL (https://)
+  - Output S3 bucket name for deployment scripts
+  - _Requirements: 7.1_
+
+- [x] 16. Integrate FrontendStack into TemplateStack and add deployment logic
+- [x] 16.1 Integrate FrontendStack into TemplateStack
+  - Import FrontendStack in `iac/iac/template_stack.py`
+  - Instantiate FrontendStack after CognitoStack and API Gateway resources are created
+  - Pass construct_id, stack_name, and region to FrontendStack
+  - Store reference as self.frontend_stack
+  - _Requirements: 7.1_
+- [x] 16.2 Update generate_amplify_config.py for production deployment
+  - Modify script to accept --cloudfront-url parameter for OAuth redirect URLs
+  - Update OAuth redirect_sign_in and redirect_sign_out to use CloudFront URL
+  - Keep localhost URLs as fallback for local development
+  - Ensure script reads all required outputs: UserPoolId, UserPoolClientId, IdentityPoolId, UserPoolDomain, ApiGatewayBaseUrl
+  - _Requirements: 7.2, 7.3_
+- [x] 16.3 Generate amplify_outputs.json directly from CDK constructs
+  - Modify `generate_amplify_config.py` to accept direct parameters instead of reading from CloudFormation:
+    - Accept parameters: user_pool_id, user_pool_client_id, identity_pool_id, user_pool_domain, api_gateway_url, cloudfront_url, region
+    - Generate amplify_outputs.json with these values
+    - Update OAuth redirect URLs to include CloudFront URL when provided
+  - In FrontendStack, create a custom resource or use CfnOutput to trigger amplify config generation:
+    - Pass cognito_stack properties (user_pool.user_pool_id, user_pool_client.user_pool_client_id, etc.)
+    - Pass API Gateway URL from template_stack (self.rest_api.url)
+    - Pass CloudFront distribution URL from frontend_stack
+    - Write amplify_outputs.json to frontend/ directory during CDK synthesis
+  - Alternative approach: Use CDK custom resource with Lambda to generate file during deployment
+  - _Requirements: 7.2, 7.3, 7.4_
+- [x] 16.3.1 Create build and deployment script `iac/scripts/build_and_deploy_frontend.sh`
+  - Bash script that runs during CDK deployment:
+    1. Check if amplify_outputs.json exists in frontend/ directory
+    2. Run `npm install` in frontend directory
+    3. Run `npm run build` in frontend directory to create dist/
+    4. Script will be called by BucketDeployment construct (task 16.5)
+  - Add proper error handling and exit codes
+  - Make script executable: `chmod +x iac/scripts/build_and_deploy_frontend.sh`
+  - _Requirements: 7.4, 7.5_
+- [x] 16.4 Update Cognito OAuth redirect URLs to include CloudFront URL
+  - Modify CognitoStack to accept optional cloudfront_url parameter
+  - Update callback_urls and logout_urls to include CloudFront URL when provided
+  - Keep localhost URLs for local development
+  - _Requirements: 1.3, 7.3_
+- [x] 16.5 Add BucketDeployment construct for automatic frontend deployment
+  - Import aws_s3_deployment in frontend_stack.py
+  - Add BucketDeployment construct that:
+    - Sources from local frontend/dist directory
+    - Deploys to S3 bucket
+    - Invalidates CloudFront distribution on changes
+    - Prunes old files from bucket
+  - Note: This requires frontend to be built BEFORE cdk deploy
+  - _Requirements: 7.4, 7.5_
+- [x] 16.6 Create deployment documentation
+  - Document the deployment process in README or docs/DEPLOYMENT_GUIDE.md:
+    1. Build frontend locally: `cd frontend && npm run build`
+    2. Deploy CDK stack: `cd iac && cdk deploy`
+    3. Or use helper script: `python iac/scripts/deploy_frontend.py --stack-name <name> --region <region>`
+  - Document environment variables needed
+  - Document how to update OAuth URLs in Cognito after first deployment
+  - _Requirements: 7.1, 7.5_
 
 - [ ] 17. Checkpoint - Ensure all core functionality works
   - Verify sign-up flow with custom attributes

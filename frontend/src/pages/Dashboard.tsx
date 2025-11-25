@@ -41,7 +41,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="h-full overflow-auto bg-dati-background">
+    <div className="h-full overflow-auto bg-background">
       <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Welcome Section */}
         <section className="mb-6 sm:mb-8" aria-labelledby="welcome-heading">
@@ -52,12 +52,12 @@ export function Dashboard() {
               className="h-10 w-10 sm:h-12 sm:w-12 object-contain bg-white p-1.5 rounded"
             />
             <div>
-              <h1 id="welcome-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+              <h1 id="welcome-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
                 Welcome back{user?.companyName ? `, ${user.companyName}` : ''}!
               </h1>
             </div>
           </div>
-          <p className="text-gray-300 text-base sm:text-lg ml-0 sm:ml-16">
+          <p className="text-muted-foreground text-base sm:text-lg ml-0 sm:ml-16">
             Your AI-powered assistant for planning your AWS re:Invent experience
           </p>
         </section>
@@ -112,7 +112,7 @@ export function Dashboard() {
 
         {/* Sample Queries */}
         <section className="mb-6 sm:mb-8" aria-labelledby="sample-queries-heading">
-          <h2 id="sample-queries-heading" className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Try these sample queries</h2>
+          <h2 id="sample-queries-heading" className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Try these sample queries</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4" role="list">
             {sampleQueries.map((sample, index) => {
               const Icon = sample.icon;

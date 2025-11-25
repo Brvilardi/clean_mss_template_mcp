@@ -40,9 +40,9 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="h-full flex flex-col bg-dati-background border-r border-gray-700">
+    <div className="h-full flex flex-col bg-card border-r border-border">
       {/* Header with Dati Logo */}
-      <div className="p-4 sm:p-6 border-b border-gray-700">
+      <div className="p-4 sm:p-6 border-b border-border">
         <div className="flex items-center gap-3 mb-2">
           <img 
             src="/dati-logo.png" 
@@ -50,19 +50,19 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
             className="h-8 w-8 sm:h-10 sm:w-10 object-contain bg-white p-1.5 rounded"
           />
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold text-white truncate">
+            <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">
               re:Invent Planner
             </h2>
-            <p className="text-xs sm:text-sm text-gray-300 truncate">AI Assistant</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">AI Assistant</p>
           </div>
         </div>
       </div>
 
       {/* New Chat Button */}
-      <div className="p-3 sm:p-4 border-b border-gray-700">
+      <div className="p-3 sm:p-4 border-b border-border">
         <Button
           onClick={handleNewChat}
-          className="w-full justify-start gap-2 bg-dati-primary hover:bg-dati-accent-4 text-white focus:ring-2 focus:ring-dati-primary focus:ring-offset-2 transition-colors"
+          className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
           size="sm"
           aria-label="Start a new chat conversation"
         >
@@ -88,11 +88,11 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
               aria-current={active ? 'page' : undefined}
               className={`
                 flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all
-                focus:outline-none focus:ring-2 focus:ring-dati-primary focus:ring-offset-2
+                focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
                 ${
                   active
-                    ? 'bg-dati-primary/20 text-white font-medium shadow-sm'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    ? 'bg-primary/20 text-foreground font-medium shadow-sm'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }
               `}
             >
@@ -104,12 +104,12 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
       </nav>
 
       {/* Sign Out */}
-      <div className="p-3 sm:p-4 border-t border-gray-700">
+      <div className="p-3 sm:p-4 border-t border-border">
         <Button
           onClick={handleSignOut}
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-3 text-gray-300 hover:text-red-400 hover:bg-red-900/20 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
           aria-label="Sign out of your account"
         >
           <LogOut className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" aria-hidden="true" />

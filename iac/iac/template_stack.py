@@ -15,6 +15,7 @@ from .strands_agent_stack import StrandsAgentStack
 from .template_dynamo_table import TemplateDynamoTable
 from .sessions_dynamo_table import SessionsDynamoTable
 from .cognito_stack import CognitoStack
+from .frontend_stack import FrontendStack
 
 
 class TemplateStack(Stack):
@@ -99,13 +100,26 @@ class TemplateStack(Stack):
             region=self.region
         )
 
+        # Create FrontendStack first to get CloudFront URL
+        self.frontend_stack = FrontendStack(
+            self,
+            construct_id="FrontendStack",
+            stack_name=construct_id,
+            region=self.region
+        )
+        
+        # Add frontend URL to environment variables for agent CORS
+        agent_environment_variables = ENVIRONMENT_VARIABLES.copy()
+        agent_environment_variables["FRONTEND_URL"] = f"https://{self.frontend_stack.distribution.distribution_domain_name}"
+        
         self.strands_agent_stack = StrandsAgentStack(
             self,
             api_gateway_resource=api_gateway_resource,
-            environment_variables=ENVIRONMENT_VARIABLES,
+            environment_variables=agent_environment_variables,
             powertools_layer=self.lambda_stack.lambda_power_tools,
             region=self.region
         )
+
         
         # Now that all resources are created, output the API Gateway URLs
         # These use url_for_path which is safe after all integrations are complete

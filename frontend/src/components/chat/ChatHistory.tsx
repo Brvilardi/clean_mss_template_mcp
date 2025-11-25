@@ -43,18 +43,18 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
                 className="h-16 w-16 sm:h-20 sm:w-20 mx-auto object-contain bg-white p-2 rounded-lg"
               />
             </div>
-            <h2 className="text-xl sm:text-2xl font-semibold" style={{ color: '#9ca3af' }}>
+            <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
               Welcome to re:Invent Planner
             </h2>
-            <p className="text-sm sm:text-base" style={{ color: '#9ca3af' }}>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Ask me anything about AWS re:Invent sessions, speakers, or help building your personalized schedule.
             </p>
             <div className="space-y-2 text-left">
-              <p className="text-xs sm:text-sm font-medium" style={{ color: '#9ca3af' }}>
+              <p className="text-xs sm:text-sm font-medium text-foreground">
                 Try asking:
               </p>
-              <ul className="text-xs sm:text-sm space-y-1" style={{ color: '#9ca3af' }} role="list">
-                <li><span aria-hidden="true">• </span>"What sessions are available on December 3rd?"</li>
+              <ul className="text-xs sm:text-sm space-y-1 text-muted-foreground" role="list">
+                <li><span aria-hidden="true">• </span>"What sessions are available on December 5th?"</li>
                 <li><span aria-hidden="true">• </span>"Show me all AI/ML sessions"</li>
                 <li><span aria-hidden="true">• </span>"Find sessions by Werner Vogels"</li>
               </ul>
