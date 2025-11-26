@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useChatStore } from '../store/chatStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -7,7 +9,13 @@ import { MessageSquare, Calendar, MapPin, Users, Sparkles } from 'lucide-react';
 
 export function Dashboard() {
   const { user } = useAuthStore();
+  const { loadChatHistory } = useChatStore();
   const navigate = useNavigate();
+
+  // Load chat history on mount so sidebar shows sessions
+  useEffect(() => {
+    loadChatHistory();
+  }, [loadChatHistory]);
 
   const sampleQueries = [
     {

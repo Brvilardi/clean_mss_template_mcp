@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Message } from '../types/chat';
 import { AgentService, type AgentError } from '../services/agentService';
-import { useAuthStore } from './authStore';
+import { ChatHistoryService, type SessionEvent } from '../services/chatHistoryService';
 
 // Cache configuration
 const STORAGE_KEY = 'reinvent-chat-history';
@@ -13,6 +13,18 @@ interface CachedData {
   timestamp: number;
 }
 
+/**
+ * Session metadata from chat history
+ */
+export interface SessionMetadata {
+  session_id: string;
+  actor_id: string;
+  created_at?: string;
+  last_activity: string;
+  message_count?: number;
+  last_message_preview?: string;
+}
+
 interface ChatState {
   // State
   messages: Message[];
@@ -21,6 +33,11 @@ interface ChatState {
   error: string | null;
   errorSuggestions: string[];
   isRetryable: boolean;
+  
+  // Chat history state
+  chatHistory: SessionMetadata[];
+  isLoadingHistory: boolean;
+  historyError: string | null;
 
   // Actions
   sendMessage: (content: string) => Promise<void>;
@@ -32,6 +49,12 @@ interface ChatState {
   loadFromCache: () => void;
   saveToCache: () => void;
   clearCache: () => void;
+  
+  // Chat history actions
+  loadChatHistory: () => Promise<void>;
+  loadSessionMessages: (sessionId: string) => Promise<void>;
+  switchSession: (sessionId: string) => Promise<void>;
+  updateSessionHistory: (sessionId: string, lastMessage: string) => void;
 }
 
 // Cache utility functions
@@ -97,6 +120,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
   error: null,
   errorSuggestions: [],
   isRetryable: false,
+  
+  // Chat history state
+  chatHistory: [],
+  isLoadingHistory: false,
+  historyError: null,
 
   // Send message action with optimistic updates
   sendMessage: async (content: string) => {
@@ -115,11 +143,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
     
-    // Get current user's Cognito sub ID for actor_id
-    const authState = useAuthStore.getState();
-    const actorId = authState.user?.id;
-    
     // Generate session_id if not exists
+    // Note: actor_id is no longer needed - it's extracted from Cognito JWT automatically
     const sessionId = state.currentSessionId || crypto.randomUUID();
     
     // Create optimistic user message
@@ -143,11 +168,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
 
     try {
-      // Send to API with session_id and actor_id
+      // Send to API with session_id
+      // actor_id is automatically extracted from Cognito JWT by API Gateway
       const response = await AgentService.sendMessage(
         content,
-        sessionId,
-        actorId
+        sessionId
       );
 
       // Update optimistic message to 'sent' status
@@ -174,6 +199,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
         currentSessionId: response.output.session_id || sessionId,
         isLoading: false
       }));
+
+      // Update session history in localStorage
+      get().updateSessionHistory(sessionId, content);
 
     } catch (error) {
       const agentError = error as AgentError;
@@ -285,5 +313,192 @@ export const useChatStore = create<ChatState>((set, get) => ({
   // Clear cache
   clearCache: () => {
     clearLocalStorage();
+  },
+
+  // Load chat history - fetch all available sessions for the user
+  loadChatHistory: async () => {
+    set({ isLoadingHistory: true, historyError: null });
+
+    try {
+      // NOTE: AWS Bedrock AgentCore Memory does not support listing all sessions for a user.
+      // As a workaround, we track session IDs in localStorage when they are created.
+      // This means chat history is local to the browser and won't sync across devices.
+      
+      // Load session IDs from localStorage
+      const sessionHistoryKey = 'reinvent-session-history';
+      const storedHistory = localStorage.getItem(sessionHistoryKey);
+      
+      let sessions: SessionMetadata[] = [];
+      
+      if (storedHistory) {
+        try {
+          const parsed = JSON.parse(storedHistory);
+          if (Array.isArray(parsed)) {
+            sessions = parsed;
+          }
+        } catch (e) {
+          console.error('Failed to parse session history from localStorage:', e);
+          localStorage.removeItem(sessionHistoryKey);
+        }
+      }
+      
+      // Sort by last_activity (most recent first)
+      const sortedSessions = sessions.sort((a, b) => {
+        const dateA = new Date(a.last_activity).getTime();
+        const dateB = new Date(b.last_activity).getTime();
+        return dateB - dateA;
+      });
+
+      set({ 
+        chatHistory: sortedSessions,
+        isLoadingHistory: false 
+      });
+
+      // Auto-load most recent session if no messages are currently loaded
+      const state = get();
+      if (sortedSessions.length > 0 && state.messages.length === 0 && !state.currentSessionId) {
+        const mostRecentSession = sortedSessions[0];
+        await get().loadSessionMessages(mostRecentSession.session_id);
+      }
+
+    } catch (error: any) {
+      console.error('Failed to load chat history:', error);
+      set({ 
+        historyError: error.message || 'Failed to load chat history',
+        isLoadingHistory: false 
+      });
+    }
+  },
+
+  // Load messages for a specific session
+  loadSessionMessages: async (sessionId: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      // Fetch session events from AgentCore Memory
+      const response = await ChatHistoryService.getSessionEvents(sessionId);
+      
+      // Convert events to messages - only include text messages from user/assistant
+      const messages: Message[] = response.events
+        .filter((event: SessionEvent) => {
+          // Only include text events with user or assistant role
+          return event.type === 'text' && (event.role === 'user' || event.role === 'assistant');
+        })
+        .map((event: SessionEvent): Message => {
+          return {
+            id: event.event_id,
+            content: event.content as string,
+            role: event.role as 'user' | 'assistant',
+            timestamp: new Date(event.timestamp),
+            status: 'sent',
+            sessionId: sessionId
+          };
+        })
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+      set({ 
+        messages,
+        currentSessionId: sessionId,
+        isLoading: false 
+      });
+
+      // Save to cache (current session only)
+      saveToLocalStorage(messages, sessionId);
+
+    } catch (error: any) {
+      console.error('Failed to load session messages:', error);
+      set({ 
+        error: error.message || 'Failed to load session messages',
+        errorSuggestions: error.suggestions || ['Try refreshing the page', 'Check your internet connection'],
+        isRetryable: error.isRetryable ?? true,
+        isLoading: false 
+      });
+    }
+  },
+
+  // Switch to a different session
+  switchSession: async (sessionId: string) => {
+    const state = get();
+    
+    // If switching to the same session, do nothing
+    if (state.currentSessionId === sessionId) {
+      return;
+    }
+
+    // Save current session to cache before switching
+    if (state.currentSessionId && state.messages.length > 0) {
+      saveToLocalStorage(state.messages, state.currentSessionId);
+    }
+
+    // Clear current messages and load new session
+    set({ 
+      messages: [],
+      currentSessionId: sessionId,
+      error: null,
+      errorSuggestions: [],
+      isRetryable: false
+    });
+
+    // Load messages for the new session
+    await get().loadSessionMessages(sessionId);
+  },
+
+  // Update session history in localStorage (helper function)
+  updateSessionHistory: (sessionId: string, lastMessage: string) => {
+    const sessionHistoryKey = 'reinvent-session-history';
+    const storedHistory = localStorage.getItem(sessionHistoryKey);
+    
+    let sessions: SessionMetadata[] = [];
+    
+    if (storedHistory) {
+      try {
+        const parsed = JSON.parse(storedHistory);
+        if (Array.isArray(parsed)) {
+          sessions = parsed;
+        }
+      } catch (e) {
+        console.error('Failed to parse session history:', e);
+      }
+    }
+    
+    // Find existing session or create new one
+    const existingIndex = sessions.findIndex(s => s.session_id === sessionId);
+    const now = new Date().toISOString();
+    
+    if (existingIndex >= 0) {
+      // Update existing session
+      sessions[existingIndex] = {
+        ...sessions[existingIndex],
+        last_activity: now,
+        last_message_preview: lastMessage.substring(0, 100),
+        message_count: (sessions[existingIndex].message_count || 0) + 1
+      };
+    } else {
+      // Create new session entry
+      sessions.push({
+        session_id: sessionId,
+        actor_id: 'current-user', // Will be replaced with actual actor_id when available
+        created_at: now,
+        last_activity: now,
+        last_message_preview: lastMessage.substring(0, 100),
+        message_count: 1
+      });
+    }
+    
+    // Save back to localStorage
+    try {
+      localStorage.setItem(sessionHistoryKey, JSON.stringify(sessions));
+      
+      // Update the chatHistory state
+      const sortedSessions = sessions.sort((a, b) => {
+        const dateA = new Date(a.last_activity).getTime();
+        const dateB = new Date(b.last_activity).getTime();
+        return dateB - dateA;
+      });
+      
+      set({ chatHistory: sortedSessions });
+    } catch (e) {
+      console.error('Failed to save session history:', e);
+    }
   }
 }));

@@ -1,10 +1,10 @@
 // Request to Strands Agent
+// Note: actor_id is no longer needed - it's extracted from Cognito JWT automatically
 export interface AgentInvocationRequest {
   input: {
     prompt: string;
   };
   session_id?: string;
-  actor_id?: string;
 }
 
 // Response from Strands Agent

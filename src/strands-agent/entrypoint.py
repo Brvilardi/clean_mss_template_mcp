@@ -15,15 +15,16 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-from aws_lambda_powertools import Logger, Metrics
+from aws_lambda_powertools import Logger, Metrics, Tracer
 from aws_lambda_powertools.metrics import MetricUnit
 
 from agent import create_agent
 from config import Config
 
-# Initialize Powertools Logger and Metrics
+# Initialize Powertools Logger, Metrics, and Tracer
 logger = Logger(service="reinvent-agent", level=Config.LOG_LEVEL)
 metrics = Metrics(namespace="ReinventAgent", service="agent-invocations")
+tracer = Tracer(service="reinvent-agent")
 
 # Configuration validation error (if any)
 agent_initialization_error = None
@@ -102,10 +103,6 @@ class InvocationRequest(BaseModel):
         None,
         description="Optional session ID for conversation continuity"
     )
-    actor_id: Optional[str] = Field(
-        None,
-        description="Optional user/actor ID for cross-session memory"
-    )
 
 
 class InvocationResponse(BaseModel):
@@ -124,20 +121,217 @@ class ErrorResponse(BaseModel):
     )
 
 
+@tracer.capture_method
+def process_agent_invocation(user_message: str, session_id: Optional[str], actor_id: str) -> Dict[str, Any]:
+    """
+    Process agent invocation with tracing.
+    
+    Args:
+        user_message: User's prompt
+        session_id: Optional session ID
+        actor_id: User identifier
+        
+    Returns:
+        Response dictionary with agent output
+    """
+    tracer.put_annotation("prompt_length", len(user_message))
+    tracer.put_annotation("session_id", session_id or "none")
+    tracer.put_annotation("actor_id", actor_id)
+    
+    # Create agent
+    agent = create_agent(
+        mcp_endpoint=Config.MCP_ENDPOINT,
+        memory_id=Config.MEMORY_ID,
+        session_id=session_id,
+        actor_id=actor_id
+    )
+    
+    # Invoke agent
+    result = agent(user_message)
+    
+    # Extract response
+    response_text = result.message['content'][0]['text']
+    usage = result.message.get('usage', {})
+    input_tokens = usage.get('input_tokens', 0)
+    output_tokens = usage.get('output_tokens', 0)
+    total_tokens = input_tokens + output_tokens
+    
+    # Add token annotations
+    tracer.put_annotation("input_tokens", input_tokens)
+    tracer.put_annotation("output_tokens", output_tokens)
+    tracer.put_annotation("total_tokens", total_tokens)
+    tracer.put_annotation("response_length", len(response_text))
+    
+    # Process tool history
+    tool_calls, tool_results = process_tool_history(result)
+    
+    # Add tool metrics
+    tracer.put_annotation("tool_calls_count", len(tool_calls))
+    tracer.put_metadata("tools_used", [t['tool'] for t in tool_calls])
+    
+    # Log success
+    logger.info("Agent invocation successful",
+        response_length=len(response_text),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        total_tokens=total_tokens,
+        tool_calls_count=len(tool_calls),
+        tools_used=[t['tool'] for t in tool_calls]
+    )
+    
+    # Add metrics
+    metrics.add_metric(name="InvocationSuccess", unit=MetricUnit.Count, value=1)
+    metrics.add_metric(name="InputTokens", unit=MetricUnit.Count, value=input_tokens)
+    metrics.add_metric(name="OutputTokens", unit=MetricUnit.Count, value=output_tokens)
+    metrics.add_metric(name="TotalTokens", unit=MetricUnit.Count, value=total_tokens)
+    metrics.add_metric(name="ToolCallsCount", unit=MetricUnit.Count, value=len(tool_calls))
+    
+    return {
+        "message": response_text,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "model": Config.MODEL_NAME,
+        "session_id": session_id,
+        "actor_id": actor_id,
+        "usage": {
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "total_tokens": total_tokens
+        },
+        "metadata": {
+            "tool_calls_count": len(tool_calls),
+            "tools_used": [t['tool'] for t in tool_calls]
+        }
+    }
+
+
+@tracer.capture_method
+def process_tool_history(result) -> tuple:
+    """
+    Process tool calls and results from agent history with tracing.
+    
+    Args:
+        result: Agent result with history
+        
+    Returns:
+        Tuple of (tool_calls, tool_results)
+    """
+    tool_calls = []
+    tool_results = []
+    
+    if not hasattr(result, 'history') or not result.history:
+        return tool_calls, tool_results
+    
+    for turn in result.history:
+        # Capture tool calls (from assistant)
+        if turn.get('role') == 'assistant':
+            content = turn.get('content', [])
+            for item in content:
+                if item.get('type') == 'tool_use':
+                    tool_call = {
+                        'id': item.get('id'),
+                        'tool': item.get('name'),
+                        'input': item.get('input', {})
+                    }
+                    tool_calls.append(tool_call)
+                    
+                    # Log and trace individual tool call
+                    log_mcp_tool_call(item)
+        
+        # Capture tool results (from user role with tool_result)
+        elif turn.get('role') == 'user':
+            content = turn.get('content', [])
+            for item in content:
+                if item.get('type') == 'tool_result':
+                    tool_result = {
+                        'tool_use_id': item.get('tool_use_id'),
+                        'content': item.get('content', [])
+                    }
+                    tool_results.append(tool_result)
+                    
+                    # Log and trace tool result
+                    log_mcp_tool_result(item)
+    
+    return tool_calls, tool_results
+
+
+@tracer.capture_method
+def log_mcp_tool_call(item: Dict[str, Any]):
+    """
+    Log and trace MCP tool call.
+    
+    Args:
+        item: Tool use item from agent history
+    """
+    tool_name = item.get('name', 'unknown')
+    tool_id = item.get('id', 'unknown')
+    tool_input = item.get('input', {})
+    
+    tracer.put_annotation("tool_name", tool_name)
+    tracer.put_annotation("tool_id", tool_id)
+    tracer.put_metadata("tool_input", tool_input)
+    
+    logger.info(f"MCP tool called: {tool_name}",
+        tool_name=tool_name,
+        tool_id=tool_id,
+        parameters=tool_input
+    )
+    
+    metrics.add_metric(name="ToolCalled", unit=MetricUnit.Count, value=1)
+    metrics.add_dimension(name="ToolName", value=tool_name)
+
+
+@tracer.capture_method
+def log_mcp_tool_result(item: Dict[str, Any]):
+    """
+    Log and trace MCP tool result.
+    
+    Args:
+        item: Tool result item from agent history
+    """
+    tool_use_id = item.get('tool_use_id', 'unknown')
+    is_error = item.get('is_error', False)
+    
+    # Extract result summary
+    result_text = ""
+    if isinstance(item.get('content'), list):
+        for content_item in item.get('content', []):
+            if content_item.get('type') == 'text':
+                result_text = content_item.get('text', '')[:500]
+    
+    tracer.put_annotation("tool_use_id", tool_use_id)
+    tracer.put_annotation("is_error", is_error)
+    tracer.put_metadata("result_preview", result_text[:200])
+    
+    logger.info("MCP tool result received",
+        tool_use_id=tool_use_id,
+        result_preview=result_text[:100] + "..." if len(result_text) > 100 else result_text,
+        is_error=is_error
+    )
+    
+    if is_error:
+        metrics.add_metric(name="ToolError", unit=MetricUnit.Count, value=1)
+
+
 @app.post("/invocations", response_model=InvocationResponse, responses={
     400: {"model": ErrorResponse, "description": "Bad Request"},
+    401: {"model": ErrorResponse, "description": "Unauthorized"},
     500: {"model": ErrorResponse, "description": "Internal Server Error"},
     503: {"model": ErrorResponse, "description": "Service Unavailable"}
 })
-async def invoke_agent(request: InvocationRequest):
+@tracer.capture_method
+async def invoke_agent(request: InvocationRequest, http_request: Request):
     """
-    Agent invocation endpoint.
+    Agent invocation endpoint with Cognito authentication.
     
     Processes user queries and returns agent responses with error handling
     and retry logic for tool invocations.
     
+    The actor_id is extracted from the Cognito JWT token via API Gateway authorizer.
+    This ensures consistency with the BFF list_sessions endpoint.
+    
     Args:
-        request: InvocationRequest containing user prompt, session_id, and actor_id
+        request: InvocationRequest containing user prompt and session_id
+        http_request: FastAPI Request object containing headers with API Gateway context
         
     Returns:
         InvocationResponse with agent's response
@@ -169,29 +363,63 @@ async def invoke_agent(request: InvocationRequest):
             }
         )
     
-    # Extract session_id and actor_id from request
-    session_id = request.session_id
-    actor_id = request.actor_id
+    # Extract actor_id from API Gateway authorizer context (Cognito JWT)
+    # Lambda Web Adapter passes API Gateway request context via x-amzn-request-context header
+    actor_id = None
     
-    # Use defaults if not provided
-    # if not session_id:
-    #     session_id = f"session_{int(time.time() * 1000)}"
-    #     logger.info("No session_id provided, using generated default",
-    #         session_id=session_id
-    #     )
-    #
-    # if not actor_id:
-    #     actor_id = "anonymous"
-    #     logger.info("No actor_id provided, using default",
-    #         actor_id=actor_id
-    #     )
+    # Extract from x-amzn-request-context header (Lambda Web Adapter)
+    request_context_header = http_request.headers.get("x-amzn-request-context")
+    if request_context_header:
+        try:
+            import json
+            request_context = json.loads(request_context_header)
+            authorizer = request_context.get("authorizer", {})
+            claims = authorizer.get("claims", {})
+            
+            # Use cognito:username for consistency with list_sessions endpoint
+            actor_id = claims.get("cognito:username") or claims.get("sub")
+            
+            logger.info("Extracted actor_id from Cognito JWT",
+                actor_id=actor_id,
+                has_username=bool(claims.get("cognito:username")),
+                has_sub=bool(claims.get("sub")),
+                email=claims.get("email")
+            )
+        except Exception as e:
+            logger.warning("Failed to parse request context from header",
+                error=str(e),
+                header_present=bool(request_context_header)
+            )
+    
+    # If still no actor_id, return 401 Unauthorized
+    if not actor_id:
+        logger.error("Unable to extract actor_id from request",
+            headers=dict(http_request.headers)
+        )
+        metrics.add_metric(name="UnauthorizedRequest", unit=MetricUnit.Count, value=1)
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": {
+                    "type": "Unauthorized",
+                    "message": "Unable to identify user from authentication token",
+                    "suggestions": [
+                        "Ensure you are authenticated with a valid Cognito token",
+                        "Check that the Authorization header is present",
+                        "Try signing in again"
+                    ]
+                }
+            }
+        )
+    
+    # Extract session_id from request
+    session_id = request.session_id
     
     # Log session information
     logger.info("Processing request with session context",
         session_id=session_id,
         actor_id=actor_id,
-        has_session_id=request.session_id is not None,
-        has_actor_id=request.actor_id is not None
+        has_session_id=request.session_id is not None
     )
     
     try:
@@ -223,162 +451,23 @@ async def invoke_agent(request: InvocationRequest):
         # Add metric for invocation
         metrics.add_metric(name="InvocationStarted", unit=MetricUnit.Count, value=1)
         
-        # Create agent with session context
-        try:
-            agent = create_agent(
-                mcp_endpoint=Config.MCP_ENDPOINT,
-                memory_id=Config.MEMORY_ID,
-                session_id=session_id,
-                actor_id=actor_id
-            )
-            logger.info("Agent created successfully with session context",
-                session_id=session_id,
-                actor_id=actor_id
-            )
-        except Exception as e:
-            logger.error("Failed to create agent",
-                error=str(e),
-                error_type=type(e).__name__,
-                session_id=session_id,
-                actor_id=actor_id
-            )
-            metrics.add_metric(name="AgentCreationFailure", unit=MetricUnit.Count, value=1)
-            raise HTTPException(
-                status_code=500,
-                detail={
-                    "error": {
-                        "type": "AgentCreationError",
-                        "message": "Failed to create agent instance. Please try again.",
-                        "details": str(e) if not Config.is_production() else None,
-                        "suggestions": [
-                            "Try again in a few moments",
-                            "Contact support if the issue persists"
-                        ]
-                    }
-                }
-            )
-        
-        # Process query through agent with retry logic for tool invocations
+        # Process query through agent with retry logic
         max_retries = 2
         last_error = None
         
         for attempt in range(max_retries + 1):
             try:
-                # Agent handles MCP lifecycle automatically with experimental managed integration
-                result = agent(user_message)
+                tracer.put_annotation("attempt", attempt + 1)
                 
-                # Extract response text from agent result
-                response_text = result.message['content'][0]['text']
+                # Process agent invocation (traced via decorator)
+                response = process_agent_invocation(user_message, session_id, actor_id)
                 
-                # Extract and log token usage
-                usage = result.message.get('usage', {})
-                input_tokens = usage.get('input_tokens', 0)
-                output_tokens = usage.get('output_tokens', 0)
-                total_tokens = input_tokens + output_tokens
-                
-                # Log tool usage details with inputs and results
-                tool_calls = []
-                tool_results = []
-                
-                if hasattr(result, 'history') and result.history:
-                    for turn in result.history:
-                        # Capture tool calls (from assistant)
-                        if turn.get('role') == 'assistant':
-                            content = turn.get('content', [])
-                            for item in content:
-                                if item.get('type') == 'tool_use':
-                                    tool_call = {
-                                        'id': item.get('id'),
-                                        'tool': item.get('name'),
-                                        'input': item.get('input', {})
-                                    }
-                                    tool_calls.append(tool_call)
-                                    
-                                    # Log individual tool call
-                                    logger.info(f"Tool called: {item.get('name')}",
-                                        tool_name=item.get('name'),
-                                        tool_id=item.get('id'),
-                                        parameters=item.get('input', {})
-                                    )
-                                    
-                                    # Add metric for tool usage
-                                    metrics.add_metric(name="ToolCalled", unit=MetricUnit.Count, value=1)
-                                    metrics.add_dimension(name="ToolName", value=item.get('name', 'unknown'))
-                        
-                        # Capture tool results (from user role with tool_result)
-                        elif turn.get('role') == 'user':
-                            content = turn.get('content', [])
-                            for item in content:
-                                if item.get('type') == 'tool_result':
-                                    tool_result = {
-                                        'tool_use_id': item.get('tool_use_id'),
-                                        'content': item.get('content', [])
-                                    }
-                                    tool_results.append(tool_result)
-                                    
-                                    # Extract result summary
-                                    result_text = ""
-                                    if isinstance(item.get('content'), list):
-                                        for content_item in item.get('content', []):
-                                            if content_item.get('type') == 'text':
-                                                result_text = content_item.get('text', '')[:500]  # First 500 chars
-                                    
-                                    # Log individual tool result
-                                    logger.info(f"Tool result received",
-                                        tool_use_id=item.get('tool_use_id'),
-                                        result_preview=result_text + "..." if len(result_text) == 500 else result_text,
-                                        is_error=item.get('is_error', False)
-                                    )
-                                    
-                                    # Add metric for tool errors
-                                    if item.get('is_error', False):
-                                        metrics.add_metric(name="ToolError", unit=MetricUnit.Count, value=1)
-                
+                # Add duration metric
                 duration = round(time.time() - request_start_time, 2)
-                
-                logger.info("Agent invocation successful",
-                    response_length=len(response_text),
-                    attempt=attempt + 1,
-                    duration_seconds=duration,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
-                    total_tokens=total_tokens,
-                    tool_calls_count=len(tool_calls),
-                    tool_results_count=len(tool_results),
-                    tools_used=[t['tool'] for t in tool_calls]
-                )
-                
-                # Add comprehensive metrics
-                metrics.add_metric(name="InvocationSuccess", unit=MetricUnit.Count, value=1)
                 metrics.add_metric(name="ResponseTime", unit=MetricUnit.Milliseconds, value=duration * 1000)
-                metrics.add_metric(name="InputTokens", unit=MetricUnit.Count, value=input_tokens)
-                metrics.add_metric(name="OutputTokens", unit=MetricUnit.Count, value=output_tokens)
-                metrics.add_metric(name="TotalTokens", unit=MetricUnit.Count, value=total_tokens)
-                metrics.add_metric(name="ToolCallsCount", unit=MetricUnit.Count, value=len(tool_calls))
+                tracer.put_annotation("duration_seconds", duration)
                 
-                # Log detailed tool execution summary for debugging
-                if tool_calls:
-                    logger.debug("Tool execution summary",
-                        tool_calls=tool_calls,
-                        tool_results=tool_results
-                    )
-                
-                response = {
-                    "message": response_text,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "model": Config.MODEL_NAME,
-                    "session_id": session_id,
-                    "actor_id": actor_id,
-                    "usage": {
-                        "input_tokens": input_tokens,
-                        "output_tokens": output_tokens,
-                        "total_tokens": total_tokens
-                    },
-                    "metadata": {
-                        "tool_calls_count": len(tool_calls),
-                        "duration_seconds": round(time.time() - request_start_time, 2)
-                    }
-                }
+                response["metadata"]["duration_seconds"] = duration
                 
                 return InvocationResponse(output=response)
                 

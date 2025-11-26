@@ -68,6 +68,14 @@ class TemplateStack(Stack):
             "CognitoStack",
             stack_name=construct_id
         )
+        
+        # Create Cognito authorizer for API Gateway
+        self.cognito_authorizer = apigw.CognitoUserPoolsAuthorizer(
+            self, "CognitoAuthorizer",
+            cognito_user_pools=[self.cognito_stack.user_pool],
+            authorizer_name="reinvent-planner-authorizer",
+            identity_source="method.request.header.Authorization"
+        )
 
         ENVIRONMENT_VARIABLES = {
             "STAGE": "DEV",
@@ -117,7 +125,8 @@ class TemplateStack(Stack):
             api_gateway_resource=api_gateway_resource,
             environment_variables=agent_environment_variables,
             powertools_layer=self.lambda_stack.lambda_power_tools,
-            region=self.region
+            region=self.region,
+            cognito_authorizer=self.cognito_authorizer
         )
 
         
@@ -139,6 +148,12 @@ class TemplateStack(Stack):
             self, "StrandsAgentUrl",
             value=f"https://{self.rest_api.rest_api_id}.execute-api.{self.region}.amazonaws.com/prod/mss-template/agent",
             description="Strands Agent endpoint URL"
+        )
+        
+        CfnOutput(
+            self, "SessionsApiUrl",
+            value=f"https://{self.rest_api.rest_api_id}.execute-api.{self.region}.amazonaws.com/prod/mss-template/sessions",
+            description="Sessions API endpoint URL (requires Cognito authentication)"
         )
 
         

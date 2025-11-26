@@ -14,6 +14,11 @@ from strands.session.file_session_manager import FileSessionManager
 from mcp.client.streamable_http import streamablehttp_client
 import os
 from typing import Optional
+from aws_lambda_powertools import Logger, Tracer
+
+# Initialize Powertools
+logger = Logger(service="reinvent-agent", child=True)
+tracer = Tracer(service="reinvent-agent")
 
 # System prompt with embedded venue knowledge and best practices
 SYSTEM_PROMPT = """You are a helpful AI assistant for AWS re:Invent conference planning.
@@ -345,6 +350,7 @@ When presenting session recommendations, ALWAYS use this engaging format with em
 - Focused on maximizing conference value"""
 
 
+@tracer.capture_method
 def create_agent(
     mcp_endpoint: str,
     memory_id: str,
@@ -362,42 +368,78 @@ def create_agent(
     Returns:
         Configured Strands Agent instance
     """
-    # Create MCP client with streamable HTTP transport
-    mcp_client = MCPClient(
-        lambda: streamablehttp_client(mcp_endpoint),
-        prefix="reinvent"
+    logger.info("Creating agent", 
+        mcp_endpoint=mcp_endpoint,
+        has_session_id=session_id is not None,
+        has_actor_id=actor_id is not None
     )
+    
+    # Create MCP client with streamable HTTP transport
+    with tracer.provider.in_subsegment("create_mcp_client") as subsegment:
+        subsegment.put_annotation("mcp_endpoint", mcp_endpoint)
+        subsegment.put_metadata("endpoint_url", mcp_endpoint)
+        
+        mcp_client = MCPClient(
+            lambda: streamablehttp_client(mcp_endpoint),
+            prefix="reinvent"
+        )
+        logger.debug("MCP client created", mcp_endpoint=mcp_endpoint)
     
     # Create Bedrock model - use Haiku for faster responses
     # For production, consider using cross-region inference profile for better availability
-    model = BedrockModel(
-        model_id=os.getenv("MODEL_NAME", "anthropic.claude-3-haiku-20240307-v1:0"),
-        temperature=0.1,
-        region_name=os.getenv("AWS_REGION", "us-east-1")
-    )
+    with tracer.provider.in_subsegment("create_bedrock_model") as subsegment:
+        model_id = os.getenv("MODEL_NAME", "anthropic.claude-3-haiku-20240307-v1:0")
+        region = os.getenv("AWS_REGION", "us-east-1")
+        
+        subsegment.put_annotation("model_id", model_id)
+        subsegment.put_annotation("region", region)
+        subsegment.put_metadata("temperature", 0.1)
+        
+        model = BedrockModel(
+            model_id=model_id,
+            temperature=0.1,
+            region_name=region
+        )
+        logger.debug("Bedrock model created", model_id=model_id, region=region)
 
     session_manager = None
-    print(f"session_id: {session_id} | actor_id: {actor_id}")
+    logger.info("Session context", session_id=session_id, actor_id=actor_id)
+    
     if session_id or actor_id:
-        agentcore_memory_config = AgentCoreMemoryConfig(
-            memory_id=memory_id,
-            session_id=session_id,
-            actor_id=actor_id or "default"
-        )
+        with tracer.provider.in_subsegment("create_session_manager") as subsegment:
+            subsegment.put_annotation("has_session_id", session_id is not None)
+            subsegment.put_annotation("has_actor_id", actor_id is not None)
+            subsegment.put_metadata("memory_id", memory_id)
+            
+            agentcore_memory_config = AgentCoreMemoryConfig(
+                memory_id=memory_id,
+                session_id=session_id,
+                actor_id=actor_id or "default"
+            )
 
-        # Create session manager
-        session_manager = AgentCoreMemorySessionManager(
-            agentcore_memory_config=agentcore_memory_config,
-            region_name="us-east-1"
-        )
+            # Create session manager
+            session_manager = AgentCoreMemorySessionManager(
+                agentcore_memory_config=agentcore_memory_config,
+                region_name="us-east-1"
+            )
+            logger.debug("Session manager created", 
+                memory_id=memory_id,
+                session_id=session_id,
+                actor_id=actor_id
+            )
     
     # Create agent with MCP tools and system prompt
     # Using experimental managed MCP integration - agent handles lifecycle
-    agent = Agent(
-        model=model,
-        tools=[mcp_client],
-        system_prompt=SYSTEM_PROMPT,
-        session_manager=session_manager
-    )
+    with tracer.provider.in_subsegment("initialize_agent") as subsegment:
+        subsegment.put_annotation("has_session_manager", session_manager is not None)
+        subsegment.put_metadata("system_prompt_length", len(SYSTEM_PROMPT))
+        
+        agent = Agent(
+            model=model,
+            tools=[mcp_client],
+            system_prompt=SYSTEM_PROMPT,
+            session_manager=session_manager
+        )
+        logger.info("Agent initialized successfully")
     
     return agent

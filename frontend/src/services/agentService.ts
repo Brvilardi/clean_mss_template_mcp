@@ -1,4 +1,4 @@
-import { post } from 'aws-amplify/api';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import type { AgentInvocationRequest, AgentInvocationResponse } from '../types/api';
 
 export interface AgentError extends Error {
@@ -7,39 +7,85 @@ export interface AgentError extends Error {
 }
 
 export class AgentService {
-  private static readonly API_NAME = 'StrandsAgentAPI';
-  private static readonly INVOCATION_PATH = '/invocations';
+  // Get API endpoint from environment or Amplify config
+  private static readonly API_ENDPOINT = 
+    import.meta.env.VITE_API_ENDPOINT || 
+    'https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent';
 
   /**
    * Send a message to the Strands Agent
+   * 
+   * Note: actor_id is no longer needed in the request body.
+   * It is automatically extracted from the Cognito JWT token by the API Gateway authorizer.
+   * 
+   * The Cognito JWT ID token is included in the Authorization header for authentication.
    */
   static async sendMessage(
     prompt: string,
-    sessionId?: string,
-    actorId?: string
+    sessionId?: string
+  ): Promise<AgentInvocationResponse> {
+    return this.sendMessageWithRetry(prompt, sessionId, 0);
+  }
+
+  /**
+   * Internal method to send message with retry logic for 504 errors
+   */
+  private static async sendMessageWithRetry(
+    prompt: string,
+    sessionId: string | undefined,
+    retryCount: number
   ): Promise<AgentInvocationResponse> {
     try {
+      // Get the current auth session to retrieve the ID token
+      const session = await fetchAuthSession();
+      const idToken = session.tokens?.idToken?.toString();
+
+      if (!idToken) {
+        throw new Error('Not authenticated. Please sign in.');
+      }
+
+      console.log('🔐 Sending request with auth token:', {
+        hasToken: !!idToken,
+        tokenPreview: idToken.substring(0, 20) + '...',
+        sessionId,
+        endpoint: this.API_ENDPOINT,
+        retryCount
+      });
+
       const request: AgentInvocationRequest = {
         input: { prompt },
-        ...(sessionId && { session_id: sessionId }),
-        ...(actorId && { actor_id: actorId })
+        ...(sessionId && { session_id: sessionId })
+        // actor_id is no longer needed - extracted from JWT token automatically
       };
 
-      const response = await post({
-        apiName: this.API_NAME,
-        path: this.INVOCATION_PATH,
-        options: {
-          body: request as any,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      }).response;
+      const response = await fetch(`${this.API_ENDPOINT}/invocations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify(request)
+      });
 
-      const data = await response.body.json() as unknown;
+      // Handle 504 Gateway Timeout with one retry
+      if (response.status === 504 && retryCount === 0) {
+        console.warn('⚠️ Received 504 Gateway Timeout, retrying once...');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+        return this.sendMessageWithRetry(prompt, sessionId, retryCount + 1);
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const error = new Error(errorData.error?.message || `HTTP ${response.status}`) as any;
+        error.response = { status: response.status, data: errorData };
+        throw error;
+      }
+
+      const data = await response.json();
       return data as AgentInvocationResponse;
 
     } catch (error) {
+      console.error('❌ Agent service error:', error);
       // Transform error to user-friendly format
       throw this.handleError(error);
     }
@@ -50,6 +96,18 @@ export class AgentService {
    */
   private static handleError(error: any): AgentError {
     const agentError = new Error() as AgentError;
+
+    // Gateway Timeout (504)
+    if (error.response?.status === 504) {
+      agentError.message = 'The request timed out. The agent took too long to respond.';
+      agentError.suggestions = [
+        'The request was automatically retried',
+        'Try simplifying your question',
+        'Wait a moment and try again'
+      ];
+      agentError.isRetryable = true;
+      return agentError;
+    }
 
     // Service unavailable (503)
     if (error.response?.status === 503) {

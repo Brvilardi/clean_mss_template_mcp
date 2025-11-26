@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { WifiOff } from "lucide-react";
 import { ChatAvatar } from "../components/chat/ChatAvatar";
+import { SessionIdDisplay } from "../components/chat/SessionIdDisplay";
 import { 
   MainContainer, 
   ChatContainer, 
@@ -34,15 +35,40 @@ export function Chat() {
     startNewSession, 
     currentSessionId,
     loadFromCache,
-    saveToCache
+    saveToCache,
+    loadChatHistory,
+    loadSessionMessages
   } = useChatStore();
   const initialQuerySent = useRef(false);
   const previousSessionId = useRef<string | null>(null);
+  const isLoadingSessionRef = useRef(false);
 
   // Load conversation history from cache on mount
   useEffect(() => {
     loadFromCache();
   }, [loadFromCache]);
+
+  // Load chat history (list of all sessions) on mount and auto-load most recent session
+  useEffect(() => {
+    const loadHistory = async () => {
+      await loadChatHistory();
+    };
+    loadHistory();
+  }, [loadChatHistory]);
+
+  // Load session messages when currentSessionId changes (from sidebar or URL)
+  useEffect(() => {
+    if (currentSessionId && currentSessionId !== previousSessionId.current) {
+      // Only load if we don't already have messages for this session
+      if (messages.length === 0 || messages[0]?.sessionId !== currentSessionId) {
+        isLoadingSessionRef.current = true;
+        loadSessionMessages(currentSessionId).finally(() => {
+          isLoadingSessionRef.current = false;
+        });
+      }
+      previousSessionId.current = currentSessionId;
+    }
+  }, [currentSessionId, loadSessionMessages, messages]);
 
   // Handle initial query from navigation state (e.g., from Dashboard)
   useEffect(() => {
@@ -62,11 +88,6 @@ export function Chat() {
     }
   }, [messages, saveToCache]);
 
-  // Track session changes to determine if we should auto-focus
-  useEffect(() => {
-    previousSessionId.current = currentSessionId;
-  }, [currentSessionId]);
-
   const handleSendMessage = async (content: string) => {
     await sendMessage(content);
   };
@@ -83,40 +104,47 @@ export function Chat() {
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <header 
-        className="p-3 sm:p-4 border-b border-border bg-card shadow-sm flex items-center justify-between gap-2 sm:gap-4"
+        className="p-3 sm:p-4 border-b border-border bg-card shadow-sm flex flex-col gap-2 sm:gap-3"
         role="banner"
       >
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          <img 
-            src="/dati-logo.png" 
-            alt="Dati company logo" 
-            className="h-6 w-6 sm:h-8 sm:w-8 object-contain flex-shrink-0 bg-white p-1 rounded"
-          />
-          <h1 className="text-lg sm:text-xl font-bold truncate text-aws-orange">
-            re:Invent Planner
-          </h1>
-          {!isOnline && (
-            <div 
-              className="flex items-center gap-1 text-xs text-destructive flex-shrink-0"
-              role="status"
-              aria-live="polite"
-            >
-              <WifiOff className="h-3 w-3" aria-hidden="true" />
-              <span className="sr-only">You are currently offline</span>
-            </div>
-          )}
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <img 
+              src="/dati-logo.png" 
+              alt="Dati company logo" 
+              className="h-6 w-6 sm:h-8 sm:w-8 object-contain flex-shrink-0 bg-white p-1 rounded"
+            />
+            <h1 className="text-lg sm:text-xl font-bold truncate text-aws-orange">
+              re:Invent Planner
+            </h1>
+            {!isOnline && (
+              <div 
+                className="flex items-center gap-1 text-xs text-destructive flex-shrink-0"
+                role="status"
+                aria-live="polite"
+              >
+                <WifiOff className="h-3 w-3" aria-hidden="true" />
+                <span className="sr-only">You are currently offline</span>
+              </div>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={startNewSession}
+            disabled={isLoading || !isOnline}
+            className="flex-shrink-0 border-aws-orange text-aws-orange hover:bg-aws-orange hover:text-white"
+            aria-label="Start a new chat conversation"
+          >
+            <span className="hidden sm:inline">New Chat</span>
+            <span className="sm:hidden">New</span>
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={startNewSession}
-          disabled={isLoading || !isOnline}
-          className="flex-shrink-0 border-aws-orange text-aws-orange hover:bg-aws-orange hover:text-white"
-          aria-label="Start a new chat conversation"
-        >
-          <span className="hidden sm:inline">New Chat</span>
-          <span className="sm:hidden">New</span>
-        </Button>
+        
+        {/* Session ID Display */}
+        {currentSessionId && (
+          <SessionIdDisplay sessionId={currentSessionId} />
+        )}
       </header>
 
       {/* Error Alert */}
@@ -141,12 +169,20 @@ export function Chat() {
               </div>
               <ConversationHeader.Content 
                 userName="AI Assistant" 
-                info={messages.length === 0 ? "Ask me about re:Invent sessions" : `${messages.length} messages`}
+                info={
+                  isLoading && messages.length === 0 
+                    ? "Loading session history..." 
+                    : isLoading
+                      ? "Thinking..."
+                      : messages.length === 0 
+                        ? "Ask me about re:Invent sessions" 
+                        : `${messages.length} messages`
+                }
               />
             </ConversationHeader>
             
             <MessageList
-              typingIndicator={isLoading ? <TypingIndicator content="AI is thinking..." /> : null}
+              typingIndicator={isLoading && messages.length > 0 ? <TypingIndicator content="AI is thinking..." /> : null}
             >
               {messages.length === 0 && !isLoading ? (
                 <MessageList.Content
@@ -183,28 +219,100 @@ export function Chat() {
                     </div>
                   </div>
                 </MessageList.Content>
+              ) : messages.length === 0 && isLoading ? (
+                <MessageList.Content
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    textAlign: 'center',
+                    padding: '2rem'
+                  }}
+                >
+                  <div style={{ maxWidth: '400px' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'center',
+                      marginBottom: '1.5rem'
+                    }}>
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aws-orange"></div>
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                      Loading Session History
+                    </h3>
+                    <p style={{ color: 'var(--muted-foreground)' }}>
+                      Please wait while we retrieve your conversation...
+                    </p>
+                  </div>
+                </MessageList.Content>
               ) : (
-                messages.map((msg) => (
-                  <Message
-                    key={msg.id}
-                    model={{
-                      message: msg.content,
-                      sentTime: msg.timestamp.toISOString(),
-                      sender: msg.role === 'user' ? 'You' : 'AI Assistant',
-                      direction: msg.role === 'user' ? 'outgoing' : 'incoming',
-                      position: 'single'
-                    }}
-                  >
-                    <Avatar>
-                      <ChatAvatar isUser={msg.role === 'user'} size={32} />
-                    </Avatar>
-                  </Message>
-                ))
+                messages.map((msg) => {
+                  const messageDate = new Date(msg.timestamp);
+                  const today = new Date();
+                  const yesterday = new Date(today);
+                  yesterday.setDate(yesterday.getDate() - 1);
+                  
+                  // Format date
+                  let dateStr = '';
+                  if (messageDate.toDateString() === today.toDateString()) {
+                    dateStr = 'Today';
+                  } else if (messageDate.toDateString() === yesterday.toDateString()) {
+                    dateStr = 'Yesterday';
+                  } else {
+                    dateStr = messageDate.toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: messageDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+                    });
+                  }
+                  
+                  // Format time
+                  const timeStr = messageDate.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                  });
+                  
+                  return (
+                    <Message
+                      key={msg.id}
+                      model={{
+                        message: msg.content,
+                        sentTime: msg.timestamp.toISOString(),
+                        sender: msg.role === 'user' ? 'You' : 'AI Assistant',
+                        direction: msg.role === 'user' ? 'outgoing' : 'incoming',
+                        position: 'single'
+                      }}
+                    >
+                      <Avatar>
+                        <ChatAvatar isUser={msg.role === 'user'} size={32} />
+                      </Avatar>
+                      <Message.Footer 
+                        sentTime={`${dateStr} at ${timeStr}`}
+                        style={{ 
+                          fontSize: '0.75rem',
+                          opacity: 0.7,
+                          marginTop: '0.25rem'
+                        }}
+                      />
+                    </Message>
+                  );
+                })
               )}
             </MessageList>
             
             <MessageInput
-              placeholder="Ask about re:Invent sessions..."
+              placeholder={
+                isLoading && messages.length === 0 
+                  ? "Loading session history..." 
+                  : !isOnline 
+                    ? "No internet connection..." 
+                    : isLoading 
+                      ? "AI is responding..." 
+                      : "Ask about re:Invent sessions..."
+              }
               onSend={handleSendMessage}
               disabled={isLoading || !isOnline}
               attachButton={false}

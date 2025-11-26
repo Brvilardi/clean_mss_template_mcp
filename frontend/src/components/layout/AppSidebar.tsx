@@ -3,6 +3,7 @@ import { Home, MessageSquare, Settings, LogOut, PlusCircle } from 'lucide-react'
 import { Button } from '../ui/button';
 import { useAuthStore } from '../../store/authStore';
 import { useChatStore } from '../../store/chatStore';
+import { ChatHistoryList } from '../chat/ChatHistoryList';
 
 interface AppSidebarProps {
   onClose?: () => void;
@@ -71,9 +72,19 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
         </Button>
       </div>
 
+      {/* Chat History Section */}
+      <div className="flex-1 flex flex-col overflow-hidden border-b border-border">
+        <div className="p-3 sm:p-4 border-b border-border">
+          <h3 className="text-sm font-semibold text-foreground">Chat History</h3>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <ChatHistoryList />
+        </div>
+      </div>
+
       {/* Navigation */}
       <nav 
-        className="flex-1 p-3 sm:p-4 space-y-1 sm:space-y-2 overflow-y-auto"
+        className="p-3 sm:p-4 space-y-1 sm:space-y-2"
         aria-label="Primary navigation"
       >
         {navItems.map((item) => {

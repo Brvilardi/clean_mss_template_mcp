@@ -129,6 +129,14 @@ class FrontendStack(Construct):
         print("=" * 60)
         
         try:
+            # Clean dist directory to force fresh build
+            dist_path = frontend_path / "dist"
+            if dist_path.exists():
+                print("Cleaning previous build...")
+                import shutil
+                shutil.rmtree(dist_path)
+                print("✓ Previous build cleaned")
+            
             # Check if node_modules exists, if not run npm install
             node_modules_path = frontend_path / "node_modules"
             if not node_modules_path.exists():

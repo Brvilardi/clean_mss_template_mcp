@@ -2,11 +2,12 @@ import os
 from aws_cdk import (
     aws_lambda as lambda_,
     aws_iam as iam,
+    aws_logs as logs,
     Duration
 )
 from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
 from constructs import Construct
-from aws_cdk.aws_apigateway import Resource, LambdaIntegration, Cors
+from aws_cdk.aws_apigateway import Resource, LambdaIntegration, Cors, AuthorizationType
 from aws_cdk import aws_bedrockagentcore as agentcore
 
 class StrandsAgentStack(Construct):
@@ -73,7 +74,9 @@ class StrandsAgentStack(Construct):
         )
         agent_resource.add_method(
             method,
-            integration=LambdaIntegration(function)
+            integration=LambdaIntegration(function),
+            authorizer=self.cognito_authorizer,
+            authorization_type=AuthorizationType.COGNITO if self.cognito_authorizer else None
         )
         
         # Add proxy resource to handle all sub-paths like /agent/ping, /agent/invocations
@@ -92,6 +95,10 @@ class StrandsAgentStack(Construct):
                     "X-Amz-User-Agent"
                 ],
                 "allow_credentials": False
+            },
+            default_method_options={
+                "authorizer": self.cognito_authorizer,
+                "authorization_type": AuthorizationType.COGNITO if self.cognito_authorizer else None
             }
         )
 
@@ -103,9 +110,13 @@ class StrandsAgentStack(Construct):
         api_gateway_resource: Resource,
         environment_variables: dict,
         powertools_layer,
-        region: str
+        region: str,
+        cognito_authorizer=None
     ) -> None:
         super().__init__(scope, "StrandsAgent")
+        
+        # Store cognito_authorizer for use in method creation
+        self.cognito_authorizer = cognito_authorizer
 
 
         # Create AgentCore Memory
@@ -189,4 +200,65 @@ class StrandsAgentStack(Construct):
                 ],
                 resources=["*"]
             )
+        )
+
+        # Create BFF Lambda function for retrieving chat history
+        # This function aggregates session data from AgentCore Memory for the frontend
+        bff_envs = environment_variables.copy()
+        bff_envs['MEMORY_ID'] = self.memory.attr_memory_id
+        bff_envs['POWERTOOLS_SERVICE_NAME'] = 'chat-history'
+        bff_envs['POWERTOOLS_METRICS_NAMESPACE'] = 'StrandsAgent'
+        bff_envs['LOG_LEVEL'] = 'INFO'
+        # Note: AWS_REGION is reserved by Lambda runtime, so we don't set it manually
+        # The Lambda function can access the region via the AWS_REGION environment variable automatically
+        
+        self.chat_history_function = lambda_.Function(
+            self, "ChatHistoryFunction",
+            code=lambda_.Code.from_asset("../src/strands-agent"),
+            handler="chat_history_handler.lambda_handler",
+            runtime=lambda_.Runtime.PYTHON_3_14,
+            architecture=lambda_.Architecture.ARM_64,
+            layers=[powertools_layer],
+            environment=bff_envs,
+            memory_size=512,
+            timeout=Duration.seconds(30),
+            tracing=lambda_.Tracing.ACTIVE,
+            description="BFF Lambda for retrieving chat history from AgentCore Memory"
+        )
+        
+        # Grant Bedrock AgentCore Memory permissions for retrieving chat history
+        self.chat_history_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "bedrock-agentcore:ListEvents",
+                    "bedrock-agentcore:GetEvent"
+                ],
+                resources=[self.memory.attr_memory_arn]
+            )
+        )
+        
+        # Create API Gateway resource for sessions endpoint
+        sessions_resource = api_gateway_resource.add_resource(
+            "chat_history",
+            default_cors_preflight_options={
+                "allow_origins": Cors.ALL_ORIGINS,
+                "allow_methods": ["GET", "OPTIONS"],
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Amz-Date",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent"
+                ],
+                "allow_credentials": False
+            }
+        )
+        
+        # Add GET method with Lambda integration and Cognito authorizer
+        sessions_resource.add_method(
+            "GET",
+            integration=LambdaIntegration(self.chat_history_function),
+            authorizer=cognito_authorizer,
+            authorization_type=AuthorizationType.COGNITO if cognito_authorizer else None
         )
