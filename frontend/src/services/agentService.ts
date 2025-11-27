@@ -19,12 +19,17 @@ export class AgentService {
    * It is automatically extracted from the Cognito JWT token by the API Gateway authorizer.
    * 
    * The Cognito JWT ID token is included in the Authorization header for authentication.
+   * 
+   * @param prompt - The user's message/question
+   * @param sessionId - Optional session ID for conversation continuity
+   * @param language - Optional ISO 639-1 language code (pt, en) for agent responses
    */
   static async sendMessage(
     prompt: string,
-    sessionId?: string
+    sessionId?: string,
+    language?: string
   ): Promise<AgentInvocationResponse> {
-    return this.sendMessageWithRetry(prompt, sessionId, 0);
+    return this.sendMessageWithRetry(prompt, sessionId, language, 0);
   }
 
   /**
@@ -33,6 +38,7 @@ export class AgentService {
   private static async sendMessageWithRetry(
     prompt: string,
     sessionId: string | undefined,
+    language: string | undefined,
     retryCount: number
   ): Promise<AgentInvocationResponse> {
     try {
@@ -54,7 +60,8 @@ export class AgentService {
 
       const request: AgentInvocationRequest = {
         input: { prompt },
-        ...(sessionId && { session_id: sessionId })
+        ...(sessionId && { session_id: sessionId }),
+        ...(language && { language })
         // actor_id is no longer needed - extracted from JWT token automatically
       };
 
@@ -71,7 +78,7 @@ export class AgentService {
       if (response.status === 504 && retryCount === 0) {
         console.warn('⚠️ Received 504 Gateway Timeout, retrying once...');
         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-        return this.sendMessageWithRetry(prompt, sessionId, retryCount + 1);
+        return this.sendMessageWithRetry(prompt, sessionId, language, retryCount + 1);
       }
 
       if (!response.ok) {

@@ -1,3 +1,6 @@
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "../../hooks/useLanguage";
+import { formatTime } from "../../utils/dateFormatter";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,20 +13,15 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ content, isUser, timestamp, status }: MessageBubbleProps) {
-  const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).format(date);
-  };
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
 
   const getStatusLabel = () => {
     if (!status || !isUser) return '';
     switch (status) {
-      case 'sending': return 'Message is being sent';
-      case 'sent': return 'Message sent successfully';
-      case 'error': return 'Message failed to send';
+      case 'sending': return t('common.loading');
+      case 'sent': return 'Sent';
+      case 'error': return t('common.error');
       default: return '';
     }
   };
@@ -35,7 +33,7 @@ export function MessageBubble({ content, isUser, timestamp, status }: MessageBub
         isUser ? "flex-row-reverse" : "flex-row"
       )}
       role="article"
-      aria-label={`${isUser ? 'Your' : 'Assistant'} message at ${formatTime(timestamp)}`}
+      aria-label={`${isUser ? t('chat.you') : t('chat.aiAssistant')} message at ${formatTime(timestamp, currentLanguage)}`}
     >
       <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0" aria-hidden="true">
         <AvatarFallback className={cn(
@@ -63,7 +61,7 @@ export function MessageBubble({ content, isUser, timestamp, status }: MessageBub
             className="text-[10px] sm:text-xs text-muted-foreground"
             dateTime={timestamp.toISOString()}
           >
-            {formatTime(timestamp)}
+            {formatTime(timestamp, currentLanguage)}
           </time>
           
           {status && isUser && status !== 'sent' && (
@@ -73,8 +71,8 @@ export function MessageBubble({ content, isUser, timestamp, status }: MessageBub
               role="status"
               aria-label={getStatusLabel()}
             >
-              {status === 'sending' && 'Sending...'}
-              {status === 'error' && 'Failed'}
+              {status === 'sending' && t('common.loading')}
+              {status === 'error' && t('common.error')}
             </Badge>
           )}
         </div>

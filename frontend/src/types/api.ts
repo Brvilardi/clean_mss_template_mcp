@@ -5,6 +5,7 @@ export interface AgentInvocationRequest {
     prompt: string;
   };
   session_id?: string;
+  language?: string; // ISO 639-1 code (pt, en)
 }
 
 // Response from Strands Agent

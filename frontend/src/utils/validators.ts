@@ -1,48 +1,52 @@
 import { z } from 'zod';
+import i18n from '../i18n/config';
+
+// Helper function to get translation
+const t = (key: string) => i18n.t(key);
 
 export const emailSchema = z
   .string()
-  .min(1, 'Email is required')
-  .email('Invalid email address');
+  .min(1, { message: t('validation.emailRequired') })
+  .email({ message: t('validation.invalidEmail') });
 
 export const passwordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .regex(/[A-Z]/, 'Must contain uppercase letter')
-  .regex(/[a-z]/, 'Must contain lowercase letter')
-  .regex(/[0-9]/, 'Must contain number')
-  .regex(/[^A-Za-z0-9]/, 'Must contain special character');
+  .min(8, { message: t('validation.passwordMinLength') })
+  .regex(/[A-Z]/, { message: t('validation.passwordUppercase') })
+  .regex(/[a-z]/, { message: t('validation.passwordLowercase') })
+  .regex(/[0-9]/, { message: t('validation.passwordNumber') })
+  .regex(/[^A-Za-z0-9]/, { message: t('validation.passwordSpecialChar') });
 
 export const urlSchema = z
   .string()
-  .min(1, 'Website is required')
-  .url('Invalid URL')
+  .min(1, { message: t('validation.websiteRequired') })
+  .url({ message: t('validation.invalidUrl') })
   .refine(
     (url) => url.startsWith('http://') || url.startsWith('https://'),
-    'URL must start with http:// or https://'
+    { message: t('validation.urlMustStartWithHttp') }
   );
 
 export const companyNameSchema = z
   .string()
-  .min(2, 'Company name must be at least 2 characters')
-  .max(100, 'Company name must be less than 100 characters');
+  .min(2, { message: t('validation.companyNameMinLength') })
+  .max(100, { message: t('validation.companyNameMaxLength') });
 
 export const signUpSchema = z
   .object({
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: z.string().min(1, 'Confirm your password'),
+    confirmPassword: z.string().min(1, { message: t('validation.confirmPasswordRequired') }),
     companyName: companyNameSchema,
     companyWebsite: urlSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: t('validation.passwordsDoNotMatch'),
     path: ['confirmPassword'],
   });
 
 export const signInSchema = z.object({
   email: emailSchema,
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().min(1, { message: t('validation.passwordRequired') }),
 });
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;

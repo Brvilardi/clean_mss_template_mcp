@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatMessage } from "./ChatMessage";
@@ -10,6 +11,7 @@ interface ChatHistoryProps {
 }
 
 export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
+  const { t } = useTranslation();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -25,7 +27,7 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
       className="h-full px-2 sm:px-4 py-4 sm:py-6" 
       ref={scrollAreaRef}
       role="log"
-      aria-label="Chat conversation history"
+      aria-label={t('chat.aria.conversationHistory')}
       aria-live="polite"
       aria-atomic="false"
     >
@@ -33,7 +35,7 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
         <div 
           className="flex flex-col items-center justify-center h-full text-center px-4"
           role="region"
-          aria-label="Welcome message and suggestions"
+          aria-label={t('chat.aria.welcomeMessage')}
         >
           <div className="max-w-md space-y-4">
             <div className="mb-4">
@@ -44,19 +46,19 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
               />
             </div>
             <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-              Welcome to re:Invent Planner
+              {t('chat.welcome')}
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Ask me anything about AWS re:Invent sessions, speakers, or help building your personalized schedule.
+              {t('chat.welcomeMessage')}
             </p>
             <div className="space-y-2 text-left">
               <p className="text-xs sm:text-sm font-medium text-foreground">
-                Try asking:
+                {t('chat.tryAsking')}
               </p>
               <ul className="text-xs sm:text-sm space-y-1 text-muted-foreground" role="list">
-                <li><span aria-hidden="true">• </span>"What sessions are available on December 5th?"</li>
-                <li><span aria-hidden="true">• </span>"Show me all AI/ML sessions"</li>
-                <li><span aria-hidden="true">• </span>"Find sessions by Werner Vogels"</li>
+                <li><span aria-hidden="true">• </span>"{t('chat.exampleQuestions.question1')}"</li>
+                <li><span aria-hidden="true">• </span>"{t('chat.exampleQuestions.question2')}"</li>
+                <li><span aria-hidden="true">• </span>"{t('chat.exampleQuestions.question3')}"</li>
               </ul>
             </div>
           </div>
@@ -75,14 +77,14 @@ export function ChatHistory({ messages, isLoading }: ChatHistoryProps) {
             <div 
               className="flex gap-2 sm:gap-3 mb-3 sm:mb-4 px-2 sm:px-0"
               role="status"
-              aria-label="Assistant is typing"
+              aria-label={t('chat.aria.assistantTyping')}
             >
               <Skeleton className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0" />
               <div className="flex flex-col gap-2 max-w-[85%] sm:max-w-[70%]">
                 <Skeleton className="h-12 sm:h-16 w-full rounded-lg" />
                 <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
               </div>
-              <span className="sr-only">Assistant is typing a response</span>
+              <span className="sr-only">{t('chat.aria.assistantTyping')}</span>
             </div>
           )}
           

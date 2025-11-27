@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import type { KeyboardEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
@@ -14,9 +15,11 @@ interface ChatInputProps {
 export function ChatInput({ 
   onSend, 
   disabled, 
-  placeholder = "Ask about re:Invent sessions...",
+  placeholder,
   autoFocus = false
 }: ChatInputProps) {
+  const { t } = useTranslation();
+  const defaultPlaceholder = placeholder || t('chat.placeholder');
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,16 +55,16 @@ export function ChatInput({
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6" role="region" aria-label="Message input">
+    <div className="p-3 sm:p-4 md:p-6" role="region" aria-label={t('chat.aria.messageInput')}>
       <div className="flex gap-2 sm:gap-3">
         <Textarea
           ref={textareaRef}
           value={message}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={defaultPlaceholder}
           disabled={disabled}
-          aria-label="Type your message"
+          aria-label={t('chat.typeYourMessage')}
           aria-describedby="chat-input-help"
           className="min-h-[50px] sm:min-h-[60px] max-h-[150px] sm:max-h-[200px] resize-none text-sm sm:text-base bg-input border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2"
           rows={2}
@@ -70,11 +73,11 @@ export function ChatInput({
           onClick={handleSend}
           disabled={disabled || !message.trim()}
           size="icon"
-          aria-label="Send message"
+          aria-label={t('chat.sendMessage')}
           className="h-[50px] w-[50px] sm:h-[60px] sm:w-[60px] flex-shrink-0 bg-dati-primary hover:bg-dati-accent-4 focus:ring-2 focus:ring-dati-primary focus:ring-offset-2 transition-colors"
         >
           <Send className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-          <span className="sr-only">Send message</span>
+          <span className="sr-only">{t('chat.sendMessage')}</span>
         </Button>
       </div>
       <p 
@@ -83,7 +86,7 @@ export function ChatInput({
         role="status"
         aria-live="polite"
       >
-        Press Enter to send, Shift+Enter for new line
+        {t('chat.pressEnterToSend')}
       </p>
     </div>
   );

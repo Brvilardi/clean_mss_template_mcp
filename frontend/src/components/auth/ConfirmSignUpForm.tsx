@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,15 +17,13 @@ import {
 } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const confirmSignUpSchema = z.object({
+const getConfirmSignUpSchema = (t: (key: string) => string) => z.object({
   code: z
     .string()
-    .min(1, 'Code is required')
-    .length(6, 'Code must be 6 digits')
-    .regex(/^\d+$/, 'Code must be numbers only'),
+    .min(1, t('auth.errors.codeRequired'))
+    .length(6, t('auth.errors.codeMustBeSixDigits'))
+    .regex(/^\d+$/, t('auth.errors.codeMustBeNumbers')),
 });
-
-type ConfirmSignUpFormData = z.infer<typeof confirmSignUpSchema>;
 
 interface ConfirmSignUpFormProps {
   email: string;
@@ -39,10 +38,14 @@ export function ConfirmSignUpForm({
   onError,
   onResendCode,
 }: ConfirmSignUpFormProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const confirmSignUpSchema = getConfirmSignUpSchema(t);
+  type ConfirmSignUpFormData = z.infer<typeof confirmSignUpSchema>;
 
   const form = useForm<ConfirmSignUpFormData>({
     resolver: zodResolver(confirmSignUpSchema),
@@ -60,12 +63,12 @@ export function ConfirmSignUpForm({
       const { useAuthStore } = await import('@/store/authStore');
       await useAuthStore.getState().confirmSignUp(email, data.code);
 
-      setSuccessMessage('Email verified! Redirecting...');
+      setSuccessMessage(t('auth.emailVerified'));
       setTimeout(() => {
         onSuccess();
       }, 1500);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Verification failed';
+      const errorMessage = err instanceof Error ? err.message : t('auth.errors.verificationFailed');
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -82,12 +85,12 @@ export function ConfirmSignUpForm({
       const { AuthService } = await import('@/services/authService');
       await AuthService.resendConfirmationCode(email);
 
-      setSuccessMessage('Code resent! Check your email');
+      setSuccessMessage(t('auth.codeResent'));
       if (onResendCode) {
         onResendCode();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to resend code';
+      const errorMessage = err instanceof Error ? err.message : t('auth.errors.resendFailed');
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -112,11 +115,11 @@ export function ConfirmSignUpForm({
 
       <div className="text-center space-y-2 mb-6">
         <p className="text-sm text-muted-foreground">
-          Verification code sent to
+          {t('auth.verificationCodeSentTo')}
         </p>
         <p className="font-semibold text-foreground">{email}</p>
         <p className="text-sm text-muted-foreground">
-          Enter the 6-digit code below
+          {t('auth.enterSixDigitCode')}
         </p>
       </div>
 
@@ -127,11 +130,11 @@ export function ConfirmSignUpForm({
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Verification Code</FormLabel>
+                <FormLabel>{t('auth.verificationCode')}</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
-                    placeholder="123456"
+                    placeholder={t('auth.placeholders.verificationCode')}
                     maxLength={6}
                     disabled={isLoading}
                     className="text-center text-2xl tracking-widest"
@@ -139,7 +142,7 @@ export function ConfirmSignUpForm({
                   />
                 </FormControl>
                 <FormDescription>
-                  Enter the 6-digit code from your email
+                  {t('auth.enterCodeFromEmail')}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -147,20 +150,20 @@ export function ConfirmSignUpForm({
           />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Verifying...' : 'Verify Email'}
+            {isLoading ? t('auth.verifying') : t('auth.verifyEmail')}
           </Button>
         </form>
       </Form>
 
       <div className="text-center space-y-2">
-        <p className="text-sm text-muted-foreground">Didn't receive the code?</p>
+        <p className="text-sm text-muted-foreground">{t('auth.didntReceiveCode')}</p>
         <Button
           variant="link"
           className="p-0 h-auto font-semibold text-primary hover:text-primary/80"
           onClick={handleResendCode}
           disabled={isResending || isLoading}
         >
-          {isResending ? 'Resending...' : 'Resend Code'}
+          {isResending ? t('auth.resending') : t('auth.resendCode')}
         </Button>
       </div>
     </div>

@@ -4,12 +4,14 @@ import { Button } from '../ui/button';
 import { useAuthStore } from '../../store/authStore';
 import { useChatStore } from '../../store/chatStore';
 import { ChatHistoryList } from '../chat/ChatHistoryList';
+import { useTranslation } from 'react-i18next';
 
 interface AppSidebarProps {
   onClose?: () => void;
 }
 
 export function AppSidebar({ onClose }: AppSidebarProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const signOut = useAuthStore((state) => state.signOut);
@@ -33,9 +35,9 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
   };
 
   const navItems = [
-    { path: '/app/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/app/chat', icon: MessageSquare, label: 'Chat' },
-    { path: '/app/settings', icon: Settings, label: 'Settings' },
+    { path: '/app/dashboard', icon: Home, label: t('sidebar.dashboard') },
+    { path: '/app/chat', icon: MessageSquare, label: t('sidebar.chat') },
+    { path: '/app/settings', icon: Settings, label: t('sidebar.settings') },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -52,9 +54,9 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
           />
           <div className="flex-1 min-w-0">
             <h2 className="text-lg sm:text-xl font-bold text-foreground truncate">
-              re:Invent Planner
+              {t('chat.title')}
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground truncate">AI Assistant</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">{t('sidebar.aiAssistant')}</p>
           </div>
         </div>
       </div>
@@ -65,17 +67,17 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
           onClick={handleNewChat}
           className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
           size="sm"
-          aria-label="Start a new chat conversation"
+          aria-label={t('sidebar.aria.startNewChat')}
         >
           <PlusCircle className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm sm:text-base">New Chat</span>
+          <span className="text-sm sm:text-base">{t('sidebar.newChat')}</span>
         </Button>
       </div>
 
       {/* Chat History Section */}
       <div className="flex-1 flex flex-col overflow-hidden border-b border-border">
         <div className="p-3 sm:p-4 border-b border-border">
-          <h3 className="text-sm font-semibold text-foreground">Chat History</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t('sidebar.chatHistory')}</h3>
         </div>
         <div className="flex-1 overflow-hidden">
           <ChatHistoryList />
@@ -85,7 +87,7 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
       {/* Navigation */}
       <nav 
         className="p-3 sm:p-4 space-y-1 sm:space-y-2"
-        aria-label="Primary navigation"
+        aria-label={t('sidebar.aria.primaryNavigation')}
       >
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -121,10 +123,10 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
           variant="ghost"
           size="sm"
           className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
-          aria-label="Sign out of your account"
+          aria-label={t('sidebar.aria.signOut')}
         >
           <LogOut className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" aria-hidden="true" />
-          <span className="text-sm sm:text-base truncate">Sign Out</span>
+          <span className="text-sm sm:text-base truncate">{t('sidebar.signOut')}</span>
         </Button>
       </div>
     </div>

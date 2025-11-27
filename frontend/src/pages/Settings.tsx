@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { User, Building2, Globe, Mail, Trash2, LogOut, MessageSquare, AlertCircle } from 'lucide-react';
+import { User, Building2, Globe, Mail, Trash2, LogOut, MessageSquare, AlertCircle, Languages } from 'lucide-react';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export function Settings() {
   const { user, signOut } = useAuthStore();
   const { clearMessages, messages } = useChatStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isClearingHistory, setIsClearingHistory] = useState(false);
@@ -53,10 +56,10 @@ export function Settings() {
               alt="Dati Logo" 
               className="h-8 w-8 sm:h-10 sm:w-10 object-contain bg-white p-1.5 rounded"
             />
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">Settings</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">{t('settings.title')}</h1>
           </div>
           <p className="text-muted-foreground text-base sm:text-lg ml-0 sm:ml-14">
-            Manage your account and preferences
+            {t('settings.subtitle')}
           </p>
         </div>
 
@@ -65,7 +68,7 @@ export function Settings() {
           <Alert className="mb-6 border-green-200 bg-green-50">
             <AlertCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              Conversation history cleared successfully
+              {t('settings.historyCleared')}
             </AlertDescription>
           </Alert>
         )}
@@ -119,6 +122,32 @@ export function Settings() {
                     <p className="text-sm sm:text-base text-gray-900">Not available</p>
                   )}
                 </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Language Preferences */}
+        <Card className="mb-6 shadow-md hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Languages className="h-5 w-5 sm:h-6 sm:w-6 text-dati-accent-1" />
+              {t('settings.language')}
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base">
+              {t('settings.selectLanguage')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-3">
+                <label htmlFor="language-select" className="text-sm font-medium text-gray-700">
+                  {t('settings.preferences')}
+                </label>
+                <LanguageSwitcher />
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Your language preference will be saved and applied across the application
+                </p>
               </div>
             </div>
           </CardContent>

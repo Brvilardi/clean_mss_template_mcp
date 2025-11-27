@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -22,6 +23,7 @@ interface SignInFormProps {
 }
 
 export function SignInForm({ onSuccess, onError, onConfirmationNeeded }: SignInFormProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,13 +48,13 @@ export function SignInForm({ onSuccess, onError, onConfirmationNeeded }: SignInF
       const errorCode = (err as any).code || (err as any).name;
       
       if (errorCode === 'UserNotConfirmedException') {
-        const displayMessage = err instanceof Error ? err.message : 'Please verify your email';
+        const displayMessage = err instanceof Error ? err.message : t('auth.pleaseVerifyEmail');
         setError(displayMessage);
         if (onConfirmationNeeded) {
           onConfirmationNeeded(data.email, data.password);
         }
       } else {
-        const displayMessage = err instanceof Error ? err.message : 'Sign in failed';
+        const displayMessage = err instanceof Error ? err.message : t('auth.errors.signInFailed');
         setError(displayMessage);
         onError(displayMessage);
       }
@@ -75,11 +77,11 @@ export function SignInForm({ onSuccess, onError, onConfirmationNeeded }: SignInF
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('auth.email')}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder={t('auth.placeholders.email')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -94,11 +96,11 @@ export function SignInForm({ onSuccess, onError, onConfirmationNeeded }: SignInF
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('auth.password')}</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth.placeholders.password')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -109,7 +111,7 @@ export function SignInForm({ onSuccess, onError, onConfirmationNeeded }: SignInF
         />
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Signing in...' : 'Sign In'}
+          {isLoading ? t('auth.signingIn') : t('auth.signIn')}
         </Button>
       </form>
     </Form>

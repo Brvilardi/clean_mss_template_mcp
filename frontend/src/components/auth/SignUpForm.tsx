@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,6 +22,7 @@ interface SignUpFormProps {
 }
 
 export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
 
       onSuccess(data.email);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Sign up failed';
+      const errorMessage = err instanceof Error ? err.message : t('auth.errors.signUpFailed');
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -74,11 +76,11 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('auth.email')}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder={t('auth.placeholders.email')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -93,11 +95,11 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('auth.password')}</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth.placeholders.password')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -112,11 +114,11 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>{t('auth.confirmPassword')}</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder={t('auth.placeholders.password')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -131,11 +133,11 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
           name="companyName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Company Name</FormLabel>
+              <FormLabel>{t('auth.companyName')}</FormLabel>
               <FormControl>
                 <Input
                   type="text"
-                  placeholder="Acme Corporation"
+                  placeholder={t('auth.placeholders.companyName')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -150,11 +152,11 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
           name="companyWebsite"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Company Website</FormLabel>
+              <FormLabel>{t('auth.companyWebsite')}</FormLabel>
               <FormControl>
                 <Input
                   type="url"
-                  placeholder="https://example.com"
+                  placeholder={t('auth.placeholders.companyWebsite')}
                   disabled={isLoading}
                   {...field}
                 />
@@ -165,7 +167,7 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
         />
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Creating account...' : 'Sign Up'}
+          {isLoading ? t('auth.creatingAccount') : t('auth.signUp')}
         </Button>
       </form>
     </Form>

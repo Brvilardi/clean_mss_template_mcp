@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Message } from '../types/chat';
 import { AgentService, type AgentError } from '../services/agentService';
 import { ChatHistoryService, type SessionEvent } from '../services/chatHistoryService';
+import i18n from '../i18n/config';
 
 // Cache configuration
 const STORAGE_KEY = 'reinvent-chat-history';
@@ -168,11 +169,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
 
     try {
-      // Send to API with session_id
+      // Get current language code (ISO 639-1: pt, en)
+      const languageCode = i18n.language.split('-')[0];
+      
+      // Send to API with session_id and language
       // actor_id is automatically extracted from Cognito JWT by API Gateway
       const response = await AgentService.sendMessage(
         content,
-        sessionId
+        sessionId,
+        languageCode
       );
 
       // Update optimistic message to 'sent' status

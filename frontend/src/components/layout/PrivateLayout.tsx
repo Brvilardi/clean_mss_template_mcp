@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { AppSidebar } from './AppSidebar';
@@ -8,13 +9,15 @@ import { Skeleton } from '../ui/skeleton';
 
 // Loading fallback for page transitions
 function PageLoadingFallback() {
+  const { t } = useTranslation();
+
   return (
-    <div className="h-full w-full p-6 space-y-4" role="status" aria-label="Loading page content">
+    <div className="h-full w-full p-6 space-y-4" role="status" aria-label={t('loading.pageContent')}>
       <Skeleton className="h-8 w-64" />
       <Skeleton className="h-4 w-full" />
       <Skeleton className="h-4 w-3/4" />
       <Skeleton className="h-64 w-full" />
-      <span className="sr-only">Loading...</span>
+      <span className="sr-only">{t('loading.default')}</span>
     </div>
   );
 }
@@ -55,6 +58,8 @@ export function PrivateLayout() {
     };
   }, [sidebarOpen]);
 
+  const { t } = useTranslation();
+
   // Show loading state while checking authentication
   if (!authChecked || isLoading) {
     return (
@@ -64,8 +69,8 @@ export function PrivateLayout() {
             className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"
             aria-hidden="true"
           ></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-          <span className="sr-only">Checking authentication status</span>
+          <p className="mt-4 text-gray-600">{t('loading.default')}</p>
+          <span className="sr-only">{t('loading.checkingAuth')}</span>
         </div>
       </div>
     );

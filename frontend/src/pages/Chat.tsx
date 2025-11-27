@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useChatStore } from "../store/chatStore";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { Button } from "@/components/ui/button";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
+import { useLanguage } from "../hooks/useLanguage";
+import { formatRelativeDate, formatTime } from "../utils/dateFormatter";
 import { WifiOff } from "lucide-react";
 import { ChatAvatar } from "../components/chat/ChatAvatar";
 import { SessionIdDisplay } from "../components/chat/SessionIdDisplay";
@@ -22,6 +25,8 @@ import "../styles/chat-theme.css";
 
 export function Chat() {
   const location = useLocation();
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const isOnline = useNetworkStatus();
   const { 
     messages, 
@@ -115,7 +120,7 @@ export function Chat() {
               className="h-6 w-6 sm:h-8 sm:w-8 object-contain flex-shrink-0 bg-white p-1 rounded"
             />
             <h1 className="text-lg sm:text-xl font-bold truncate text-aws-orange">
-              re:Invent Planner
+              {t('chat.title')}
             </h1>
             {!isOnline && (
               <div 
@@ -124,7 +129,7 @@ export function Chat() {
                 aria-live="polite"
               >
                 <WifiOff className="h-3 w-3" aria-hidden="true" />
-                <span className="sr-only">You are currently offline</span>
+                <span className="sr-only">{t('chat.aria.youAreOffline')}</span>
               </div>
             )}
           </div>
@@ -134,10 +139,10 @@ export function Chat() {
             onClick={startNewSession}
             disabled={isLoading || !isOnline}
             className="flex-shrink-0 border-aws-orange text-aws-orange hover:bg-aws-orange hover:text-white"
-            aria-label="Start a new chat conversation"
+            aria-label={t('chat.aria.startNewChat')}
           >
-            <span className="hidden sm:inline">New Chat</span>
-            <span className="sm:hidden">New</span>
+            <span className="hidden sm:inline">{t('chat.newChat')}</span>
+            <span className="sm:hidden">{t('common.new')}</span>
           </Button>
         </div>
         
@@ -149,7 +154,7 @@ export function Chat() {
 
       {/* Error Alert */}
       {error && (
-        <div className="px-3 sm:px-4 pt-3 sm:pt-4" role="region" aria-label="Error notification">
+        <div className="px-3 sm:px-4 pt-3 sm:pt-4" role="region" aria-label={t('chat.aria.errorNotification')}>
           <ErrorAlert
             error={error}
             suggestions={errorSuggestions}
@@ -168,21 +173,21 @@ export function Chat() {
                 <ChatAvatar isUser={false} size={40} />
               </div>
               <ConversationHeader.Content 
-                userName="AI Assistant" 
+                userName={t('chat.aiAssistant')} 
                 info={
                   isLoading && messages.length === 0 
-                    ? "Loading session history..." 
+                    ? t('chat.loadingSessionHistory') 
                     : isLoading
-                      ? "Thinking..."
+                      ? t('chat.thinking')
                       : messages.length === 0 
-                        ? "Ask me about re:Invent sessions" 
-                        : `${messages.length} messages`
+                        ? t('chat.askAboutSessions') 
+                        : t('chat.messagesCount', { count: messages.length })
                 }
               />
             </ConversationHeader>
             
             <MessageList
-              typingIndicator={isLoading && messages.length > 0 ? <TypingIndicator content="AI is thinking..." /> : null}
+              typingIndicator={isLoading && messages.length > 0 ? <TypingIndicator content={t('chat.aiIsThinking')} /> : null}
             >
               {messages.length === 0 && !isLoading ? (
                 <MessageList.Content
@@ -204,17 +209,17 @@ export function Chat() {
                       <ChatAvatar isUser={false} size={80} />
                     </div>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                      Welcome to re:Invent Planner
+                      {t('chat.welcome')}
                     </h2>
                     <p style={{ color: 'var(--muted-foreground)', marginBottom: '1rem' }}>
-                      Ask me anything about AWS re:Invent sessions, speakers, or help building your personalized schedule.
+                      {t('chat.welcomeMessage')}
                     </p>
                     <div style={{ textAlign: 'left', marginTop: '1.5rem' }}>
-                      <p style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Try asking:</p>
+                      <p style={{ fontWeight: '500', marginBottom: '0.5rem' }}>{t('chat.tryAsking')}</p>
                       <ul style={{ listStyle: 'none', padding: 0 }}>
-                        <li style={{ marginBottom: '0.25rem' }}>• "What sessions are available on December 5th?"</li>
-                        <li style={{ marginBottom: '0.25rem' }}>• "Show me all AI/ML sessions"</li>
-                        <li style={{ marginBottom: '0.25rem' }}>• "Find sessions by Werner Vogels"</li>
+                        <li style={{ marginBottom: '0.25rem' }}>• "{t('chat.exampleQuestions.question1')}"</li>
+                        <li style={{ marginBottom: '0.25rem' }}>• "{t('chat.exampleQuestions.question2')}"</li>
+                        <li style={{ marginBottom: '0.25rem' }}>• "{t('chat.exampleQuestions.question3')}"</li>
                       </ul>
                     </div>
                   </div>
@@ -240,40 +245,22 @@ export function Chat() {
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aws-orange"></div>
                     </div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.5rem' }}>
-                      Loading Session History
+                      {t('chat.loadingSessionHistory')}
                     </h3>
                     <p style={{ color: 'var(--muted-foreground)' }}>
-                      Please wait while we retrieve your conversation...
+                      {t('common.loading')}
                     </p>
                   </div>
                 </MessageList.Content>
               ) : (
                 messages.map((msg) => {
                   const messageDate = new Date(msg.timestamp);
-                  const today = new Date();
-                  const yesterday = new Date(today);
-                  yesterday.setDate(yesterday.getDate() - 1);
                   
-                  // Format date
-                  let dateStr = '';
-                  if (messageDate.toDateString() === today.toDateString()) {
-                    dateStr = 'Today';
-                  } else if (messageDate.toDateString() === yesterday.toDateString()) {
-                    dateStr = 'Yesterday';
-                  } else {
-                    dateStr = messageDate.toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric',
-                      year: messageDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-                    });
-                  }
+                  // Format date using locale-aware formatter
+                  const dateStr = formatRelativeDate(messageDate, currentLanguage, t);
                   
-                  // Format time
-                  const timeStr = messageDate.toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit',
-                    hour12: true 
-                  });
+                  // Format time using locale-aware formatter
+                  const timeStr = formatTime(messageDate, currentLanguage);
                   
                   return (
                     <Message
@@ -281,7 +268,7 @@ export function Chat() {
                       model={{
                         message: msg.content,
                         sentTime: msg.timestamp.toISOString(),
-                        sender: msg.role === 'user' ? 'You' : 'AI Assistant',
+                        sender: msg.role === 'user' ? t('chat.you') : t('chat.aiAssistant'),
                         direction: msg.role === 'user' ? 'outgoing' : 'incoming',
                         position: 'single'
                       }}
@@ -306,12 +293,12 @@ export function Chat() {
             <MessageInput
               placeholder={
                 isLoading && messages.length === 0 
-                  ? "Loading session history..." 
+                  ? t('chat.placeholderLoading')
                   : !isOnline 
-                    ? "No internet connection..." 
+                    ? t('chat.placeholderOffline')
                     : isLoading 
-                      ? "AI is responding..." 
-                      : "Ask about re:Invent sessions..."
+                      ? t('chat.placeholderThinking')
+                      : t('chat.placeholder')
               }
               onSend={handleSendMessage}
               disabled={isLoading || !isOnline}

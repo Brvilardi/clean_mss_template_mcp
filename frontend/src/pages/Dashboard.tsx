@@ -6,8 +6,10 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Calendar, MapPin, Users, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { loadChatHistory } = useChatStore();
   const navigate = useNavigate();
@@ -20,27 +22,27 @@ export function Dashboard() {
   const sampleQueries = [
     {
       icon: Calendar,
-      title: "Find sessions by date",
-      query: "What sessions are happening on December 3rd?",
-      category: "Schedule"
+      title: t('dashboard.sampleQuery1Title'),
+      query: t('dashboard.sampleQuery1'),
+      category: t('dashboard.categorySchedule')
     },
     {
       icon: MapPin,
-      title: "Explore venues",
-      query: "What sessions are at the Venetian?",
-      category: "Location"
+      title: t('dashboard.sampleQuery2Title'),
+      query: t('dashboard.sampleQuery2'),
+      category: t('dashboard.categoryLocation')
     },
     {
       icon: Users,
-      title: "Session difficulty",
-      query: "Show me all 300-level sessions",
-      category: "Level"
+      title: t('dashboard.sampleQuery3Title'),
+      query: t('dashboard.sampleQuery3'),
+      category: t('dashboard.categoryLevel')
     },
     {
       icon: Sparkles,
-      title: "Search topics",
-      query: "Find sessions about machine learning and AI",
-      category: "Topics"
+      title: t('dashboard.sampleQuery4Title'),
+      query: t('dashboard.sampleQuery4'),
+      category: t('dashboard.categoryTopics')
     }
   ];
 
@@ -61,12 +63,12 @@ export function Dashboard() {
             />
             <div>
               <h1 id="welcome-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-                Welcome back{user?.companyName ? `, ${user.companyName}` : ''}!
+                {t('dashboard.welcomeBack')}{user?.companyName ? `, ${user.companyName}` : ''}!
               </h1>
             </div>
           </div>
           <p className="text-muted-foreground text-base sm:text-lg ml-0 sm:ml-16">
-            Your AI-powered assistant for planning your AWS re:Invent experience
+            {t('dashboard.subtitle')}
           </p>
         </section>
 
@@ -75,32 +77,32 @@ export function Dashboard() {
           <CardHeader>
             <CardTitle id="quick-start-title" className="flex items-center gap-2 text-lg sm:text-xl">
               <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-dati-accent-1" aria-hidden="true" />
-              Quick Start Guide
+              {t('dashboard.quickStartGuide')}
             </CardTitle>
             <CardDescription className="text-sm sm:text-base">
-              Get started with the re:Invent Planner by asking questions about sessions, venues, and schedules
+              {t('dashboard.quickStartDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">What can you ask?</h3>
+                <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">{t('dashboard.whatCanYouAsk')}</h3>
                 <ul className="space-y-2 text-sm sm:text-base text-gray-600" role="list">
                   <li className="flex items-start gap-2">
                     <span className="text-dati-accent-1 mt-0.5 flex-shrink-0" aria-hidden="true">•</span>
-                    <span>Find sessions by date, venue, or difficulty level</span>
+                    <span>{t('dashboard.findSessions')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-dati-accent-1 mt-0.5 flex-shrink-0" aria-hidden="true">•</span>
-                    <span>Search for specific topics or technologies</span>
+                    <span>{t('dashboard.searchTopics')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-dati-accent-1 mt-0.5 flex-shrink-0" aria-hidden="true">•</span>
-                    <span>Get recommendations based on your interests</span>
+                    <span>{t('dashboard.getRecommendations')}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-dati-accent-1 mt-0.5 flex-shrink-0" aria-hidden="true">•</span>
-                    <span>Build a personalized conference schedule</span>
+                    <span>{t('dashboard.buildSchedule')}</span>
                   </li>
                 </ul>
               </div>
@@ -108,10 +110,10 @@ export function Dashboard() {
                 <Button 
                   onClick={() => navigate('/app/chat')}
                   className="bg-dati-primary hover:bg-dati-accent-4 text-white shadow-md hover:shadow-lg transition-all focus:ring-2 focus:ring-dati-primary focus:ring-offset-2 w-full sm:w-auto"
-                  aria-label="Navigate to chat page to start chatting"
+                  aria-label={t('dashboard.aria.navigateToChat')}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Start Chatting
+                  {t('dashboard.startChatting')}
                 </Button>
               </div>
             </div>
@@ -120,7 +122,7 @@ export function Dashboard() {
 
         {/* Sample Queries */}
         <section className="mb-6 sm:mb-8" aria-labelledby="sample-queries-heading">
-          <h2 id="sample-queries-heading" className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Try these sample queries</h2>
+          <h2 id="sample-queries-heading" className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{t('dashboard.sampleQueries')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4" role="list">
             {sampleQueries.map((sample, index) => {
               const Icon = sample.icon;
@@ -166,21 +168,21 @@ export function Dashboard() {
         {/* Tips Section */}
         <Card className="shadow-md" role="region" aria-labelledby="tips-heading">
           <CardHeader>
-            <CardTitle id="tips-heading" className="text-base sm:text-lg">Pro Tips</CardTitle>
+            <CardTitle id="tips-heading" className="text-base sm:text-lg">{t('dashboard.proTips')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600" role="list">
               <li className="flex items-start gap-2">
                 <span className="text-dati-accent-2 font-bold flex-shrink-0" role="img" aria-label="Light bulb">💡</span>
-                <span>Be specific with your questions for better results</span>
+                <span>{t('dashboard.tip1')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-dati-accent-2 font-bold flex-shrink-0" role="img" aria-label="Light bulb">💡</span>
-                <span>You can ask follow-up questions to refine your search</span>
+                <span>{t('dashboard.tip2')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-dati-accent-2 font-bold flex-shrink-0" role="img" aria-label="Light bulb">💡</span>
-                <span>Start a new chat anytime to explore different topics</span>
+                <span>{t('dashboard.tip3')}</span>
               </li>
             </ul>
           </CardContent>

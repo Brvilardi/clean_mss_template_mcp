@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ interface SessionIdDisplayProps {
  * Requirements: 2.1, 2.2, 2.3, 2.4
  */
 export function SessionIdDisplay({ sessionId, className }: SessionIdDisplayProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -53,11 +55,11 @@ export function SessionIdDisplay({ sessionId, className }: SessionIdDisplayProps
         className
       )}
       role="region"
-      aria-label="Session ID display"
+      aria-label={t('chat.sessionId')}
     >
       {/* Session ID label */}
       <span className="text-xs text-muted-foreground font-medium">
-        Session:
+        {t('chat.sessionId')}:
       </span>
 
       {/* Truncated session ID with tooltip */}
@@ -100,7 +102,7 @@ export function SessionIdDisplay({ sessionId, className }: SessionIdDisplayProps
         size="sm"
         onClick={handleCopy}
         disabled={copied}
-        aria-label={copied ? "Session ID copied" : "Copy session ID to clipboard"}
+        aria-label={copied ? t('chat.sessionId') + ' copied' : 'Copy ' + t('chat.sessionId')}
         className="h-7 w-7 p-0 hover:bg-accent"
       >
         {copied ? (
@@ -113,7 +115,7 @@ export function SessionIdDisplay({ sessionId, className }: SessionIdDisplayProps
       {/* Screen reader feedback */}
       {copied && (
         <span className="sr-only" role="status" aria-live="polite">
-          Session ID copied to clipboard
+          {t('chat.sessionId')} copied to clipboard
         </span>
       )}
     </div>
