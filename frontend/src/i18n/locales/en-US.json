@@ -201,6 +201,7 @@
   "validation": {
     "emailRequired": "Email is required",
     "invalidEmail": "Invalid email address",
+    "corporateEmailRequired": "Please use a corporate email address (Gmail, Outlook, etc. are not allowed)",
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordUppercase": "Must contain uppercase letter",
     "passwordLowercase": "Must contain lowercase letter",
@@ -212,6 +213,7 @@
     "companyNameMaxLength": "Company name must be less than 100 characters",
     "websiteRequired": "Website is required",
     "invalidUrl": "Invalid URL",
+    "invalidDomain": "Please enter a valid domain (e.g., example.com)",
     "urlMustStartWithHttp": "URL must start with http:// or https://",
     "passwordRequired": "Password is required"
   },

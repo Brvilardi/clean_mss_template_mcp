@@ -97,7 +97,7 @@ class InvocationRequest(BaseModel):
     """Request model for agent invocations."""
     input: Dict[str, Any] = Field(
         ...,
-        description="Input data containing the user prompt"
+        description="Input data containing the user prompt and optional language"
     )
     session_id: Optional[str] = Field(
         None,
@@ -435,14 +435,27 @@ async def invoke_agent(request: InvocationRequest, http_request: Request):
                         "message": "No prompt found in input. Please provide a 'prompt' key.",
                         "suggestions": [
                             "Include a 'prompt' field in the input object",
-                            "Example: {\"input\": {\"prompt\": \"Find sessions about serverless\"}}"
+                            "Example: {\"input\": {\"prompt\": \"Find sessions about serverless\", \"language\": \"pt\"}}"
                         ]
                     }
                 }
             )
         
+        # Extract language parameter (defaults to "pt" for Portuguese)
+        language = request.input.get("language", "pt")
+        if language not in ["pt", "en"]:
+            logger.warning("Invalid language parameter, defaulting to Portuguese",
+                provided_language=language
+            )
+            language = "pt"
+        
+        # Prepend language instruction to user message
+        language_instruction = f"[LANGUAGE: {language}] "
+        user_message_with_language = language_instruction + user_message
+        
         logger.info("Processing agent invocation",
             prompt_length=len(user_message),
+            language=language,
             session_id=session_id,
             actor_id=actor_id,
             user_message_preview=user_message[:100] + "..." if len(user_message) > 100 else user_message
@@ -458,9 +471,10 @@ async def invoke_agent(request: InvocationRequest, http_request: Request):
         for attempt in range(max_retries + 1):
             try:
                 tracer.put_annotation("attempt", attempt + 1)
+                tracer.put_annotation("language", language)
                 
                 # Process agent invocation (traced via decorator)
-                response = process_agent_invocation(user_message, session_id, actor_id)
+                response = process_agent_invocation(user_message_with_language, session_id, actor_id)
                 
                 # Add duration metric
                 duration = round(time.time() - request_start_time, 2)

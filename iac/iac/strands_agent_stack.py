@@ -18,91 +18,7 @@ class StrandsAgentStack(Construct):
         f"arn:aws:lambda:{region}:753240598075:layer:LambdaAdapterLayerArm64:25"
     )
 
-    def create_lambda_api_gateway_integration(
-        self,
-        method: str,
-        api_gateway_resource: Resource,
-        environment_variables: dict,
-        memory_size: int = 512,
-        timeout_seconds: int = 30,
-        layers: list = None
-    ):
-        """
-        Create Lambda function with API Gateway integration.
 
-        Args:
-            method: HTTP method (e.g., "ANY")
-            api_gateway_resource: API Gateway resource to attach to
-            environment_variables: Environment variables for Lambda
-            memory_size: Lambda memory in MB
-            timeout_seconds: Lambda timeout in seconds
-            layers: Lambda layers to attach
-
-        Returns:
-            Lambda function
-        """
-        function = lambda_.Function(
-            self, "StrandsAgentFunction",
-            code=lambda_.Code.from_asset("../src/strands-agent"),
-            handler="run.sh",
-            runtime=lambda_.Runtime.PYTHON_3_14,
-            architecture=lambda_.Architecture.ARM_64,
-            layers=layers,
-            environment=environment_variables,
-            memory_size=memory_size,
-            timeout=Duration.seconds(timeout_seconds),
-            tracing=lambda_.Tracing.ACTIVE,
-            snap_start=lambda_.SnapStartConf.ON_PUBLISHED_VERSIONS
-        )
-
-        # Create API Gateway resource with proxy for all sub-paths
-        agent_resource = api_gateway_resource.add_resource(
-            "agent",
-            default_cors_preflight_options={
-                "allow_origins": Cors.ALL_ORIGINS,
-                "allow_methods": Cors.ALL_METHODS,
-                "allow_headers": [
-                    "Content-Type",
-                    "Authorization",
-                    "X-Amz-Date",
-                    "X-Api-Key",
-                    "X-Amz-Security-Token",
-                    "X-Amz-User-Agent"
-                ],
-                "allow_credentials": False
-            }
-        )
-        agent_resource.add_method(
-            method,
-            integration=LambdaIntegration(function),
-            authorizer=self.cognito_authorizer,
-            authorization_type=AuthorizationType.COGNITO if self.cognito_authorizer else None
-        )
-        
-        # Add proxy resource to handle all sub-paths like /agent/ping, /agent/invocations
-        agent_resource.add_proxy(
-            default_integration=LambdaIntegration(function),
-            any_method=True,
-            default_cors_preflight_options={
-                "allow_origins": Cors.ALL_ORIGINS,
-                "allow_methods": Cors.ALL_METHODS,
-                "allow_headers": [
-                    "Content-Type",
-                    "Authorization",
-                    "X-Amz-Date",
-                    "X-Api-Key",
-                    "X-Amz-Security-Token",
-                    "X-Amz-User-Agent"
-                ],
-                "allow_credentials": False
-            },
-            default_method_options={
-                "authorizer": self.cognito_authorizer,
-                "authorization_type": AuthorizationType.COGNITO if self.cognito_authorizer else None
-            }
-        )
-
-        return function
 
     def __init__(
         self,
@@ -170,14 +86,19 @@ class StrandsAgentStack(Construct):
         envs['AWS_LWA_REMOVE_BASE_PATH'] = "/mss-template/agent"  # Remove API Gateway base path including /agent
         envs['MEMORY_ID'] = self.memory.attr_memory_id
 
-        # Create Lambda function with API Gateway integration
-        self.agent_function = self.create_lambda_api_gateway_integration(
-            method="ANY",
-            api_gateway_resource=api_gateway_resource,
-            environment_variables=envs,
+        # Create Lambda function (without API Gateway integration yet)
+        self.agent_function = lambda_.Function(
+            self, "StrandsAgentFunction",
+            code=lambda_.Code.from_asset("../src/strands-agent"),
+            handler="run.sh",
+            runtime=lambda_.Runtime.PYTHON_3_14,
+            architecture=lambda_.Architecture.ARM_64,
+            layers=self.layers,
+            environment=envs,
             memory_size=3008,  # Increased for better performance
-            timeout_seconds=120,  # Increased timeout for agent processing
-            layers=self.layers
+            timeout=Duration.seconds(120),  # Increased timeout for agent processing
+            tracing=lambda_.Tracing.ACTIVE,
+            snap_start=lambda_.SnapStartConf.ON_PUBLISHED_VERSIONS
         )
         
         # Add MCP_ENDPOINT after function is created to avoid circular dependency
@@ -185,6 +106,63 @@ class StrandsAgentStack(Construct):
         self.agent_function.add_environment(
             "MCP_ENDPOINT",
             f"https://{api_gateway_resource.api.rest_api_id}.execute-api.{region}.amazonaws.com/prod/mss-template/mcp"
+        )
+        
+        # Create a published version for SnapStart
+        self.agent_function_version = self.agent_function.current_version
+        
+        # Create an alias pointing to the version
+        self.agent_function_alias = lambda_.Alias(
+            self, "StrandsAgentAlias",
+            alias_name="live",
+            version=self.agent_function_version
+        )
+        
+        # Create API Gateway integration using the alias
+        agent_resource = api_gateway_resource.add_resource(
+            "agent",
+            default_cors_preflight_options={
+                "allow_origins": Cors.ALL_ORIGINS,
+                "allow_methods": Cors.ALL_METHODS,
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Amz-Date",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent"
+                ],
+                "allow_credentials": False
+            }
+        )
+        agent_resource.add_method(
+            "ANY",
+            integration=LambdaIntegration(self.agent_function_alias),
+            authorizer=self.cognito_authorizer,
+            authorization_type=AuthorizationType.COGNITO if self.cognito_authorizer else None
+        )
+        
+        # Add proxy resource to handle all sub-paths like /agent/ping, /agent/invocations
+        agent_resource.add_proxy(
+            default_integration=LambdaIntegration(self.agent_function_alias),
+            any_method=True,
+            default_cors_preflight_options={
+                "allow_origins": Cors.ALL_ORIGINS,
+                "allow_methods": Cors.ALL_METHODS,
+                "allow_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Amz-Date",
+                    "X-Api-Key",
+                    "X-Amz-Security-Token",
+                    "X-Amz-User-Agent"
+                ],
+                "allow_credentials": False
+            },
+            default_method_options={
+                "authorizer": self.cognito_authorizer,
+                "authorization_type": AuthorizationType.COGNITO if self.cognito_authorizer else None
+            }
         )
 
         # Grant Bedrock permissions

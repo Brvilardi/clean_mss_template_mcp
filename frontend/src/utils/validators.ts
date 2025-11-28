@@ -4,10 +4,33 @@ import i18n from '../i18n/config';
 // Helper function to get translation
 const t = (key: string) => i18n.t(key);
 
+// List of common free email providers to exclude
+const FREE_EMAIL_PROVIDERS = [
+  'gmail.com',
+  'yahoo.com',
+  'hotmail.com',
+  'outlook.com',
+  'live.com',
+  'aol.com',
+  'icloud.com',
+  'mail.com',
+  'protonmail.com',
+  'zoho.com',
+  'yandex.com',
+  'gmx.com',
+];
+
 export const emailSchema = z
   .string()
   .min(1, { message: t('validation.emailRequired') })
-  .email({ message: t('validation.invalidEmail') });
+  .email({ message: t('validation.invalidEmail') })
+  .refine(
+    (email) => {
+      const domain = email.split('@')[1]?.toLowerCase();
+      return domain && !FREE_EMAIL_PROVIDERS.includes(domain);
+    },
+    { message: t('validation.corporateEmailRequired') }
+  );
 
 export const passwordSchema = z
   .string()
@@ -20,10 +43,15 @@ export const passwordSchema = z
 export const urlSchema = z
   .string()
   .min(1, { message: t('validation.websiteRequired') })
-  .url({ message: t('validation.invalidUrl') })
   .refine(
-    (url) => url.startsWith('http://') || url.startsWith('https://'),
-    { message: t('validation.urlMustStartWithHttp') }
+    (url) => {
+      // Remove protocol if present
+      const cleanUrl = url.replace(/^https?:\/\//, '');
+      // Basic domain validation
+      const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z]{2,})+$/;
+      return domainRegex.test(cleanUrl);
+    },
+    { message: t('validation.invalidDomain') }
   );
 
 export const companyNameSchema = z

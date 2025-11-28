@@ -12,29 +12,7 @@ class MCPStack(Construct):
 
     LAMBDA_WEB_ADAPTER_LAYER_ARN = lambda x: f"arn:aws:lambda:{x}:753240598075:layer:LambdaAdapterLayerArm64:25"
 
-    def create_lambda_api_gateway_integration(self, method: str, mss_student_api_resource: Resource,
-                                              environment_variables: dict = {"STAGE": "TEST"}, memory_size: int = 128,
-                                              timeout_seconds: int = 15, layers: list = None):
-        function = lambda_.Function(
-            self, "MCP_SERVER",
-            code=lambda_.Code.from_asset(f"../src/mcp"),
-            handler=f"run.sh",
-            runtime=lambda_.Runtime.PYTHON_3_14,
-            architecture=lambda_.Architecture.ARM_64,
-            layers=layers,
-            environment=environment_variables,
-            memory_size=memory_size,
-            timeout=Duration.seconds(timeout_seconds),
-            tracing=lambda_.Tracing.ACTIVE,
-            snap_start=lambda_.SnapStartConf.ON_PUBLISHED_VERSIONS
-        )
 
-        mss_student_api_resource.add_resource("mcp").add_method(method,
-                                                                        integration=LambdaIntegration(
-                                                                                            function))
-
-
-        return function
 
     def __init__(self, scope: Construct, api_gateway_resource: Resource, environment_variables: dict, dependencies_layers, region) -> None:
         super().__init__(scope, "Template_MCP")
@@ -53,13 +31,19 @@ class MCPStack(Construct):
         envs['AWS_LWA_PORT'] = "8000" # set the port to handle FastMCP requests
         envs['AWS_LWA_REMOVE_BASE_PATH'] = "/mss-template" #remove the apigateway base path
 
-        self.mcp_server = self.create_lambda_api_gateway_integration(
-            method="ANY",
-            mss_student_api_resource=api_gateway_resource,
-            environment_variables=envs,
+        # Create Lambda function
+        self.mcp_server = lambda_.Function(
+            self, "MCP_SERVER",
+            code=lambda_.Code.from_asset("../src/mcp"),
+            handler="run.sh",
+            runtime=lambda_.Runtime.PYTHON_3_14,
+            architecture=lambda_.Architecture.ARM_64,
+            layers=self.layers,
+            environment=envs,
             memory_size=3008,  # Increased for better performance
-            timeout_seconds=60,  # Increased timeout for complex queries
-            layers=self.layers
+            timeout=Duration.seconds(60),  # Increased timeout for complex queries
+            tracing=lambda_.Tracing.ACTIVE,
+            snap_start=lambda_.SnapStartConf.ON_PUBLISHED_VERSIONS
         )
         
         # Add API_GATEWAY_BASE_URL after function is created to avoid circular dependency
@@ -67,6 +51,22 @@ class MCPStack(Construct):
         self.mcp_server.add_environment(
             "API_GATEWAY_BASE_URL",
             f"https://{api_gateway_resource.api.rest_api_id}.execute-api.{region}.amazonaws.com/prod/mss-template"
+        )
+        
+        # Create a published version for SnapStart
+        self.mcp_server_version = self.mcp_server.current_version
+        
+        # Create an alias pointing to the version
+        self.mcp_server_alias = lambda_.Alias(
+            self, "MCPServerAlias",
+            alias_name="live",
+            version=self.mcp_server_version
+        )
+        
+        # Create API Gateway integration using the alias
+        api_gateway_resource.add_resource("mcp").add_method(
+            "ANY",
+            integration=LambdaIntegration(self.mcp_server_alias)
         )
 
 

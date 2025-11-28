@@ -37,6 +37,14 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
     },
   });
 
+  // Auto-populate website from email domain
+  const handleEmailChange = (email: string) => {
+    const domain = email.split('@')[1];
+    if (domain && !form.getValues('companyWebsite')) {
+      form.setValue('companyWebsite', domain);
+    }
+  };
+
   const onSubmit = async (data: SignUpFormData) => {
     try {
       setIsLoading(true);
@@ -83,6 +91,10 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
                   placeholder={t('auth.placeholders.email')}
                   disabled={isLoading}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleEmailChange(e.target.value);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -155,8 +167,8 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
               <FormLabel>{t('auth.companyWebsite')}</FormLabel>
               <FormControl>
                 <Input
-                  type="url"
-                  placeholder={t('auth.placeholders.companyWebsite')}
+                  type="text"
+                  placeholder="example.com"
                   disabled={isLoading}
                   {...field}
                 />
