@@ -43,7 +43,8 @@ def create_agent(
     mcp_endpoint: str,
     memory_id: str,
     session_id: Optional[str] = None,
-    actor_id: Optional[str] = None
+    actor_id: Optional[str] = None,
+    aws_region: str = None
 ) -> Agent:
     """
     Create and configure the re:Invent planning agent.
@@ -108,7 +109,7 @@ def create_agent(
             # Create session manager
             session_manager = AgentCoreMemorySessionManager(
                 agentcore_memory_config=agentcore_memory_config,
-                region_name="us-east-1"
+                region_name=os.getenv("REGION")
             )
             logger.debug("Session manager created", 
                 memory_id=memory_id,

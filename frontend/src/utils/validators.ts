@@ -18,6 +18,11 @@ const FREE_EMAIL_PROVIDERS = [
   'zoho.com',
   'yandex.com',
   'gmx.com',
+  'me.com',
+  'msn.com',
+  'yahoo.co.uk',
+  'yahoo.co.in',
+  'googlemail.com',
 ];
 
 export const emailSchema = z
@@ -26,8 +31,11 @@ export const emailSchema = z
   .email({ message: t('validation.invalidEmail') })
   .refine(
     (email) => {
-      const domain = email.split('@')[1]?.toLowerCase();
-      return domain && !FREE_EMAIL_PROVIDERS.includes(domain);
+      const parts = email.split('@');
+      if (parts.length !== 2) return false;
+      const domain = parts[1].toLowerCase().trim();
+      const isFreeEmail = FREE_EMAIL_PROVIDERS.includes(domain);
+      return !isFreeEmail;
     },
     { message: t('validation.corporateEmailRequired') }
   );

@@ -39,9 +39,14 @@ export function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
 
   // Auto-populate website from email domain
   const handleEmailChange = (email: string) => {
-    const domain = email.split('@')[1];
-    if (domain && !form.getValues('companyWebsite')) {
-      form.setValue('companyWebsite', domain);
+    const parts = email.split('@');
+    if (parts.length === 2 && parts[1]) {
+      const domain = parts[1];
+      const currentWebsite = form.getValues('companyWebsite');
+      // Only update if website is empty or was previously auto-populated from a different domain
+      if (!currentWebsite || currentWebsite.includes('@') || email.includes(currentWebsite)) {
+        form.setValue('companyWebsite', domain);
+      }
     }
   };
 

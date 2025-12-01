@@ -35,6 +35,16 @@
     "enterSixDigitCode": "Digite o código de 6 dígitos abaixo",
     "enterCodeFromEmail": "Digite o código de 6 dígitos do seu e-mail",
     "pleaseVerifyEmail": "Por favor, verifique seu e-mail",
+    "createAccount": "Criar uma conta",
+    "signUpForReinvent": "Cadastre-se no re:Invent Planner",
+    "welcomeBack": "Bem-vindo de volta",
+    "signInToAccount": "Entre na sua conta do re:Invent Planner",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "dontHaveAccount": "Não tem uma conta?",
+    "clickHereToSignIn": "Entrar",
+    "clickHereToSignUp": "Criar conta",
+    "needToVerifyEmail": "Precisa verificar seu e-mail?",
+    "enterConfirmationCode": "Digite o código de confirmação",
     "placeholders": {
       "email": "voce@empresa.com",
       "password": "••••••••",
@@ -201,6 +211,7 @@
   "validation": {
     "emailRequired": "E-mail é obrigatório",
     "invalidEmail": "Endereço de e-mail inválido",
+    "corporateEmailRequired": "Por favor, use um e-mail corporativo. Provedores de e-mail pessoal (Gmail, Outlook, Yahoo, etc.) não são permitidos",
     "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
     "passwordUppercase": "Deve conter letra maiúscula",
     "passwordLowercase": "Deve conter letra minúscula",
@@ -212,6 +223,7 @@
     "companyNameMaxLength": "O nome da empresa deve ter menos de 100 caracteres",
     "websiteRequired": "Site é obrigatório",
     "invalidUrl": "URL inválida",
+    "invalidDomain": "Por favor, insira um domínio válido (ex: exemplo.com)",
     "urlMustStartWithHttp": "A URL deve começar com http:// ou https://",
     "passwordRequired": "Senha é obrigatória"
   },

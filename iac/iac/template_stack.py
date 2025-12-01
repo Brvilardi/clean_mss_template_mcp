@@ -29,9 +29,9 @@ class TemplateStack(Stack):
             "http://localhost:3000",  # Alternative local port
         ]
         
-        self.rest_api = RestApi(self, "Template_RestApi",
-                                    rest_api_name="Template_RestApi",
-                                    description="This is the Template RestApi",
+        self.rest_api = RestApi(self, "Reinvent_Planner",
+                                    rest_api_name="Reinvent_Planner_RestApi",
+                                    description="This is the Reinvent_Planner RestApi",
                                     default_cors_preflight_options=
                                     {
                                         "allow_origins": apigw.Cors.ALL_ORIGINS,
@@ -58,7 +58,7 @@ class TemplateStack(Stack):
         }
                                                                )
 
-        self.dynamo_table = TemplateDynamoTable(self, "TemplateDynamoTable")
+        # self.dynamo_table = TemplateDynamoTable(self, "Dynamo_Table")
         self.sessions_dynamo_table = SessionsDynamoTable(self, "SessionsDynamoTable")
         
         # Create Cognito stack for frontend authentication
@@ -79,7 +79,7 @@ class TemplateStack(Stack):
 
         ENVIRONMENT_VARIABLES = {
             "STAGE": "DEV",
-            "DYNAMO_TABLE_NAME": self.dynamo_table.table.table_name,
+            "DYNAMO_TABLE_NAME": self.sessions_dynamo_table.table.table_name,
             "DYNAMO_PARTITION_KEY": "PK",
             "DYNAMO_SORT_KEY": "SK",
             "SESSIONS_DYNAMO_TABLE_NAME": self.sessions_dynamo_table.table.table_name,
@@ -90,7 +90,7 @@ class TemplateStack(Stack):
 
 
         self.lambda_stack = LambdaStack(self, api_gateway_resource=api_gateway_resource,
-                                        environment_variables=ENVIRONMENT_VARIABLES)
+                                        environment_variables=ENVIRONMENT_VARIABLES, region=self.region)
 
         for function in self.lambda_stack.functions_that_need_dynamo_permissions:
             self.dynamo_table.table.grant_read_write_data(function)

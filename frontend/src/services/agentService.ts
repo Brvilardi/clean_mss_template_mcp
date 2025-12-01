@@ -1,5 +1,6 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 import type { AgentInvocationRequest, AgentInvocationResponse } from '../types/api';
+import amplifyOutputs from '../../amplify_outputs.json';
 
 export interface AgentError extends Error {
   suggestions?: string[];
@@ -7,10 +8,11 @@ export interface AgentError extends Error {
 }
 
 export class AgentService {
-  // Get API endpoint from environment or Amplify config
+  // Get API endpoint from Amplify config or environment variable
   private static readonly API_ENDPOINT = 
+    amplifyOutputs.custom?.api?.StrandsAgentAPI?.endpoint || 
     import.meta.env.VITE_API_ENDPOINT || 
-    'https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent';
+    'https://qx5ir73yzj.execute-api.us-east-1.amazonaws.com/prod/mss-template/agent';
 
   /**
    * Send a message to the Strands Agent

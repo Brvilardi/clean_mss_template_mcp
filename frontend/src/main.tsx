@@ -5,13 +5,21 @@ import amplifyOutputs from '../amplify_outputs.json'
 import './index.css'
 import App from './App.tsx'
 
-// Use environment variables if available, otherwise fall back to amplify_outputs.json
-const userPoolId = import.meta.env.VITE_USER_POOL_ID || amplifyOutputs.auth.user_pool_id;
-const userPoolClientId = import.meta.env.VITE_USER_POOL_CLIENT_ID || amplifyOutputs.auth.user_pool_client_id;
-const identityPoolId = import.meta.env.VITE_IDENTITY_POOL_ID || amplifyOutputs.auth.identity_pool_id;
-const awsRegion = import.meta.env.VITE_AWS_REGION || amplifyOutputs.auth.aws_region;
-const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN || amplifyOutputs.auth.oauth.domain;
-const apiEndpoint = import.meta.env.VITE_API_ENDPOINT || amplifyOutputs.custom.api.StrandsAgentAPI.endpoint;
+// Always use amplify_outputs.json (ignore environment variables)
+const userPoolId = amplifyOutputs.auth.user_pool_id;
+const userPoolClientId = amplifyOutputs.auth.user_pool_client_id;
+const identityPoolId = amplifyOutputs.auth.identity_pool_id;
+const awsRegion = amplifyOutputs.auth.aws_region;
+const cognitoDomain = amplifyOutputs.auth.oauth.domain;
+const apiEndpoint = amplifyOutputs.custom.api.StrandsAgentAPI.endpoint;
+
+// Debug: Log configuration being used
+console.log('🔧 Amplify Configuration Debug:');
+console.log('  Region:', awsRegion);
+console.log('  User Pool ID:', userPoolId);
+console.log('  Cognito Domain:', cognitoDomain);
+console.log('  API Endpoint:', apiEndpoint);
+console.log('  Full amplify_outputs.json:', amplifyOutputs);
 
 // Configure Amplify with authentication and API settings
 Amplify.configure({

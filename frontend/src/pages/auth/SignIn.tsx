@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SignInForm } from '@/components/auth/SignInForm';
 import { useAuthStore } from '@/store/authStore';
 import {
@@ -13,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 export function SignIn() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, checkAuth } = useAuthStore();
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
@@ -63,10 +65,10 @@ export function SignIn() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center text-slate-800 dark:text-slate-500">
-            Welcome back
+            {t('auth.welcomeBack')}
           </CardTitle>
           <CardDescription className="text-center text-slate-700 dark:text-slate-400">
-            Sign in to your re:Invent Planner account
+            {t('auth.signInToAccount')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,24 +81,24 @@ export function SignIn() {
         <CardFooter className="flex flex-col space-y-4">
           {needsConfirmation && (
             <div className="text-sm text-center text-slate-700 dark:text-slate-400">
-              Need to verify your email?{' '}
+              {t('auth.needToVerifyEmail')}{' '}
               <Button
                 variant="link"
                 className="p-0 h-auto font-semibold text-primary hover:text-primary/80"
                 onClick={handleGoToConfirmation}
               >
-                Enter confirmation code
+                {t('auth.enterConfirmationCode')}
               </Button>
             </div>
           )}
           <div className="text-sm text-center text-slate-700 dark:text-slate-400">
-            Don't have an account?{' '}
+            {t('auth.dontHaveAccount')}{' '}
             <Button
               variant="link"
               className="p-0 h-auto font-semibold text-primary hover:text-primary/80"
               onClick={() => navigate('/signup')}
             >
-              Sign up
+              {t('auth.clickHereToSignUp')}
             </Button>
           </div>
         </CardFooter>

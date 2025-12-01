@@ -1,4 +1,5 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
+import amplifyOutputs from '../../amplify_outputs.json';
 
 /**
  * Parsed event from chat history API (simplified by backend)
@@ -62,11 +63,12 @@ interface RetryConfig {
  * Service for managing chat history and session events
  */
 export class ChatHistoryService {
-  // Get API endpoint from environment or Amplify config
+  // Get API endpoint from Amplify config or environment variable
   // Chat history is at /mss-template/chat_history, not under /agent
   private static readonly API_ENDPOINT = 
+    amplifyOutputs.custom?.api?.StrandsAgentAPI?.endpoint?.replace('/agent', '') || 
     import.meta.env.VITE_API_ENDPOINT?.replace('/agent', '') || 
-    'https://8cjlle5daa.execute-api.us-east-1.amazonaws.com/prod/mss-template';
+    'https://qx5ir73yzj.execute-api.us-east-1.amazonaws.com/prod/mss-template';
 
   // Default retry configuration
   private static readonly DEFAULT_RETRY_CONFIG: RetryConfig = {

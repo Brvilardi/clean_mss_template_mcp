@@ -155,8 +155,8 @@ def main():
     )
     parser.add_argument(
         '--output',
-        default='../frontend/amplify_outputs.json',
-        help='Output file path (default: ../frontend/amplify_outputs.json)'
+        default='../../frontend/amplify_outputs.json',
+        help='Output file path (default: ../../frontend/amplify_outputs.json)'
     )
     parser.add_argument(
         '--cloudfront-url',
@@ -216,7 +216,14 @@ def main():
         config = generate_amplify_config(outputs, args.region, cloudfront_url)
     
     # Write to file
-    output_path = Path(__file__).parent / args.output
+    # Resolve output path relative to project root, not script location
+    if args.output.startswith('../'):
+        # Relative path from script dir - resolve to absolute
+        output_path = (Path(__file__).parent / args.output).resolve()
+    else:
+        # Absolute or simple path
+        output_path = Path(args.output).resolve()
+    
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     with open(output_path, 'w') as f:

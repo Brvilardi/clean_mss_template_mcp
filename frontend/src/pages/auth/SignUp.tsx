@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SignUpForm } from '@/components/auth/SignUpForm';
 import { useAuthStore } from '@/store/authStore';
 import {
@@ -13,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 export function SignUp() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, checkAuth } = useAuthStore();
 
@@ -44,10 +46,10 @@ export function SignUp() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center text-slate-800 dark:text-slate-800">
-            Create an account
+            {t('auth.createAccount')}
           </CardTitle>
           <CardDescription className="text-center text-slate-700 dark:text-slate-600">
-            Sign up for re:Invent Planner
+            {t('auth.signUpForReinvent')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -55,13 +57,13 @@ export function SignUp() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-center text-slate-700 dark:text-slate-500">
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Button
               variant="link"
               className="p-0 h-auto font-semibold text-primary hover:text-primary/80"
               onClick={() => navigate('/signin')}
             >
-              Sign in
+              {t('auth.clickHereToSignIn')}
             </Button>
           </div>
         </CardFooter>

@@ -304,7 +304,7 @@ def get_chat_history(event: Dict[str, Any]) -> Dict[str, Any]:
             metrics.add_metric(name="SessionHistoryRequests", unit=MetricUnit.Count, value=1)
             
             memory_id = os.getenv("MEMORY_ID")
-            aws_region = os.getenv("AWS_REGION", "us-east-1")
+            aws_region = os.getenv("REGION")
 
             if not memory_id:
                 logger.error("MEMORY_ID environment variable not set")
