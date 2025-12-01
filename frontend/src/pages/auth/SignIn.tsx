@@ -60,9 +60,11 @@ export function SignIn() {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 pb-6">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-2xl font-bold text-white">re:</span>
-            </div>
+            <img 
+              src="/dati-logo.png" 
+              alt="Dati company logo" 
+              className="h-16 w-16 object-contain bg-white p-2 rounded-lg shadow-lg"
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-center text-slate-800 dark:text-slate-500">
             {t('auth.welcomeBack')}

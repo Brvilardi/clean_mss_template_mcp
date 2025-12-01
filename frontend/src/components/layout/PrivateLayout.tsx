@@ -63,13 +63,13 @@ export function PrivateLayout() {
   // Show loading state while checking authentication
   if (!authChecked || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite">
+      <div className="min-h-screen flex items-center justify-center bg-background" role="status" aria-live="polite">
         <div className="text-center">
           <div 
-            className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"
+            className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"
             aria-hidden="true"
           ></div>
-          <p className="mt-4 text-gray-600">{t('loading.default')}</p>
+          <p className="mt-4 text-muted-foreground">{t('loading.default')}</p>
           <span className="sr-only">{t('loading.checkingAuth')}</span>
         </div>
       </div>
@@ -82,11 +82,11 @@ export function PrivateLayout() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-dati-background">
+    <div className="h-screen flex overflow-hidden bg-background">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
           role="presentation"
           aria-hidden="true"
@@ -96,7 +96,7 @@ export function PrivateLayout() {
       {/* Skip to main content link for keyboard navigation */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-dati-primary focus:text-white focus:rounded-md"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
       >
         Skip to main content
       </a>
@@ -113,16 +113,17 @@ export function PrivateLayout() {
       <aside
         className={`
           fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:hidden
+          shadow-2xl bg-white dark:bg-card
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         aria-label="Main navigation"
         aria-hidden={!sidebarOpen}
       >
-        <div className="relative h-full">
+        <div className="relative h-full bg-white dark:bg-card">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 z-10 focus:ring-2 focus:ring-dati-primary focus:ring-offset-2"
+            className="absolute top-4 right-4 z-10 text-foreground hover:bg-accent focus:ring-2 focus:ring-ring focus:ring-offset-2"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close navigation menu"
           >
@@ -134,8 +135,8 @@ export function PrivateLayout() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Mobile header */}
-        <header className="lg:hidden bg-dati-background border-b border-gray-700 px-4 py-3 flex items-center gap-3">
+        {/* Mobile header with hamburger menu */}
+        <header className="lg:hidden bg-card border-b border-border px-4 py-3 flex items-center gap-3 shadow-sm">
           <Button
             variant="ghost"
             size="icon"
@@ -143,20 +144,27 @@ export function PrivateLayout() {
             aria-label="Open navigation menu"
             aria-expanded={sidebarOpen}
             aria-controls="mobile-sidebar"
-            className="text-white hover:bg-gray-700 focus:ring-2 focus:ring-dati-primary focus:ring-offset-2"
+            className="text-foreground hover:bg-accent hover:text-accent-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
-          <h1 className="text-lg font-semibold text-white">
-            re:Invent Planner
-          </h1>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <img 
+              src="/dati-logo.png" 
+              alt="Dati logo" 
+              className="h-6 w-6 object-contain bg-white p-1 rounded flex-shrink-0"
+            />
+            <h1 className="text-base font-semibold text-foreground truncate">
+              {t('chat.title')}
+            </h1>
+          </div>
         </header>
 
         {/* Page content */}
         <main 
           id="main-content"
           ref={mainContentRef}
-          className="flex-1 overflow-auto"
+          className="flex-1 overflow-auto bg-background"
           role="main"
           aria-label="Main content"
           tabIndex={-1}

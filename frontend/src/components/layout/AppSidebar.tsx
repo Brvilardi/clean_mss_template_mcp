@@ -43,9 +43,9 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="h-full flex flex-col bg-card border-r border-border">
+    <div className="h-full w-full flex flex-col bg-white dark:bg-card border-r border-border">
       {/* Header with Dati Logo */}
-      <div className="p-4 sm:p-6 border-b border-border">
+      <div className="p-4 sm:p-6 border-b border-border bg-white dark:bg-card">
         <div className="flex items-center gap-3 mb-2">
           <img 
             src="/dati-logo.png" 
@@ -62,7 +62,7 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
       </div>
 
       {/* New Chat Button */}
-      <div className="p-3 sm:p-4 border-b border-border">
+      <div className="p-3 sm:p-4 border-b border-border bg-white dark:bg-card">
         <Button
           onClick={handleNewChat}
           className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
@@ -75,18 +75,18 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
       </div>
 
       {/* Chat History Section */}
-      <div className="flex-1 flex flex-col overflow-hidden border-b border-border">
-        <div className="p-3 sm:p-4 border-b border-border">
+      <div className="flex-1 flex flex-col overflow-hidden border-b border-border bg-white dark:bg-card">
+        <div className="p-3 sm:p-4 border-b border-border bg-white dark:bg-card">
           <h3 className="text-sm font-semibold text-foreground">{t('sidebar.chatHistory')}</h3>
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-white dark:bg-card">
           <ChatHistoryList />
         </div>
       </div>
 
       {/* Navigation */}
       <nav 
-        className="p-3 sm:p-4 space-y-1 sm:space-y-2"
+        className="p-3 sm:p-4 space-y-1 sm:space-y-2 bg-white dark:bg-card"
         aria-label={t('sidebar.aria.primaryNavigation')}
       >
         {navItems.map((item) => {
@@ -117,7 +117,7 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
       </nav>
 
       {/* Sign Out */}
-      <div className="p-3 sm:p-4 border-t border-border">
+      <div className="p-3 sm:p-4 border-t border-border bg-white dark:bg-card">
         <Button
           onClick={handleSignOut}
           variant="ghost"

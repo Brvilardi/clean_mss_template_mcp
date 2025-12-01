@@ -109,17 +109,17 @@ export function Chat() {
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <header 
-        className="p-3 sm:p-4 border-b border-border bg-card shadow-sm flex flex-col gap-2 sm:gap-3"
+        className="p-2 sm:p-4 border-b border-border bg-card shadow-sm flex flex-col gap-2"
         role="banner"
       >
-        <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <img 
               src="/dati-logo.png" 
               alt="Dati company logo" 
               className="h-6 w-6 sm:h-8 sm:w-8 object-contain flex-shrink-0 bg-white p-1 rounded"
             />
-            <h1 className="text-lg sm:text-xl font-bold truncate text-aws-orange">
+            <h1 className="text-base sm:text-xl font-bold truncate text-primary">
               {t('chat.title')}
             </h1>
             {!isOnline && (
@@ -138,7 +138,7 @@ export function Chat() {
             size="sm"
             onClick={startNewSession}
             disabled={isLoading || !isOnline}
-            className="flex-shrink-0 border-aws-orange text-aws-orange hover:bg-aws-orange hover:text-white"
+            className="flex-shrink-0 text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-9"
             aria-label={t('chat.aria.startNewChat')}
           >
             <span className="hidden sm:inline">{t('chat.newChat')}</span>
@@ -146,15 +146,17 @@ export function Chat() {
           </Button>
         </div>
         
-        {/* Session ID Display */}
+        {/* Session ID Display - Hide on very small screens */}
         {currentSessionId && (
-          <SessionIdDisplay sessionId={currentSessionId} />
+          <div className="hidden xs:block">
+            <SessionIdDisplay sessionId={currentSessionId} />
+          </div>
         )}
       </header>
 
       {/* Error Alert */}
       {error && (
-        <div className="px-3 sm:px-4 pt-3 sm:pt-4" role="region" aria-label={t('chat.aria.errorNotification')}>
+        <div className="px-2 sm:px-4 pt-2 sm:pt-4" role="region" aria-label={t('chat.aria.errorNotification')}>
           <ErrorAlert
             error={error}
             suggestions={errorSuggestions}
