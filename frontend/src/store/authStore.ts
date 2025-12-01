@@ -14,6 +14,8 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -173,6 +175,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
         error: null,
       });
+    }
+  },
+
+  forgotPassword: async (email: string) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      await AuthService.forgotPassword(email);
+      set({ isLoading: false });
+    } catch (error: any) {
+      set({ 
+        isLoading: false, 
+        error: error.message || 'Failed to send reset code' 
+      });
+      throw error;
+    }
+  },
+
+  resetPassword: async (email: string, code: string, newPassword: string) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      await AuthService.resetPassword(email, code, newPassword);
+      set({ isLoading: false });
+    } catch (error: any) {
+      set({ 
+        isLoading: false, 
+        error: error.message || 'Failed to reset password' 
+      });
+      throw error;
     }
   },
 

@@ -1,5 +1,16 @@
 import json
+from unittest.mock import Mock
 from src.modules.search_sessions.app.search_sessions_presenter import lambda_handler
+
+
+def create_mock_lambda_context():
+    """Create a mock Lambda context for testing"""
+    context = Mock()
+    context.function_name = "test-search-sessions"
+    context.memory_limit_in_mb = 128
+    context.invoked_function_arn = "arn:aws:lambda:us-east-1:123456789012:function:test-search-sessions"
+    context.aws_request_id = "test-request-id-123"
+    return context
 
 
 class Test_SearchSessionsPresenter:
@@ -35,7 +46,8 @@ class Test_SearchSessionsPresenter:
             "isBase64Encoded": False
         }
         
-        response = lambda_handler(event, None)
+        context = create_mock_lambda_context()
+        response = lambda_handler(event, context)
         
         assert response["statusCode"] == 200
         body = json.loads(response["body"])
@@ -63,7 +75,8 @@ class Test_SearchSessionsPresenter:
             }
         }
         
-        response = lambda_handler(event, None)
+        context = create_mock_lambda_context()
+        response = lambda_handler(event, context)
         
         assert response["statusCode"] == 200
         body = json.loads(response["body"])
@@ -87,7 +100,8 @@ class Test_SearchSessionsPresenter:
             }
         }
         
-        response = lambda_handler(event, None)
+        context = create_mock_lambda_context()
+        response = lambda_handler(event, context)
         
         assert response["statusCode"] == 200
         body = json.loads(response["body"])
@@ -114,7 +128,8 @@ class Test_SearchSessionsPresenter:
             }
         }
         
-        response = lambda_handler(event, None)
+        context = create_mock_lambda_context()
+        response = lambda_handler(event, context)
         
         # Verify the handler processes the request successfully
         assert response["statusCode"] == 200
@@ -135,7 +150,8 @@ class Test_SearchSessionsPresenter:
             }
         }
         
-        response = lambda_handler(event, None)
+        context = create_mock_lambda_context()
+        response = lambda_handler(event, context)
         
         assert response["statusCode"] == 200
         body = json.loads(response["body"])
@@ -159,7 +175,8 @@ class Test_SearchSessionsPresenter:
             }
         }
         
-        response = lambda_handler(event, None)
+        context = create_mock_lambda_context()
+        response = lambda_handler(event, context)
         
         # Should process without error
         assert response["statusCode"] == 200

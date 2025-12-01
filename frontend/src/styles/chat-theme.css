@@ -86,6 +86,8 @@
   padding: 1rem;
   flex-shrink: 0;
   min-height: 60px;
+  /* Add safe area padding for mobile devices (notch, home indicator, etc.) */
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 .cs-message-input__content-editor {
@@ -191,6 +193,8 @@
   
   .cs-message-input {
     padding: 0.5rem;
+    /* Extra padding for mobile Safari to avoid overlap with browser UI */
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
   }
   
   .cs-message-input__content-editor {
@@ -211,6 +215,8 @@
   
   .cs-message-list {
     padding: 0.75rem;
+    /* Add bottom padding to prevent last message from being hidden behind input */
+    padding-bottom: max(1rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
   }
   
   .cs-message__content {
@@ -221,6 +227,27 @@
   /* Better touch targets for mobile */
   .cs-message {
     margin-bottom: 0.75rem;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Target iOS Safari specifically */
+  .cs-message-input {
+    /* Add extra bottom padding for iOS Safari's floating toolbar */
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+  }
+  
+  @media (max-width: 640px) {
+    .cs-message-input {
+      /* Even more padding on mobile iOS to account for Safari's UI */
+      padding-bottom: max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
+    }
+    
+    .cs-message-list {
+      /* Ensure messages don't get hidden behind the input area */
+      padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
+    }
   }
 }
 

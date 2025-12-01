@@ -82,11 +82,11 @@ def create_agent(
         
         subsegment.put_annotation("model_id", model_id)
         subsegment.put_annotation("region", region)
-        subsegment.put_metadata("temperature", 0.1)
+        subsegment.put_metadata("temperature", 0.0)
         
         model = BedrockModel(
             model_id=model_id,
-            temperature=0.1,
+            temperature=0.0,  # Zero temperature to prevent hallucinations
             region_name=region
         )
         logger.debug("Bedrock model created", model_id=model_id, region=region)

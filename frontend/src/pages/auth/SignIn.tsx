@@ -94,6 +94,16 @@ export function SignIn() {
             </div>
           )}
           <div className="text-sm text-center text-slate-700 dark:text-slate-400">
+            {t('auth.forgotPassword')}{' '}
+            <Button
+              variant="link"
+              className="p-0 h-auto font-semibold text-primary hover:text-primary/80"
+              onClick={() => navigate('/forgot-password')}
+            >
+              {t('auth.clickHereToReset')}
+            </Button>
+          </div>
+          <div className="text-sm text-center text-slate-700 dark:text-slate-400">
             {t('auth.dontHaveAccount')}{' '}
             <Button
               variant="link"

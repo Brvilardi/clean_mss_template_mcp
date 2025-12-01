@@ -1,44 +1,25 @@
 #!/bin/bash
 set -e
 
-# Deployment script that ensures amplify_outputs.json is up-to-date before building
-
 echo "🚀 Starting deployment process..."
 
-# Get stack name and region from environment or use defaults
-STACK_NAME=${STACK_NAME:-"clean-mss-template"}
-AWS_REGION=${AWS_REGION:-"us-west-2"}
+# Step 1: Check for build errors
+echo "🔍 Step 1: Checking for build errors..."
+cd ../frontend
+npm run build > /dev/null 2>&1 || { echo "❌ Build failed"; exit 1; }
+echo "✓ Build check passed"
+cd ../iac
 
-echo "📋 Configuration:"
-echo "  Stack: $STACK_NAME"
-echo "  Region: $AWS_REGION"
-
-# Step 1: Generate amplify_outputs.json from deployed stack
-echo ""
-echo "📝 Step 1: Generating amplify_outputs.json..."
-python scripts/generate_amplify_config.py \
-  --stack-name "$STACK_NAME" \
-  --region "$AWS_REGION"
-
-if [ $? -ne 0 ]; then
-  echo "❌ Failed to generate amplify_outputs.json"
-  exit 1
-fi
-
-# Step 2: Deploy with CDK (which will build frontend with correct config)
-echo ""
-echo "🏗️  Step 2: Deploying with CDK..."
+# Step 2: Deploy infrastructure
+echo "🏗️  Step 2: Deploying infrastructure..."
 cdk deploy --require-approval never
 
-if [ $? -ne 0 ]; then
-  echo "❌ CDK deployment failed"
-  exit 1
-fi
+# Step 3: Generate amplify outputs
+echo "📝 Step 3: Generating amplify_outputs.json..."
+python scripts/generate_amplify_config.py
 
-echo ""
+# Step 4: Deploy again with updated config
+echo "🔄 Step 4: Deploying with updated config..."
+cdk deploy --require-approval never
+
 echo "✅ Deployment completed successfully!"
-echo "🌐 Frontend URL: https://$(aws cloudformation describe-stacks \
-  --stack-name "$STACK_NAME" \
-  --region "$AWS_REGION" \
-  --query 'Stacks[0].Outputs[?OutputKey==`FrontendStackCloudFrontDomainName5912B3C2`].OutputValue' \
-  --output text)"

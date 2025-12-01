@@ -6,8 +6,11 @@ import {
   fetchUserAttributes,
   confirmSignUp,
   resendSignUpCode,
+  resetPassword,
+  confirmResetPassword,
   type SignUpOutput,
   type SignInOutput,
+  type ResetPasswordOutput,
 } from 'aws-amplify/auth';
 import type { User, SignUpData, AuthError } from '../types/auth';
 
@@ -91,6 +94,26 @@ export class AuthService {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  static async forgotPassword(email: string): Promise<ResetPasswordOutput> {
+    try {
+      return await resetPassword({ username: email });
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  static async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    try {
+      await confirmResetPassword({
+        username: email,
+        confirmationCode: code,
+        newPassword: newPassword,
+      });
+    } catch (error) {
+      throw this.handleError(error);
     }
   }
 
