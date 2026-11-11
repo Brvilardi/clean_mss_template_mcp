@@ -1,0 +1,49 @@
+{
+  "version": "1",
+  "auth": {
+    "user_pool_id": "us-west-2_G8juDw72i",
+    "aws_region": "us-west-2",
+    "user_pool_client_id": "1i46i0q1mpi140c37idgruebb0",
+    "identity_pool_id": "us-west-2:b3acf797-3ffa-4107-85d7-16598b634db5",
+    "oauth": {
+      "domain": "reinvent-planner-clean-mss-template.auth.us-west-2.amazoncognito.com",
+      "scope": [
+        "email",
+        "openid",
+        "profile"
+      ],
+      "redirect_sign_in": "https://d1xhhg2s9q8p9e.cloudfront.net/",
+      "redirect_sign_out": "https://d1xhhg2s9q8p9e.cloudfront.net/",
+      "response_type": "code"
+    },
+    "password_policy": {
+      "min_length": 8,
+      "require_lowercase": true,
+      "require_uppercase": true,
+      "require_numbers": true,
+      "require_symbols": true
+    },
+    "username_attributes": [
+      "email"
+    ],
+    "user_verification_types": [
+      "email"
+    ],
+    "mfa_configuration": "OFF",
+    "mfa_types": [],
+    "standard_required_attributes": [
+      "email"
+    ]
+  },
+  "data": {
+    "aws_region": "us-west-2"
+  },
+  "custom": {
+    "api": {
+      "StrandsAgentAPI": {
+        "endpoint": "https://rhfvoc82j9.execute-api.us-west-2.amazonaws.com/prod/mss-template/agent",
+        "region": "us-west-2"
+      }
+    }
+  }
+}

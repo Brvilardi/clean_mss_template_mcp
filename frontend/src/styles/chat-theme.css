@@ -1,0 +1,261 @@
+/* Custom theming for @chatscope/chat-ui-kit-react */
+
+/* Override chat container colors to match theme */
+.cs-main-container {
+  background: hsl(var(--background));
+  border: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-chat-container {
+  background: hsl(var(--background));
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-conversation-header {
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 0.75rem 1rem;
+}
+
+.cs-conversation-header__content {
+  color: hsl(var(--foreground));
+}
+
+.cs-conversation-header__info {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Message list styling */
+.cs-message-list {
+  background: hsl(var(--background));
+  padding: 1rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Incoming messages (AI) */
+.cs-message--incoming .cs-message__content {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border-radius: 1rem 1rem 1rem 0.25rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Outgoing messages (User) */
+.cs-message--outgoing .cs-message__content {
+  background: hsl(246 48% 65%);
+  color: white;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Message text */
+.cs-message__content-wrapper {
+  max-width: 70%;
+}
+
+.cs-message__html-content,
+.cs-message__text-content {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+/* Typing indicator */
+.cs-typing-indicator {
+  background: hsl(var(--muted));
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.cs-typing-indicator__dot {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Message input */
+.cs-message-input {
+  background: hsl(var(--card));
+  border-top: 1px solid hsl(var(--border));
+  padding: 1rem;
+  flex-shrink: 0;
+  min-height: 60px;
+  /* Add safe area padding for mobile devices (notch, home indicator, etc.) */
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.cs-message-input__content-editor {
+  background: hsl(var(--input));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  color: hsl(var(--foreground));
+  padding: 0.75rem 1rem;
+  min-height: 2.5rem;
+  max-height: 8rem;
+}
+
+.cs-message-input__content-editor:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-color: hsl(var(--ring));
+}
+
+.cs-message-input__content-editor::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Send button */
+.cs-button--send {
+  background: hsl(246 48% 65%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  transition: all 0.2s;
+  height: 2.5rem;
+  min-width: 2.5rem;
+}
+
+.cs-button--send:hover:not(:disabled) {
+  background: hsl(246 48% 60%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cs-button--send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cs-button--send svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Avatar styling */
+.cs-avatar {
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0;
+  background: transparent !important;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cs-avatar img {
+  border-radius: 50%;
+}
+
+/* Custom avatar container */
+.cs-message__avatar {
+  display: flex;
+  align-items: flex-start;
+  margin-right: 0.5rem;
+}
+
+.cs-message--outgoing .cs-message__avatar {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Scrollbar styling */
+.cs-message-list__scroll-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cs-message-list__scroll-wrapper::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+.cs-message-list__scroll-wrapper::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+.cs-message-list__scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .cs-message__content-wrapper {
+    max-width: 85%;
+  }
+  
+  .cs-message-input {
+    padding: 0.5rem;
+    /* Extra padding for mobile Safari to avoid overlap with browser UI */
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+  }
+  
+  .cs-message-input__content-editor {
+    padding: 0.625rem 0.75rem;
+    font-size: 1rem; /* Prevent zoom on iOS */
+    min-height: 2.25rem;
+  }
+  
+  .cs-button--send {
+    height: 2.25rem;
+    min-width: 2.25rem;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .cs-conversation-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .cs-message-list {
+    padding: 0.75rem;
+    /* Add bottom padding to prevent last message from being hidden behind input */
+    padding-bottom: max(1rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+  }
+  
+  .cs-message__content {
+    font-size: 0.9375rem;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  /* Better touch targets for mobile */
+  .cs-message {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Target iOS Safari specifically */
+  .cs-message-input {
+    /* Add extra bottom padding for iOS Safari's floating toolbar */
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+  }
+  
+  @media (max-width: 640px) {
+    .cs-message-input {
+      /* Even more padding on mobile iOS to account for Safari's UI */
+      padding-bottom: max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
+    }
+    
+    .cs-message-list {
+      /* Ensure messages don't get hidden behind the input area */
+      padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
+    }
+  }
+}
+
+/* Dark mode specific adjustments */
+.dark .cs-message--incoming .cs-message__content {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .cs-message--outgoing .cs-message__content {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}

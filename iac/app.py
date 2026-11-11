@@ -3,10 +3,11 @@ import os
 
 import aws_cdk as cdk
 from adjust_layer_directory import adjust_layer_directory
+from dotenv import load_dotenv
 
 from iac.template_stack import TemplateStack
 
-
+load_dotenv()
 
 print("Starting the CDK")
 
@@ -34,13 +35,13 @@ else:
     stage = 'TEST'
 
 tags = {
-    'project': 'Template',
+    'project': 'ReInvent_Planner',
     'stage': stage,
-    'stack': 'BACK',
-    'owner': 'DevCommunity'
+    'stack': 'Solutions_Team',
+    'owner': 'BrunoVilardi'
 }
 
-TemplateStack(app, stack_name=stack_name, env=cdk.Environment(account=aws_account_id, region=aws_region), tags=tags)
+TemplateStack(app, stack_name, env=cdk.Environment(account=aws_account_id, region=aws_region), tags=tags)
 
 
 app.synth()

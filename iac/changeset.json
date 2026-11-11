@@ -1,0 +1,958 @@
+{
+    "Changes": [
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "CDKMetadata",
+                "PhysicalResourceId": "38bf7540-c6e4-11f0-98d8-0ef81e48faf1",
+                "ResourceType": "AWS::CDK::Metadata",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Analytics",
+                            "RequiresRecreation": "Conditionally"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "DirectModification"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Add",
+                "LogicalResourceId": "StrandsAgentStackAgentCoreRole88F2E49A",
+                "ResourceType": "AWS::IAM::Role",
+                "Scope": [],
+                "Details": []
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Add",
+                "LogicalResourceId": "StrandsAgentStackAgentCoreRoleDefaultPolicyD2D9DF7C",
+                "ResourceType": "AWS::IAM::Policy",
+                "Scope": [],
+                "Details": []
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Add",
+                "LogicalResourceId": "StrandsAgentStackAgentCoreRuntimeAF070BC5",
+                "ResourceType": "AWS::BedrockAgentCore::Runtime",
+                "Scope": [],
+                "Details": []
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Add",
+                "LogicalResourceId": "StrandsAgentStackAgentLogGroupCFF91043",
+                "ResourceType": "AWS::Logs::LogGroup",
+                "Scope": [],
+                "Details": []
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Add",
+                "LogicalResourceId": "StrandsAgentStackReInventAgentRepository7C3F005F",
+                "ResourceType": "AWS::ECR::Repository",
+                "Scope": [],
+                "Details": []
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "PolicyAction": "ReplaceAndDelete",
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasExternalDependenciesLayer59C22C4D",
+                "PhysicalResourceId": "arn:aws:lambda:us-east-1:954976331552:layer:TemplateLambdasExternalDependenciesLayer59C22C4D:5",
+                "ResourceType": "AWS::Lambda::LayerVersion",
+                "Replacement": "True",
+                "Scope": [
+                    "Metadata",
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Content",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "DirectModification"
+                    },
+                    {
+                        "Target": {
+                            "Attribute": "Metadata",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "DirectModification"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasGetAllSessions7069A559",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasGetAllSessions70-YYl7e1BClquK",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasGetAllSessionsPaginated1E2DD378",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasGetAllSessionsPa-i1ZbXPnabpTf",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasGetSessionsByDayCECCFA95",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasGetSessionsByDay-P2sTTuCOWVJb",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasGetSessionsByLevel3CD673F0",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasGetSessionsByLev-vczstPByMvI5",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasGetSessionsByShortId3C9D5E82",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasGetSessionsBySho-InjM3jjqo5ht",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasGetSessionsByVenueA0453064",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasGetSessionsByVen-Bx88PQ0KDZCe",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateLambdasSyncSessions6612C41F",
+                "PhysicalResourceId": "clean-mss-template-TemplateLambdasSyncSessions6612-7rwAIYzcMdTF",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateMCPMCPSERVER2F54B165",
+                "PhysicalResourceId": "clean-mss-template-TemplateMCPMCPSERVER2F54B165-UudYvQkci9u6",
+                "ResourceType": "AWS::Lambda::Function",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Layers",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Static",
+                        "ChangeSource": "ResourceReference",
+                        "CausingEntity": "TemplateLambdasExternalDependenciesLayer59C22C4D"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetallsessionsGETApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetallsessionsEB3BA09A",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetallsessionsGETApiPermissionTestcleanmss-9n5L49idw6nK",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetAllSessions7069A559.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetallsessionsGETApiPermissioncleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetallsessions20E3EC93",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetallsessionsGETApiPermissioncleanmsstemp-E9KTqxru16NW",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetAllSessions7069A559.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetallsessionsGETCE213A7C",
+                "PhysicalResourceId": "l8n9jwz8n2|i8svl1|GET",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetAllSessions7069A559.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetallsessionspaginatedGET80FB9211",
+                "PhysicalResourceId": "l8n9jwz8n2|mn5qwm|GET",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetAllSessionsPaginated1E2DD378.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetallsessionspaginatedGETApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetallsessionspaginatedF4CC1CE4",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetallsessionspaginatedGETApiPermissionTes-2xYOQPnhOfBb",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetAllSessionsPaginated1E2DD378.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetallsessionspaginatedGETApiPermissioncleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetallsessionspaginatedC157719A",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetallsessionspaginatedGETApiPermissioncle-tTLlhEBJZHyX",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetAllSessionsPaginated1E2DD378.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbydayGETApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbyday72A9D0B9",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbydayGETApiPermissionTestcleanm-nxMOjYuRR6Uj",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByDayCECCFA95.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbydayGETApiPermissioncleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbyday526291D4",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbydayGETApiPermissioncleanmsste-1bvQGIiFbh0a",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByDayCECCFA95.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbydayGETF05AD7AA",
+                "PhysicalResourceId": "l8n9jwz8n2|79t65u|GET",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByDayCECCFA95.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbylevelGET607A65E7",
+                "PhysicalResourceId": "l8n9jwz8n2|j10yg5|GET",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByLevel3CD673F0.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbylevelGETApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbylevelCF1E723E",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbylevelGETApiPermissionTestclea-SouxS2TErFca",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByLevel3CD673F0.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbylevelGETApiPermissioncleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbylevel2C4B5E75",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbylevelGETApiPermissioncleanmss-LZgnOXZQW5i7",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByLevel3CD673F0.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbyshortidGETApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbyshortidF95900C1",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbyshortidGETApiPermissionTestcl-pWFOCxbtL57x",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByShortId3C9D5E82.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbyshortidGETApiPermissioncleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbyshortid93CE3330",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbyshortidGETApiPermissioncleanm-HYc5ccL3pzdC",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByShortId3C9D5E82.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbyshortidGETF12FE224",
+                "PhysicalResourceId": "l8n9jwz8n2|qe9iui|GET",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByShortId3C9D5E82.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbyvenueGETApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbyvenue0EA9128B",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbyvenueGETApiPermissionTestclea-Ke0bKdEIb8o3",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByVenueA0453064.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbyvenueGETApiPermissioncleanmsstemplateTemplateRestApi8667BC93GETmsstemplategetsessionsbyvenueC9286377",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplategetsessionsbyvenueGETApiPermissioncleanmss-2piRBKvMmFF9",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByVenueA0453064.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplategetsessionsbyvenueGETDFB1A237",
+                "PhysicalResourceId": "l8n9jwz8n2|1wdfa8|GET",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasGetSessionsByVenueA0453064.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplatemcpANY1E8FFCC4",
+                "PhysicalResourceId": "l8n9jwz8n2|gsaynn|ANY",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateMCPMCPSERVER2F54B165.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplatemcpANYApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93ANYmsstemplatemcpE2F4E1B8",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplatemcpANYApiPermissionTestcleanmsstemplateTem-xMLVxZ2ePvev",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateMCPMCPSERVER2F54B165.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplatemcpANYApiPermissioncleanmsstemplateTemplateRestApi8667BC93ANYmsstemplatemcpF525F8A4",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplatemcpANYApiPermissioncleanmsstemplateTemplat-txxpSbMW0ed6",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateMCPMCPSERVER2F54B165.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplatesyncsessionsPOST2098E5E0",
+                "PhysicalResourceId": "l8n9jwz8n2|x82oe6|POST",
+                "ResourceType": "AWS::ApiGateway::Method",
+                "Replacement": "False",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "Integration",
+                            "RequiresRecreation": "Never"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasSyncSessions6612C41F.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplatesyncsessionsPOSTApiPermissionTestcleanmsstemplateTemplateRestApi8667BC93POSTmsstemplatesyncsessions1422E112",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplatesyncsessionsPOSTApiPermissionTestcleanmsst-5dGWSekrAt0j",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasSyncSessions6612C41F.Arn"
+                    }
+                ]
+            }
+        },
+        {
+            "Type": "Resource",
+            "ResourceChange": {
+                "Action": "Modify",
+                "LogicalResourceId": "TemplateRestApimsstemplatesyncsessionsPOSTApiPermissioncleanmsstemplateTemplateRestApi8667BC93POSTmsstemplatesyncsessions71DCA6D6",
+                "PhysicalResourceId": "clean-mss-template-TemplateRestApimsstemplatesyncsessionsPOSTApiPermissioncleanmsstempl-ZTsx7eAak5yl",
+                "ResourceType": "AWS::Lambda::Permission",
+                "Replacement": "Conditional",
+                "Scope": [
+                    "Properties"
+                ],
+                "Details": [
+                    {
+                        "Target": {
+                            "Attribute": "Properties",
+                            "Name": "FunctionName",
+                            "RequiresRecreation": "Always"
+                        },
+                        "Evaluation": "Dynamic",
+                        "ChangeSource": "ResourceAttribute",
+                        "CausingEntity": "TemplateLambdasSyncSessions6612C41F.Arn"
+                    }
+                ]
+            }
+        }
+    ],
+    "ChangeSetName": "cdk-diff-change-set",
+    "ChangeSetId": "arn:aws:cloudformation:us-east-1:954976331552:changeSet/cdk-diff-change-set/27b8586e-c38c-4452-8121-57409470b483",
+    "StackId": "arn:aws:cloudformation:us-east-1:954976331552:stack/clean-mss-template/38bf7540-c6e4-11f0-98d8-0ef81e48faf1",
+    "StackName": "clean-mss-template",
+    "Description": "CDK Changeset for diff 0e8299b1-3544-44c7-8eff-42a9fa11b4b8",
+    "Parameters": [
+        {
+            "ParameterKey": "BootstrapVersion",
+            "ParameterValue": "/cdk-bootstrap/hnb659fds/version",
+            "ResolvedValue": "27"
+        }
+    ],
+    "CreationTime": "2025-11-21T14:37:10.793000+00:00",
+    "ExecutionStatus": "UNAVAILABLE",
+    "Status": "FAILED",
+    "StatusReason": "The following hook(s)/validation failed: [AWS::EarlyValidation::ResourceExistenceCheck]. To troubleshoot Early Validation errors, use the DescribeEvents API for detailed failure information.",
+    "NotificationARNs": [],
+    "RollbackConfiguration": {},
+    "Capabilities": [
+        "CAPABILITY_IAM",
+        "CAPABILITY_NAMED_IAM",
+        "CAPABILITY_AUTO_EXPAND"
+    ],
+    "Tags": [
+        {
+            "Key": "owner",
+            "Value": "DevCommunity"
+        },
+        {
+            "Key": "stack",
+            "Value": "BACK"
+        },
+        {
+            "Key": "stage",
+            "Value": "TEST"
+        },
+        {
+            "Key": "project",
+            "Value": "Template"
+        }
+    ],
+    "ParentChangeSetId": null,
+    "IncludeNestedStacks": false,
+    "RootChangeSetId": null,
+    "OnStackFailure": null,
+    "ImportExistingResources": false
+}

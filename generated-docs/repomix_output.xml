@@ -1,0 +1,4681 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository>
+<repository_structure>
+  <directory name="tests">
+    <directory name="shared">
+      <directory name="infra">
+        <directory name="dto">
+          <file name="test_user_dynamo_dto.py"/>
+        </directory>
+        <directory name="repositories">
+          <file name="test_user_repository_mock.py"/>
+          <file name="test_user_repository_dynamo.py"/>
+        </directory>
+      </directory>
+      <directory name="domain">
+        <directory name="entities">
+          <file name="test_user.py"/>
+        </directory>
+      </directory>
+    </directory>
+    <directory name="modules">
+      <directory name="create_user">
+        <directory name="app">
+          <file name="test_create_user_viewmodel.py"/>
+          <file name="test_create_user_controller.py"/>
+          <file name="test_create_user_usecase.py"/>
+        </directory>
+      </directory>
+      <directory name="update_user">
+        <directory name="app">
+          <file name="test_update_user_viewmodel.py"/>
+          <file name="test_update_user_controller.py"/>
+          <file name="test_update_user_presenter.py"/>
+          <file name="test_update_user_usecase.py"/>
+        </directory>
+      </directory>
+      <directory name="get_all_users">
+        <directory name="app">
+          <file name="test_get_all_users_controller.py"/>
+          <file name="test_get_all_users_presenter.py"/>
+          <file name="test_get_all_users_usecase.py"/>
+          <file name="test_get_all_users_viewmodel.py"/>
+        </directory>
+      </directory>
+      <directory name="delete_user">
+        <directory name="app">
+          <file name="test_delete_user_viewmodel.py"/>
+          <file name="test_delete_user_controller.py"/>
+          <file name="test_delete_user_usecase.py"/>
+          <file name="test_delete_user_presenter.py"/>
+        </directory>
+      </directory>
+      <directory name="get_user">
+        <directory name="app">
+          <file name="test_get_user_usecase.py"/>
+          <file name="test_get_user_viewmodel.py"/>
+          <file name="test_get_user_controller.py"/>
+          <file name="test_get_user_presenter.py"/>
+        </directory>
+      </directory>
+    </directory>
+  </directory>
+  <file name="README.md"/>
+  <directory name="iac">
+    <file name="requirements.txt"/>
+    <file name="adjust_layer_directory.py"/>
+    <file name="source.bat"/>
+    <file name="README.md"/>
+    <directory name="local">
+      <file name="README.md"/>
+      <file name="configure_dynamodb.md"/>
+      <file name="docker-compose.yml"/>
+    </directory>
+    <directory name="iac">
+      <file name="lambda_stack.py"/>
+      <file name="template_stack.py"/>
+      <file name="template_dynamo_table.py"/>
+    </directory>
+    <file name="requirements-dev.txt"/>
+    <file name=".gitignore"/>
+    <file name="app.py"/>
+  </directory>
+  <file name="requirements-dev.txt"/>
+  <file name=".gitignore"/>
+  <directory name=".github">
+    <directory name="workflows">
+      <file name="CD.yml"/>
+      <file name="CI.yml"/>
+      <file name="CREATE_PR.yml"/>
+    </directory>
+  </directory>
+  <directory name="src">
+    <directory name="shared">
+      <directory name="infra">
+        <directory name="dto">
+          <file name="user_dynamo_dto.py"/>
+        </directory>
+        <directory name="repositories">
+          <file name="user_repository_dynamo.py"/>
+          <file name="load_user_mock_to_dynamo.py"/>
+          <file name="user_repository_mock.py"/>
+        </directory>
+        <directory name="external">
+          <directory name="dynamo">
+            <file name="dynamo_table.py"/>
+          </directory>
+          <directory name="observability">
+            <file name="observability_mock.py"/>
+            <file name="observability_aws.py"/>
+          </directory>
+        </directory>
+      </directory>
+      <file name="environments.py"/>
+      <directory name="domain">
+        <directory name="enums">
+          <file name="state_enum.py"/>
+        </directory>
+        <directory name="repositories">
+          <file name="user_repository_interface.py"/>
+        </directory>
+        <directory name="observability">
+          <file name="observability_interface.py"/>
+        </directory>
+        <directory name="entities">
+          <file name="user.py"/>
+        </directory>
+      </directory>
+      <directory name="helpers">
+        <directory name="enum">
+          <file name="http_status_code_enum.py"/>
+        </directory>
+        <directory name="errors">
+          <file name="usecase_errors.py"/>
+          <file name="controller_errors.py"/>
+          <file name="base_error.py"/>
+          <file name="domain_errors.py"/>
+        </directory>
+        <directory name="external_interfaces">
+          <file name="http_lambda_requests.py"/>
+          <file name="http_models.py"/>
+          <file name="http_codes.py"/>
+          <file name="external_interface.py"/>
+        </directory>
+      </directory>
+    </directory>
+    <directory name="modules">
+      <directory name="create_user">
+        <directory name="app">
+          <file name="create_user_controller.py"/>
+          <file name="create_user_viewmodel.py"/>
+          <file name="create_user_presenter.py"/>
+          <file name="create_user_usecase.py"/>
+        </directory>
+      </directory>
+      <directory name="update_user">
+        <directory name="app">
+          <file name="update_user_presenter.py"/>
+          <file name="update_user_usecase.py"/>
+          <file name="update_user_controller.py"/>
+          <file name="update_user_viewmodel.py"/>
+        </directory>
+      </directory>
+      <directory name="get_all_users">
+        <directory name="app">
+          <file name="get_all_users_presenter.py"/>
+          <file name="get_all_users_usecase.py"/>
+          <file name="get_all_users_viewmodel.py"/>
+          <file name="get_all_users_controller.py"/>
+        </directory>
+      </directory>
+      <directory name="delete_user">
+        <directory name="app">
+          <file name="delete_user_controller.py"/>
+          <file name="delete_user_presenter.py"/>
+          <file name="delete_user_usecase.py"/>
+          <file name="delete_user_viewmodel.py"/>
+        </directory>
+      </directory>
+      <directory name="get_user">
+        <directory name="app">
+          <file name="get_user_presenter.py"/>
+          <file name="get_user_viewmodel.py"/>
+          <file name="get_user_usecase.py"/>
+          <file name="get_user_controller.py"/>
+        </directory>
+      </directory>
+    </directory>
+  </directory>
+</repository_structure>
+<repository_files>
+  <file>
+    
+  
+    <path>tests/shared/infra/dto/test_user_dynamo_dto.py</path>
+    
+  
+    <content>from decimal import Decimal
+
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+from src.shared.infra.dto.user_dynamo_dto import UserDynamoDTO
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_UserDynamoDto:
+    def test_from_entity(self):
+        repo = UserRepositoryMock()
+
+        user_dto = UserDynamoDTO.from_entity(user=repo.users[0])
+
+        expected_selfie_dto = UserDynamoDTO(
+            name=repo.users[0].name,
+            email=repo.users[0].email,
+            user_id=repo.users[0].user_id,
+            state=repo.users[0].state
+        )
+
+        assert user_dto == expected_selfie_dto
+
+    def test_to_dynamo(self):
+        repo = UserRepositoryMock()
+
+        user_dto = UserDynamoDTO(
+            name=repo.users[0].name,
+            email=repo.users[0].email,
+            user_id=repo.users[0].user_id,
+            state=repo.users[0].state
+        )
+
+        user_dynamo = user_dto.to_dynamo()
+
+        expected_dict = {
+            &quot;entity&quot;: &quot;user&quot;,
+            &quot;name&quot;: repo.users[0].name,
+            &quot;email&quot;: repo.users[0].email,
+            &quot;user_id&quot;: repo.users[0].user_id,
+            &quot;state&quot;: repo.users[0].state.value
+        }
+
+        assert user_dto.to_dynamo() == expected_dict
+
+    def test_from_dynamo(self):
+        dynamo_dict = {'Item': {'user_id': Decimal('1'),
+                                'name': 'Bruno Soller',
+                                'SK': '#1',
+                                'state': 'APPROVED',
+                                'PK': 'user#1',
+                                'entity': 'user',
+                                'email': 'soller@soller.com'},
+                       'ResponseMetadata': {'RequestId': 'aa6a5e5e-943f-4452-8c1f-4e5441ee6042',
+                                            'HTTPStatusCode': 200,
+                                            'HTTPHeaders': {'date': 'Fri, 16 Dec 2022 15:40:29 GMT',
+                                                            'content-type': 'application/x-amz-json-1.0',
+                                                            'x-amz-crc32': '3909675734',
+                                                            'x-amzn-requestid': 'aa6a5e5e-943f-4452-8c1f-4e5441ee6042',
+                                                            'content-length': '174',
+                                                            'server': 'Jetty(9.4.48.v20220622)'},
+                                            'RetryAttempts': 0}}
+
+        user_dto = UserDynamoDTO.from_dynamo(user_data=dynamo_dict[&quot;Item&quot;])
+
+        expected_user_dto = UserDynamoDTO(
+            name=&quot;Bruno Soller&quot;,
+            email='soller@soller.com',
+            user_id=1,
+            state=STATE.APPROVED
+        )
+
+        assert user_dto == expected_user_dto
+
+    def test_to_entity(self):
+        repo = UserRepositoryMock()
+
+        user_dto = UserDynamoDTO(
+            name=repo.users[0].name,
+            email=repo.users[0].email,
+            user_id=repo.users[0].user_id,
+            state=repo.users[0].state
+        )
+
+        user = user_dto.to_entity()
+
+        assert user.name == repo.users[0].name
+        assert user.email == repo.users[0].email
+        assert user.user_id == repo.users[0].user_id
+        assert user.state == repo.users[0].state
+
+    def test_from_dynamo_to_entity(self):
+        dynamo_item = {'Item': {'user_id': Decimal('1'),
+                                'name': 'Bruno Soller',
+                                'SK': '#1',
+                                'state': 'APPROVED',
+                                'PK': 'user#1',
+                                'entity': 'user',
+                                'email': 'soller@soller.com'}}
+
+        user_dto = UserDynamoDTO.from_dynamo(user_data=dynamo_item[&quot;Item&quot;])
+
+        user = user_dto.to_entity()
+
+        expected_user = User(
+            name=&quot;Bruno Soller&quot;,
+            email=&quot;soller@soller.com&quot;,
+            user_id=1,
+            state=STATE.APPROVED
+        )
+
+        assert user.name == expected_user.name
+        assert user.email == expected_user.email
+        assert user.user_id == expected_user.user_id
+        assert user.state == expected_user.state
+
+    def test_from_entity_to_dynamo(self):
+        repo = UserRepositoryMock()
+
+        user_dto = UserDynamoDTO.from_entity(user=repo.users[0])
+
+        user_dynamo = user_dto.to_dynamo()
+
+        expected_dict = {
+            &quot;entity&quot;: &quot;user&quot;,
+            &quot;name&quot;: repo.users[0].name,
+            &quot;email&quot;: repo.users[0].email,
+            &quot;user_id&quot;: repo.users[0].user_id,
+            &quot;state&quot;: repo.users[0].state.value
+        }
+
+        assert user_dynamo == expected_dict</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/shared/infra/repositories/test_user_repository_mock.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+import pytest
+
+
+class Test_UserRepositoryMock:
+    def test_get_user(self):
+        repo = UserRepositoryMock()
+        user = repo.get_user(1)
+
+        assert user.name == &quot;Bruno Soller&quot;
+        assert user.email == &quot;soller@soller.com&quot;
+        assert user.user_id == 1
+        assert user.state == STATE.APPROVED
+
+    def test_get_user_not_found(self):
+        repo = UserRepositoryMock()
+        with pytest.raises(NoItemsFound):
+            user = repo.get_user(69)
+
+    def test_get_all_user(self):
+        repo = UserRepositoryMock()
+        users = repo.get_all_user()
+        assert len(users) == 3
+
+    def test_create_user(self):
+        repo = UserRepositoryMock()
+        user = User(
+            name=&quot;Vitor Soller&quot;,
+            email=&quot;dohype@vitin.com&quot;,
+            user_id=4,
+            state=STATE.PENDING
+        )
+
+        repo.create_user(user)
+
+        assert repo.users[3].name == &quot;Vitor Soller&quot;
+        assert repo.users[3].email == &quot;dohype@vitin.com&quot;
+        assert repo.users[3].user_id == 4
+        assert repo.users[3].state == STATE.PENDING
+
+        assert repo.user_counter == 4
+
+    def test_delete_user(self):
+        repo = UserRepositoryMock()
+        user = repo.delete_user(1)
+        assert user.name == &quot;Bruno Soller&quot;
+        assert user.email == &quot;soller@soller.com&quot;
+        assert user.user_id == 1
+        assert user.state == STATE.APPROVED
+
+    def test_delete_user_not_found(self):
+        repo = UserRepositoryMock()
+        with pytest.raises(NoItemsFound):
+            user = repo.delete_user(69)
+
+    def test_update_user(self):
+        repo = UserRepositoryMock()
+        user = repo.update_user(1, &quot;Bruno Guirão&quot;)
+
+        assert user.name == &quot;Bruno Guirão&quot;
+        assert repo.users[0].name == &quot;Bruno Guirão&quot;
+
+    def test_update_user_not_found(self):
+        repo = UserRepositoryMock()
+        with pytest.raises(NoItemsFound):
+            user = repo.update_user(69, &quot;Bruno Guirão&quot;)
+
+    def test_get_users_counter(self):
+        repo = UserRepositoryMock()
+
+        assert repo.get_user_counter() == 3</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/shared/infra/repositories/test_user_repository_dynamo.py</path>
+    
+  
+    <content>import os
+
+import pytest
+
+from src.shared.infra.repositories.user_repository_dynamo import UserRepositoryDynamo
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_UserRepositoryDynamo:
+    @pytest.mark.skip(reason=&quot;Needs dynamoDB&quot;)
+    def test_create_user(self):
+        os.environ[&quot;STAGE&quot;] = &quot;TEST&quot;
+
+        user_repository = UserRepositoryDynamo()
+        user_repository_mock = UserRepositoryMock()
+        resp = user_repository.create_user(user_repository_mock.users[0])
+
+        assert user_repository_mock.users[0].name == resp.name
+
+    @pytest.mark.skip(reason=&quot;Needs dynamoDB&quot;)
+    def test_get_user(self):
+        os.environ[&quot;STAGE&quot;] = &quot;TEST&quot;
+
+        user_repository = UserRepositoryDynamo()
+        user_repository_mock = UserRepositoryMock()
+        resp = user_repository.get_user(1)
+
+        assert user_repository_mock.users[0].name == resp.name
+
+    @pytest.mark.skip(reason=&quot;Needs dynamoDB&quot;)
+    def test_delete_user(self):
+        os.environ[&quot;STAGE&quot;] = &quot;TEST&quot;
+
+        user_repository = UserRepositoryDynamo()
+        user_repository_mock = UserRepositoryMock()
+        resp = user_repository.delete_user(3)
+
+        assert user_repository_mock.users[2].name == resp.name
+
+    @pytest.mark.skip(reason=&quot;Needs dynamoDB&quot;)
+    def test_get_all_user(self):
+        os.environ[&quot;STAGE&quot;] = &quot;TEST&quot;
+
+        user_repository = UserRepositoryDynamo()
+        user_repository_mock = UserRepositoryMock()
+        resp = user_repository.get_all_user()
+
+        assert len(user_repository_mock.users) == len(resp)
+
+    @pytest.mark.skip(reason=&quot;Needs dynamoDB&quot;)
+    def test_update_user(self):
+        os.environ[&quot;STAGE&quot;] = &quot;TEST&quot;
+
+        user_repository = UserRepositoryDynamo()
+        user_repository_mock = UserRepositoryMock()
+        resp = user_repository.update_user(user_id=1, new_name=&quot;Vitor Soller Soller&quot;)
+
+        assert resp.name == &quot;Vitor Soller Soller&quot;</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/shared/domain/entities/test_user.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+from src.shared.helpers.errors.domain_errors import EntityError
+import pytest
+
+
+class Test_User:
+    def test_user(self):
+        User(name=&quot;VITOR&quot;, email=&quot;21.01444-2@maua.br&quot;, user_id=1, state=STATE.APPROVED)
+
+    def test_user_name_is_none(self):
+        with pytest.raises(EntityError):
+            User(name=None, email=&quot;21.01444-2@maua.br&quot;, user_id=1, state=STATE.APPROVED)
+
+    def test_user_name_is_not_str(self):
+        with pytest.raises(EntityError):
+            User(name=1, email=&quot;21.01444-2@maua.br&quot;, user_id=1, state=STATE.APPROVED)
+
+    def test_user_name_is_shorter_than_min_length(self):
+        with pytest.raises(EntityError):
+            User(name=&quot;V&quot;, email=&quot;21.01444-2@maua.br&quot;, user_id=1, state=STATE.APPROVED)
+
+    def test_user_email_is_none(self):
+        with pytest.raises(EntityError):
+            User(name=&quot;VITOR&quot;, email=None, user_id=1, state=STATE.APPROVED)
+
+    def test_user_email_is_not_valid(self):
+        with pytest.raises(EntityError):
+            User(name=&quot;VITOR&quot;, email=&quot;21.01444-2maua.br&quot;, user_id=1, state=STATE.APPROVED)
+
+    def test_user_user_id_is_not_int(self):
+        with pytest.raises(EntityError):
+            User(name=&quot;VITOR&quot;, email=&quot;21.01444-2@maua.br&quot;, user_id=&quot;1&quot;, state=STATE.APPROVED)
+
+    def test_user_user_id_is_negative(self):
+        with pytest.raises(EntityError):
+            User(name=&quot;VITOR&quot;, email=&quot;21.01444-2@maua.br&quot;, user_id=-1, state=STATE.APPROVED)
+
+    def test_user_state_is_not_sate_enum(self):
+        with pytest.raises(EntityError):
+            User(name=&quot;VITOR&quot;, email=&quot;21.01444-2@maua.br&quot;, user_id=1, state=&quot;APPROVED&quot;)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/create_user/app/test_create_user_viewmodel.py</path>
+    
+  
+    <content>from src.modules.create_user.app.create_user_viewmodel import CreateUserViewmodel
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class Test_CreateUserViewModel:
+    def test_create_user_viewmodel(self):
+        user = User(
+            user_id=1,
+            name=&quot;Vitor Soller&quot;,
+            email=&quot;vitinho@hype.com&quot;,
+            state=STATE.APPROVED
+        )
+        userViewmodel = CreateUserViewmodel(user=user).to_dict()
+
+        expected = {'user_id': 1,
+                    'name': 'Vitor Soller',
+                    'email': 'vitinho@hype.com',
+                    'state': 'APPROVED',
+                    'message': 'the user was created successfully'}
+
+        assert expected == userViewmodel</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/create_user/app/test_create_user_controller.py</path>
+    
+  
+    <content>from src.modules.create_user.app.create_user_controller import CreateUserController
+from src.modules.create_user.app.create_user_usecase import CreateUserUsecase
+from src.shared.helpers.external_interfaces.http_models import HttpRequest
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_CreateUserControler:
+    def test_create_user_controller(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo=repo)
+        controller = CreateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'name': 'Branco do Branco Branco da Silva',
+            'email': 'branco@branco.com'
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 201
+        assert response.body['user_id'] == repo.users[-1].user_id
+        assert response.body['name'] == repo.users[-1].name
+        assert response.body['email'] == repo.users[-1].email
+        assert response.body['state'] == repo.users[-1].state.value
+        assert response.body['message'] == &quot;the user was created successfully&quot;
+
+    def test_create_user_controller_missing_name(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo=repo)
+        controller = CreateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'email': '21.01444-2@maua.br'})
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field name is missing&quot;
+
+
+    def test_create_user_controller_missing_email(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo=repo)
+        controller = CreateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'name': 'Branco do Branco Branco da Silva'})
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field email is missing&quot;
+
+    def test_create_user_controller_invalid_email(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo=repo)
+        controller = CreateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'name': 'Branco do Branco Branco da Silva',
+            'email': 'branco@branco'})
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field email is not valid&quot;
+
+    def test_create_user_controller_invalid_name(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo=repo)
+        controller = CreateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'name': 'B',
+            'email': 'branco@branco.com'})
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field name is not valid&quot;</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/create_user/app/test_create_user_usecase.py</path>
+    
+  
+    <content>import pytest
+
+from src.modules.create_user.app.create_user_usecase import CreateUserUsecase
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_CreateUserUsecase:
+
+    def test_create_user(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo)
+
+        user = usecase(name=&quot;Vitor Choueri&quot;, email=&quot;branco@branco.branco&quot;)
+
+        assert repo.users[-1] == user
+
+    def test_create_user_invalid_name(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo)
+
+        with pytest.raises(EntityError):
+            user = usecase(name=&quot;V&quot;, email=&quot;branco@branco.branco&quot;)
+
+    def test_create_user_invalid_email(self):
+        repo = UserRepositoryMock()
+        usecase = CreateUserUsecase(repo)
+
+        with pytest.raises(EntityError):
+            user = usecase(name=&quot;Vitor Choueri&quot;, email=&quot;branco@brancobranco&quot;)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/update_user/app/test_update_user_viewmodel.py</path>
+    
+  
+    <content>from src.modules.update_user.app.update_user_viewmodel import UpdateUserViewmodel
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class Test_UpadateUserViewmodel:
+    def test_update_user_viewmodel(self):
+        user = User(user_id=1, name=&quot;Test&quot;, email=&quot;teste@test.com&quot;, state=STATE.APPROVED)
+
+        updated_useer_viewmodel = UpdateUserViewmodel(user)
+
+        expected = {
+            'user_id': 1,
+            'name': &quot;Test&quot;,
+            'email': &quot;teste@test.com&quot;,
+            'state': &quot;APPROVED&quot;,
+            'message': &quot;the user was updated successfully&quot;
+        }
+
+        assert expected == updated_useer_viewmodel.to_dict()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/update_user/app/test_update_user_controller.py</path>
+    
+  
+    <content>from src.modules.update_user.app.update_user_controller import UpdateUserController
+from src.modules.update_user.app.update_user_usecase import UpdateUserUsecase
+from src.shared.helpers.external_interfaces.http_models import HttpRequest
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_UpdateUserController:
+    def test_update_user_controller(self):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+        controller = UpdateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'user_id': &quot;1&quot;,
+            'new_name': 'Branco do Branco Branco da Silva'
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 200
+        assert response.body['user_id'] == repo.users[0].user_id
+        assert response.body['name'] == 'Branco do Branco Branco da Silva'
+        assert response.body['email'] == repo.users[0].email
+        assert response.body['state'] == repo.users[0].state.value
+        assert response.body['message'] == &quot;the user was updated successfully&quot;
+
+    def test_update_user_controller_missing_user_id(self):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+        controller = UpdateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'new_name': 'Branco do Branco Branco da Silva'
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field user_id is missing&quot;
+
+    def test_update_user_controller_missing_new_name(self):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+        controller = UpdateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'user_id': &quot;1&quot;
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field new_name is missing&quot;
+
+    def test_update_user_controller_invalid_user_id(self):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+        controller = UpdateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'user_id': 3,
+            'new_name': 'Branco do Branco Branco da Silva'
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field user_id isn't in the right type.\n Received: int.\n Expected: str&quot;
+
+    def test_update_user_not_found(self):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+        controller = UpdateUserController(usecase=usecase)
+
+        request = HttpRequest(body={
+            'user_id': &quot;69&quot;,
+            'new_name': 'Branco do Branco Branco da Silva'
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 404
+        assert response.body == 'No items found for user_id'</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/update_user/app/test_update_user_presenter.py</path>
+    
+  
+    <content>import json
+
+from src.modules.update_user.app.update_user_presenter import lambda_handler
+
+
+class Test_UpdateUserPresenter:
+
+    def test_update_user(self):
+        event = {
+            &quot;version&quot;: &quot;2.0&quot;,
+            &quot;routeKey&quot;: &quot;$default&quot;,
+            &quot;rawPath&quot;: &quot;/my/path&quot;,
+            &quot;rawQueryString&quot;: &quot;parameter1=value1&amp;parameter1=value2&amp;parameter2=value&quot;,
+            &quot;cookies&quot;: [
+                &quot;cookie1&quot;,
+                &quot;cookie2&quot;
+            ],
+            &quot;headers&quot;: {
+                &quot;header1&quot;: &quot;value1&quot;,
+                &quot;header2&quot;: &quot;value1,value2&quot;
+            },
+            &quot;queryStringParameters&quot;: {
+                &quot;parameter1&quot;: &quot;1&quot;
+            },
+            &quot;requestContext&quot;: {
+                &quot;accountId&quot;: &quot;123456789012&quot;,
+                &quot;apiId&quot;: &quot;&lt;urlid&gt;&quot;,
+                &quot;authentication&quot;: None,
+                &quot;authorizer&quot;: {
+                    &quot;iam&quot;: {
+                        &quot;accessKey&quot;: &quot;AKIA...&quot;,
+                        &quot;accountId&quot;: &quot;111122223333&quot;,
+                        &quot;callerId&quot;: &quot;AIDA...&quot;,
+                        &quot;cognitoIdentity&quot;: None,
+                        &quot;principalOrgId&quot;: None,
+                        &quot;userArn&quot;: &quot;arn:aws:iam::111122223333:user/example-user&quot;,
+                        &quot;userId&quot;: &quot;AIDA...&quot;
+                    }
+                },
+                &quot;domainName&quot;: &quot;&lt;url-id&gt;.lambda-url.us-west-2.on.aws&quot;,
+                &quot;domainPrefix&quot;: &quot;&lt;url-id&gt;&quot;,
+                &quot;external_interfaces&quot;: {
+                    &quot;method&quot;: &quot;POST&quot;,
+                    &quot;path&quot;: &quot;/my/path&quot;,
+                    &quot;protocol&quot;: &quot;HTTP/1.1&quot;,
+                    &quot;sourceIp&quot;: &quot;123.123.123.123&quot;,
+                    &quot;userAgent&quot;: &quot;agent&quot;
+                },
+                &quot;requestId&quot;: &quot;id&quot;,
+                &quot;routeKey&quot;: &quot;$default&quot;,
+                &quot;stage&quot;: &quot;$default&quot;,
+                &quot;time&quot;: &quot;12/Mar/2020:19:03:58 +0000&quot;,
+                &quot;timeEpoch&quot;: 1583348638390
+            },
+            &quot;body&quot;: '{&quot;user_id&quot;: &quot;1&quot;,  &quot;new_name&quot;: &quot;João Soller&quot;}',
+            &quot;pathParameters&quot;: None,
+            &quot;isBase64Encoded&quot;: None,
+            &quot;stageVariables&quot;: None
+        }
+
+        response = lambda_handler(event, None)
+
+
+        assert response[&quot;statusCode&quot;] == 200
+        assert json.loads(response[&quot;body&quot;])['name'] == 'João Soller'</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/update_user/app/test_update_user_usecase.py</path>
+    
+  
+    <content>import pytest
+
+from src.modules.update_user.app.update_user_usecase import UpdateUserUsecase
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_UpdateUserUsecase:
+    def test_update_user_usecase(selfs):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+        updated_user = usecase(user_id=1, new_name=&quot;Bruno Guirão MPNTM&quot;)
+
+        assert updated_user.name == &quot;Bruno Guirão MPNTM&quot;
+
+    def test_update_user_usecase_wrong_user_id(selfs):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+
+        with pytest.raises(EntityError):
+            usecase(user_id=&quot;1&quot;, new_name=&quot;Bruno Guirão MPNTM&quot;)
+
+    def test_update_user_usecase_wrong_new_name(selfs):
+        repo = UserRepositoryMock()
+        usecase = UpdateUserUsecase(repo=repo)
+
+        with pytest.raises(EntityError):
+            usecase(user_id=1, new_name=1)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_all_users/app/test_get_all_users_controller.py</path>
+    
+  
+    <content>from src.modules.get_all_users.app.get_all_users_controller import GetAllUsersController
+from src.modules.get_all_users.app.get_all_users_usecase import GetAllUsersUsecase
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_GetAllUsersController:
+
+    def test_get_all_users_controller(self):
+        repo_mock = UserRepositoryMock()
+        get_all_users_usecase = GetAllUsersUsecase(repo_mock)
+        controller = GetAllUsersController(get_all_users_usecase)
+
+        response = controller(None)
+
+        assert response.status_code == 200</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_all_users/app/test_get_all_users_presenter.py</path>
+    
+  
+    <content>import json
+
+from src.modules.get_all_users.app.get_all_users_presenter import lambda_handler
+
+
+class Test_GetAllUsersPresenter:
+    def test_get_all_users_presenter(self):
+        event = {
+            &quot;version&quot;: &quot;2.0&quot;,
+            &quot;routeKey&quot;: &quot;$default&quot;,
+            &quot;rawPath&quot;: &quot;/my/path&quot;,
+            &quot;rawQueryString&quot;: &quot;parameter1=value1&amp;parameter1=value2&amp;parameter2=value&quot;,
+            &quot;cookies&quot;: [
+                &quot;cookie1&quot;,
+                &quot;cookie2&quot;
+            ],
+            &quot;headers&quot;: {
+                &quot;header1&quot;: &quot;value1&quot;,
+                &quot;header2&quot;: &quot;value1,value2&quot;
+            },
+            &quot;queryStringParameters&quot;: {
+                &quot;parameter1&quot;: &quot;value1&quot;,
+            },
+            &quot;requestContext&quot;: {
+                &quot;accountId&quot;: &quot;123456789012&quot;,
+                &quot;apiId&quot;: &quot;&lt;urlid&gt;&quot;,
+                &quot;authentication&quot;: None,
+                &quot;authorizer&quot;: {
+                    &quot;iam&quot;: {
+                        &quot;accessKey&quot;: &quot;AKIA...&quot;,
+                        &quot;accountId&quot;: &quot;111122223333&quot;,
+                        &quot;callerId&quot;: &quot;AIDA...&quot;,
+                        &quot;cognitoIdentity&quot;: None,
+                        &quot;principalOrgId&quot;: None,
+                        &quot;userArn&quot;: &quot;arn:aws:iam::111122223333:user_id/example-user_id&quot;,
+                        &quot;userId&quot;: &quot;AIDA...&quot;
+                    }
+                },
+                &quot;domainName&quot;: &quot;&lt;url-id&gt;.lambda-url.us-west-2.on.aws&quot;,
+                &quot;domainPrefix&quot;: &quot;&lt;url-id&gt;&quot;,
+                &quot;external_interfaces&quot;: {
+                    &quot;method&quot;: &quot;POST&quot;,
+                    &quot;path&quot;: &quot;/my/path&quot;,
+                    &quot;protocol&quot;: &quot;HTTP/1.1&quot;,
+                    &quot;sourceIp&quot;: &quot;123.123.123.123&quot;,
+                    &quot;userAgent&quot;: &quot;agent&quot;
+                },
+                &quot;requestId&quot;: &quot;id&quot;,
+                &quot;routeKey&quot;: &quot;$default&quot;,
+                &quot;stage&quot;: &quot;$default&quot;,
+                &quot;time&quot;: &quot;12/Mar/2020:19:03:58 +0000&quot;,
+                &quot;timeEpoch&quot;: 1583348638390
+            },
+            &quot;body&quot;: &quot;Hello from client!&quot;,
+            &quot;pathParameters&quot;: None,
+            &quot;isBase64Encoded&quot;: None,
+            &quot;stageVariables&quot;: None
+        }
+
+        expected_body = {
+            &quot;all_users&quot;: [
+                {
+                    'user_id': 1,
+                    'name': &quot;Bruno Soller&quot;,
+                    'email': &quot;soller@soller.com&quot;,
+                    'state': 'APPROVED',
+                },
+                {
+                    'user_id': 2,
+                    'name': &quot;Vitor Brancas&quot;,
+                    'email': &quot;brancas@brancas.com&quot;,
+                    'state': 'REJECTED',
+                },
+                {
+                    'user_id': 3,
+                    'name': &quot;João Vilas&quot;,
+                    'email': &quot;bruno@bruno.com&quot;,
+                    'state': 'PENDING',
+                }
+            ],
+            &quot;message&quot;: &quot;all users has been retrieved&quot;
+        }
+
+        response = lambda_handler(event=event, context=None)
+
+        assert response[&quot;statusCode&quot;] == 200
+        assert json.loads(response[&quot;body&quot;]) == expected_body</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_all_users/app/test_get_all_users_usecase.py</path>
+    
+  
+    <content>from src.modules.get_all_users.app.get_all_users_usecase import GetAllUsersUsecase
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_GetAllUsersUsecase:
+
+    def test_get_all_users_usecase(self):
+        repo_mock = UserRepositoryMock()
+        usecase = GetAllUsersUsecase(repo_mock)
+
+        all_users_list_returned = usecase()
+
+        assert all_users_list_returned == repo_mock.users
+        assert len(all_users_list_returned) == len(repo_mock.users)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_all_users/app/test_get_all_users_viewmodel.py</path>
+    
+  
+    <content>from src.modules.get_all_users.app.get_all_users_viewmodel import GetAllUsersViewmodel, UserViewmodel
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class Test_GetAllUsersViewmodel:
+    all_users_list = [
+        User(user_id=1,
+             name=&quot;Lucas Duez&quot;,
+             email=&quot;deuzexmachina@gmail.com&quot;,
+             state=STATE.APPROVED),
+
+        User(user_id=2,
+             name=&quot;Laura Blablachan&quot;,
+             email=&quot;laurinha@gmail.com&quot;,
+             state=STATE.APPROVED),
+    ]
+
+    def test_get_all_users_viewmodel(self):
+        viewmodel = GetAllUsersViewmodel(self.all_users_list)
+
+        expected = {
+            &quot;all_users&quot;: [
+                {
+                    'user_id': 1,
+                    'name': &quot;Lucas Duez&quot;,
+                    'email': &quot;deuzexmachina@gmail.com&quot;,
+                    'state': 'APPROVED',
+                },
+                {
+                    'user_id': 2,
+                    'name': &quot;Laura Blablachan&quot;,
+                    'email': &quot;laurinha@gmail.com&quot;,
+                    'state': 'APPROVED',
+                }
+            ],
+            &quot;message&quot;: &quot;all users has been retrieved&quot;
+        }
+
+        response = viewmodel.to_dict()
+
+        assert response == expected
+
+    def test_user_viewmodel(self):
+        viewmodel = UserViewmodel(
+            User(user_id=2,
+                 name=&quot;Laura Blablachan&quot;,
+                 email=&quot;laurinha@gmail.com&quot;,
+                 state=STATE.APPROVED),
+)
+
+        response = viewmodel.to_dict()
+
+        expected = {
+                    'user_id': 2,
+                    'name': &quot;Laura Blablachan&quot;,
+                    'email': &quot;laurinha@gmail.com&quot;,
+                    'state': 'APPROVED',
+        }
+
+        assert response == expected</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/delete_user/app/test_delete_user_viewmodel.py</path>
+    
+  
+    <content>from src.modules.delete_user.app.delete_user_viewmodel import DeleteUserViewmodel
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class Test_DeleteUserViewmodel:
+    def test_delete_user_viewmodel(self):
+        user = User(
+            user_id=1,
+            name=&quot;Vitinho da Silva&quot;,
+            email=&quot;21.01444-2@maua.br&quot;,
+            state=STATE.APPROVED)
+
+        delete_user_viewmodel = DeleteUserViewmodel(user)
+
+        expected = {
+                    'user_id': 1,
+                    'name': 'Vitinho da Silva',
+                    'email': '21.01444-2@maua.br',
+                    'state': 'APPROVED',
+                    'message': 'the user was deleted successfully'}
+
+        assert expected == delete_user_viewmodel.to_dict()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/delete_user/app/test_delete_user_controller.py</path>
+    
+  
+    <content>from src.modules.delete_user.app.delete_user_controller import DeleteUserController
+from src.modules.delete_user.app.delete_user_usecase import DeleteUserUsecase
+from src.shared.helpers.external_interfaces.http_models import HttpRequest
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_DeleteUserController:
+    def test_delete_user_controller(self):
+            repo = UserRepositoryMock()
+            usecase = DeleteUserUsecase(repo=repo)
+            controller = DeleteUserController(usecase=usecase)
+
+            request = HttpRequest(body={
+                'user_id': '1'
+            })
+
+            response = controller(request=request)
+
+            assert response.status_code == 200
+            assert response.body['message'] == 'the user was deleted successfully'
+
+    def test_delete_user_controller_wrong_type(self):
+            repo = UserRepositoryMock()
+            usecase = DeleteUserUsecase(repo=repo)
+            controller = DeleteUserController(usecase=usecase)
+
+            request = HttpRequest(body={
+                'user_id': 'a'
+            })
+
+            response = controller(request=request)
+
+            assert response.status_code == 400
+            assert response.body == 'Field user_id is not valid'
+
+    def test_delete_user_controller_missing_parameter(self):
+            repo = UserRepositoryMock()
+            usecase = DeleteUserUsecase(repo=repo)
+            controller = DeleteUserController(usecase=usecase)
+
+            request = HttpRequest(body={
+                'id': '1'
+            })
+
+            response = controller(request=request)
+
+            assert response.status_code == 400
+            assert response.body == 'Field user_id is missing'
+
+    def test_delete_user_controller_invalid_user_id(self):
+            repo = UserRepositoryMock()
+            usecase = DeleteUserUsecase(repo=repo)
+            controller = DeleteUserController(usecase=usecase)
+
+            request = HttpRequest(body={
+                'user_id': 2
+            })
+
+            response = controller(request=request)
+
+            assert response.status_code == 400
+            assert response.body == &quot;Field user_id isn't in the right type.\n Received: int.\n Expected: str&quot;
+
+    def test_delete_user_controller_no_items_found(self):
+            repo = UserRepositoryMock()
+            usecase = DeleteUserUsecase(repo=repo)
+            controller = DeleteUserController(usecase=usecase)
+
+            request = HttpRequest(body={
+                'user_id': '69'
+            })
+
+            response = controller(request=request)
+
+            assert response.status_code == 404
+            assert response.body == 'No items found for user_id'</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/delete_user/app/test_delete_user_usecase.py</path>
+    
+  
+    <content>import pytest
+
+from src.modules.delete_user.app.delete_user_usecase import DeleteUserUsecase
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+
+class Test_DeleteUserUsecase:
+    def test_delete_user(self):
+        repo = UserRepositoryMock()
+        usecase = DeleteUserUsecase(repo)
+
+        lenBefore = len(repo.users)
+
+        user = usecase(1)
+
+        assert len(repo.users) == lenBefore - 1
+
+    def test_delete_user_not_found(self):
+        repo = UserRepositoryMock()
+        usecase = DeleteUserUsecase(repo)
+
+        with pytest.raises(NoItemsFound):
+            user = usecase(69)
+
+    def test_delete_user_invalid_id(self):
+        repo = UserRepositoryMock()
+        usecase = DeleteUserUsecase(repo)
+
+        with pytest.raises(EntityError):
+            user = usecase(&quot;invalid&quot;)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/delete_user/app/test_delete_user_presenter.py</path>
+    
+  
+    <content>import json
+
+from src.modules.delete_user.app.delete_user_presenter import lambda_handler
+
+
+class Test_DeleteUserPresenter:
+
+    def test_delete_user(self):
+        event = {
+            &quot;version&quot;: &quot;2.0&quot;,
+            &quot;routeKey&quot;: &quot;$default&quot;,
+            &quot;rawPath&quot;: &quot;/my/path&quot;,
+            &quot;rawQueryString&quot;: &quot;parameter1=value1&amp;parameter1=value2&amp;parameter2=value&quot;,
+            &quot;cookies&quot;: [
+                &quot;cookie1&quot;,
+                &quot;cookie2&quot;
+            ],
+            &quot;headers&quot;: {
+                &quot;header1&quot;: &quot;value1&quot;,
+                &quot;header2&quot;: &quot;value1,value2&quot;
+            },
+            &quot;queryStringParameters&quot;: {
+                &quot;parameter1&quot;: &quot;1&quot;
+            },
+            &quot;requestContext&quot;: {
+                &quot;accountId&quot;: &quot;123456789012&quot;,
+                &quot;apiId&quot;: &quot;&lt;urlid&gt;&quot;,
+                &quot;authentication&quot;: None,
+                &quot;authorizer&quot;: {
+                    &quot;iam&quot;: {
+                        &quot;accessKey&quot;: &quot;AKIA...&quot;,
+                        &quot;accountId&quot;: &quot;111122223333&quot;,
+                        &quot;callerId&quot;: &quot;AIDA...&quot;,
+                        &quot;cognitoIdentity&quot;: None,
+                        &quot;principalOrgId&quot;: None,
+                        &quot;userArn&quot;: &quot;arn:aws:iam::111122223333:user/example-user&quot;,
+                        &quot;userId&quot;: &quot;AIDA...&quot;
+                    }
+                },
+                &quot;domainName&quot;: &quot;&lt;url-id&gt;.lambda-url.us-west-2.on.aws&quot;,
+                &quot;domainPrefix&quot;: &quot;&lt;url-id&gt;&quot;,
+                &quot;external_interfaces&quot;: {
+                    &quot;method&quot;: &quot;POST&quot;,
+                    &quot;path&quot;: &quot;/my/path&quot;,
+                    &quot;protocol&quot;: &quot;HTTP/1.1&quot;,
+                    &quot;sourceIp&quot;: &quot;123.123.123.123&quot;,
+                    &quot;userAgent&quot;: &quot;agent&quot;
+                },
+                &quot;requestId&quot;: &quot;id&quot;,
+                &quot;routeKey&quot;: &quot;$default&quot;,
+                &quot;stage&quot;: &quot;$default&quot;,
+                &quot;time&quot;: &quot;12/Mar/2020:19:03:58 +0000&quot;,
+                &quot;timeEpoch&quot;: 1583348638390
+            },
+            &quot;body&quot;: '{&quot;user_id&quot;: &quot;1&quot;}',
+            &quot;pathParameters&quot;: None,
+            &quot;isBase64Encoded&quot;: None,
+            &quot;stageVariables&quot;: None
+        }
+
+        response = lambda_handler(event, None)
+
+        expected = {'user_id': 1,
+                     'name': 'Bruno Soller',
+                     'email': 'soller@soller.com',
+                     'state': 'APPROVED',
+                     'message': 'the user was deleted successfully'}
+
+        assert json.loads(response[&quot;body&quot;]) == expected
+        assert response[&quot;statusCode&quot;] == 200</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_user/app/test_get_user_usecase.py</path>
+    
+  
+    <content>import pytest
+
+from src.modules.get_user.app.get_user_usecase import GetUserUsecase
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.infra.external.observability.observability_mock import ObservabilityMock
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+observability = ObservabilityMock(module_name=&quot;get_user&quot;)
+
+class Test_GetUserUsecase:
+
+    def test_get_user(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo, observability=observability)
+
+        user = usecase(user_id=repo.users[1].user_id)
+
+        assert repo.users[1] == user
+
+    def test_get_user_not_found(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo, observability=observability)
+
+        with pytest.raises(NoItemsFound):
+            user = usecase(user_id=999)
+
+    def test_get_user_invalid_id(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo, observability=observability)
+
+        with pytest.raises(EntityError):
+            user = usecase(user_id=&quot;invalid&quot;)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_user/app/test_get_user_viewmodel.py</path>
+    
+  
+    <content>from src.modules.get_user.app.get_user_viewmodel import GetUserViewmodel
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class Test_GetUserViewModel:
+    def test_get_user_viewmodel(self):
+        user = User(
+            user_id=1,
+            name=&quot;Vitor Soller&quot;,
+            email=&quot;vitinho@hype.com&quot;,
+            state=STATE.APPROVED
+        )
+        userViewmodel = GetUserViewmodel(user=user).to_dict()
+
+        expected = {'user_id': 1,
+                    'name': 'Vitor Soller',
+                    'email': 'vitinho@hype.com',
+                    'state': 'APPROVED',
+                    'message': 'the user was retrieved successfully'}
+
+        assert expected == userViewmodel</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_user/app/test_get_user_controller.py</path>
+    
+  
+    <content>from src.modules.get_user.app.get_user_controller import GetUserController
+from src.modules.get_user.app.get_user_usecase import GetUserUsecase
+from src.shared.helpers.external_interfaces.http_models import HttpRequest
+from src.shared.infra.external.observability.observability_mock import ObservabilityMock
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+
+observability = ObservabilityMock(module_name=&quot;get_user&quot;)
+
+class Test_GetUserController:
+    def test_get_user_controller(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo=repo, observability=observability)
+        controller = GetUserController(usecase=usecase, observability=observability)
+
+        request = HttpRequest(query_params={
+            'user_id': str(repo.users[1].user_id)
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 200
+        assert response.body['user_id'] == repo.users[1].user_id
+        assert response.body['name'] == repo.users[1].name
+        assert response.body['email'] == repo.users[1].email
+        assert response.body['state'] == repo.users[1].state.value
+
+    def test_get_user_controller_missing_parameters(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo=repo, observability=observability)
+        controller = GetUserController(usecase=usecase, observability=observability)
+
+        request = HttpRequest(query_params={})
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == 'Field user_id is missing'
+
+
+    def test_get_user_contoller_wrong_type_parameter(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo=repo, observability=observability)
+        controller = GetUserController(usecase=usecase, observability=observability)
+
+        request = HttpRequest(query_params={
+            'user_id': 999
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == &quot;Field user_id isn't in the right type.\n Received: int.\n Expected: str&quot;
+
+    def test_get_user_contoller_entity_error(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo=repo, observability=observability)
+        controller = GetUserController(usecase=usecase, observability=observability)
+
+        request = HttpRequest(query_params={
+            'user_id': 'abc'
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 400
+        assert response.body == 'Field user_id is not valid'
+
+    def test_get_user_controller_no_items_found(self):
+        repo = UserRepositoryMock()
+        usecase = GetUserUsecase(repo=repo, observability=observability)
+        controller = GetUserController(usecase=usecase, observability=observability)
+
+        request = HttpRequest(query_params={
+            'user_id': str(999)
+        })
+
+        response = controller(request=request)
+
+        assert response.status_code == 404
+        assert response.body == 'No items found for user_id'</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>tests/modules/get_user/app/test_get_user_presenter.py</path>
+    
+  
+    <content>import json
+from dataclasses import dataclass
+import pytest
+
+from src.modules.get_user.app.get_user_presenter import lambda_handler
+
+
+class Test_GetUserPresenter:
+
+    def test_get_user(self):
+        event = {
+            &quot;version&quot;: &quot;2.0&quot;,
+            &quot;routeKey&quot;: &quot;$default&quot;,
+            &quot;rawPath&quot;: &quot;/my/path&quot;,
+            &quot;rawQueryString&quot;: &quot;parameter1=value1&amp;parameter1=value2&amp;parameter2=value&quot;,
+            &quot;cookies&quot;: [
+                &quot;cookie1&quot;,
+                &quot;cookie2&quot;
+            ],
+            &quot;headers&quot;: {
+                &quot;header1&quot;: &quot;value1&quot;,
+                &quot;header2&quot;: &quot;value1,value2&quot;
+            },
+            &quot;queryStringParameters&quot;: {
+                &quot;user_id&quot;: &quot;1&quot;
+            },
+            &quot;requestContext&quot;: {
+                &quot;accountId&quot;: &quot;123456789012&quot;,
+                &quot;apiId&quot;: &quot;&lt;urlid&gt;&quot;,
+                &quot;authentication&quot;: None,
+                &quot;authorizer&quot;: {
+                    &quot;iam&quot;: {
+                        &quot;accessKey&quot;: &quot;AKIA...&quot;,
+                        &quot;accountId&quot;: &quot;111122223333&quot;,
+                        &quot;callerId&quot;: &quot;AIDA...&quot;,
+                        &quot;cognitoIdentity&quot;: None,
+                        &quot;principalOrgId&quot;: None,
+                        &quot;userArn&quot;: &quot;arn:aws:iam::111122223333:user/example-user&quot;,
+                        &quot;userId&quot;: &quot;AIDA...&quot;
+                    }
+                },
+                &quot;domainName&quot;: &quot;&lt;url-id&gt;.lambda-url.us-west-2.on.aws&quot;,
+                &quot;domainPrefix&quot;: &quot;&lt;url-id&gt;&quot;,
+                &quot;external_interfaces&quot;: {
+                    &quot;method&quot;: &quot;POST&quot;,
+                    &quot;path&quot;: &quot;/my/path&quot;,
+                    &quot;protocol&quot;: &quot;HTTP/1.1&quot;,
+                    &quot;sourceIp&quot;: &quot;123.123.123.123&quot;,
+                    &quot;userAgent&quot;: &quot;agent&quot;
+                },
+                &quot;requestId&quot;: &quot;id&quot;,
+                &quot;routeKey&quot;: &quot;$default&quot;,
+                &quot;stage&quot;: &quot;$default&quot;,
+                &quot;time&quot;: &quot;12/Mar/2020:19:03:58 +0000&quot;,
+                &quot;timeEpoch&quot;: 1583348638390
+            },
+            &quot;body&quot;: &quot;Hello from client!&quot;,
+            &quot;pathParameters&quot;: None,
+            &quot;isBase64Encoded&quot;: None,
+            &quot;stageVariables&quot;: None
+        }
+
+        response = lambda_handler(event, None)
+        assert response[&quot;statusCode&quot;] == 200
+        assert json.loads(response[&quot;body&quot;])[&quot;name&quot;] == &quot;Bruno Soller&quot;
+        assert json.loads(response[&quot;body&quot;])[&quot;email&quot;] == &quot;soller@soller.com&quot;
+        assert json.loads(response[&quot;body&quot;])[&quot;state&quot;] == &quot;APPROVED&quot;
+        assert json.loads(response[&quot;body&quot;])[&quot;user_id&quot;] == 1</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>README.md</path>
+    
+  
+    <content># clean_mss_template 🌡🍽
+
+Template for microservices repositories based in Clean Arch
+
+## The Project 📽
+
+### Introduction and Objectives ⁉
+
+The main objective is to provide a template for repositories that can be used as a starting point for new projects. This
+architecture is based on the Clean Architecture, and it was based in many other projects and books, articles that were
+mixed by the students of Mauá Institute of Technology, from the academic group Dev. Community Mauá.
+
+### Reasons 1️⃣3️⃣
+
+The project aims to help developers to start new projects with a good architecture, and with a good structure, so that anybody can create good applications.
+
+### Clean Architecture 🧼🏰
+
+The purpose of the project is to learn and create a Clean Architecture for microservices stateless with AWS Lambda which is a way of structuring
+the code in layers, each of which has a
+specific responsibility. This architecture is based on the principles of SOLID and books like &quot;Clean Architecture: A
+Craftsman's Guide to Software Structure and Design&quot; by Robert C. Martin.
+
+We also tried to explain for new programmers in the mos intuitive way and you can see the explanation here: [Clean Architecture Figma](https://www.figma.com/file/CmfQcH2xbZyIszPX0iOxPp/Clean-Arch---HackaBeckas?node-id=0%3A1&amp;t=B38vNfX3VSv6qtU7-1)
+
+
+### Folder Structure 🎄🌴🌲🌳
+
+Our folder structure was developed specially for our projects. 
+
+
+```bash
+.
+├── iac
+├── src
+│   ├── modules
+│   │   ├── create_user
+│   │   │   └── app
+│   │   ├── delete_user
+│   │   │   └── app
+│   │   ├── get_user
+│   │   │   └── app
+│   │   └── update_user
+│   │       └── app
+│   └── shared
+│       ├── domain
+│       │   ├── entities
+│       │   ├── enums
+│       │   └── repositories
+│       ├── helpers
+│       │   ├── enum
+│       │   ├── errors
+│       │   ├── functions
+│       │   └── http
+│       └── infra
+│           ├── dto
+│           ├── external
+│           └── repositories
+└── tests
+    ├── modules
+    │   ├── create_user
+    │   │   └── app
+    │   ├── delete_user
+    │   │   └── app
+    │   ├── get_user
+    │   │   └── app
+    │   └── update_user
+    │       └── app
+    └── shared
+        ├── domain
+        │   └── entities
+        ├── helpers
+        └── infra
+
+```
+
+
+## Name Format 📛
+### Files and Directories 📁
+
+- Files have the same name as the classes
+- snake_case 🐍 (ex: `./app/create_user_controller.py`)
+
+### Classes 🕴
+- #### Pattern 📟
+
+    - CamelCase 🐫🐪
+
+- #### Types 🧭
+
+    - **Interface** starts with &quot;I&quot; --&gt; `IUserRepository`, `ISelfieRepository` 😀
+    - **Repository** have the same name as interface, without the &quot;I&quot; and the type in final (ex: `UserRepositoryMock`, `SelfieRepositoryDynamo`) 🥬
+    - **Controller** ends with &quot;Controller&quot; --&gt; `CreateUserController`, `GetSelfieController` 🎮
+    - **Usecase** ends with &quot;Usecase&quot; --&gt; `CreateUserUsecase`, `GetSelfieUsecase` 🏠
+    - **Viewmodel** ends with &quot;Viewmodel&quot; --&gt; `CreateUserViewmodel`, `GetSelfieViewmodel` 👀
+    - **Presenter** ends with &quot;Presenter&quot; --&gt; `CreateUserPresenter`, `GetSelfiePresenter`🎁
+
+### Methods 👨‍🏫
+
+- snake_case 🐍
+- Try associate with a verb (ex: `create_user`, `get_user`, `update_selfie`)
+
+### Variables 🅰
+
+- snake_case 🐍
+- Avoid verbs
+
+### Enums
+
+- SNAKE_CASE 🐍
+- File name ends with &quot;ENUM&quot; (ex: &quot;STATE_ENUM&quot;)
+
+### Tests 📄
+
+- snake_case 🐍
+- &quot;test&quot; follow by class name (ex: `test_cadastrar_usuario_valido`, `test_cadastrar_usuario_sem_email`)
+    - The files must start with &quot;test&quot; to pytest recognition
+
+### Commit 💢
+
+- Start with verb
+- Ends with emoji 😎
+
+
+## Architecture Diagram 🏗
+![img.png](docs/architecture_diagram.png)
+
+
+
+
+## Installation 👩‍💻
+
+Clone the repository using template
+
+### Create virtual ambient in python (only first time)
+
+###### Windows
+
+    python -m venv venv
+
+###### Linux
+
+    virtualenv -p python3.9 venv
+
+### Activate the venv
+
+###### Windows:
+
+    venv\Scripts\activate
+
+###### Linux:
+
+    source venv/bin/activate
+
+### Install the requirements
+
+    pip install -r requirements-dev.txt
+
+### Run the tests
+
+    pytest
+
+### To run local set .env file
+
+    STAGE = TEST
+
+
+## Contributors 💰🤝💰
+
+- Bruno Vilardi - [Brvilardi](https://github.com/Brvilardi) 👷‍♂️
+- Hector Guerrini - [hectorguerrini](https://github.com/hectorguerrini) 🧙‍♂️
+- João Branco - [JoaoVitorBranco](https://github.com/JoaoVitorBranco) 😎
+- Vitor Soller - [VgsStudio](https://github.com/VgsStudio) ☀
+- Lucas Duez - [Lucasdvs10](https://github.com/Lucasdvs10) 🤡
+- Rodrigo Morales - [RodrigoM2004](https://github.com/RodrigoM2004) 🚗
+- Lucas Milani - [LucasKiller](https://github.com/LucasKiller) 🔪
+- Rafael Rubio - [Rubiozito](https://github.com/Rubiozito) 🎸
+
+## Special Thanks 🙏
+
+- [Dev. Community Mauá](https://www.instagram.com/devcommunitymaua/)
+- [Clean Architecture: A Craftsman's Guide to Software Structure and Design](https://www.amazon.com.br/Clean-Architecture-Craftsmans-Software-Structure/dp/0134494164)
+- [Institute Mauá of Technology](https://www.maua.br/)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/requirements.txt</path>
+    
+  
+    <content>aws-cdk-lib==2.25.0
+constructs&gt;=10.0.0,&lt;11.0.0
+aws-lambda-powertools==2.9.0
+aws-xray-sdk==2.11.0
+pytest==6.2.5</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/adjust_layer_directory.py</path>
+    
+  
+    <content>import os
+import shutil
+from pathlib import Path
+import sys
+
+IAC_DIRECTORY_NAME = &quot;iac&quot;
+SOURCE_DIRECTORY_NAME = &quot;src&quot;
+LAMBDA_LAYER_PREFIX = os.path.join(&quot;python&quot;, &quot;src&quot;)
+
+
+def adjust_layer_directory(shared_dir_name: str, destination: str):
+    # Get the root directory of the source directory
+    root_directory = Path(__file__).parent.parent
+    iac_directory = os.path.join(root_directory, IAC_DIRECTORY_NAME)
+
+    print(f&quot;Root directory: {root_directory}&quot;)
+    print(f&quot;Root direcotry files: {os.listdir(root_directory)}&quot;)
+    print(f&quot;IaC directory: {iac_directory}&quot;)
+    print(f&quot;IaC directory files: {os.listdir(iac_directory)}&quot;)
+
+
+    # Get the destination and source directory
+    destination_directory = os.path.join(root_directory, IAC_DIRECTORY_NAME, destination)
+    source_directory = os.path.join(root_directory, SOURCE_DIRECTORY_NAME, shared_dir_name)
+
+    # Delete the destination directory if it exists
+    if os.path.exists(destination_directory):
+        shutil.rmtree(destination_directory)
+
+    # Copy the source directory to the destination directory
+    shutil.copytree(source_directory, os.path.join(destination_directory, LAMBDA_LAYER_PREFIX, shared_dir_name))
+    print(
+        f&quot;Copying files from {source_directory} to {os.path.join(destination_directory, LAMBDA_LAYER_PREFIX, shared_dir_name)}&quot;)
+
+
+if __name__ == '__main__':
+    adjust_layer_directory(shared_dir_name=&quot;shared&quot;, destination=&quot;lambda_layer_out_temp&quot;)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/source.bat</path>
+    
+  
+    <content>@echo off
+
+rem The sole purpose of this script is to make the command
+rem
+rem     source .venv/bin/activate
+rem
+rem (which activates a Python virtualenv on Linux or Mac OS X) work on Windows.
+rem On Windows, this command just runs this batch file (the argument is ignored).
+rem
+rem Now we don't need to document a Windows command for activating a virtualenv.
+
+echo Executing .venv\Scripts\activate.bat for you
+.venv\Scripts\activate.bat</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/README.md</path>
+    
+  
+    <content># Welcome to your CDK Python project!
+
+This is a blank project for CDK development with Python.
+
+The `cdk.json` file tells the CDK Toolkit how to execute your app.
+
+This project is set up like a standard Python project.  The initialization
+process also creates a virtualenv within this project, stored under the `.venv`
+directory.  To create the virtualenv it assumes that there is a `python3`
+(or `python` for Windows) executable in your path with access to the `venv`
+package. If for any reason the automatic creation of the virtualenv fails,
+you can create the virtualenv manually.
+
+To manually create a virtualenv on MacOS and Linux:
+
+```
+$ python -m venv .venv
+```
+
+After the init process completes and the virtualenv is created, you can use the following
+step to activate your virtualenv.
+
+```
+$ source .venv/bin/activate
+```
+
+If you are a Windows platform, you would activate the virtualenv like this:
+
+```
+% .venv\Scripts\activate.bat
+```
+
+Once the virtualenv is activated, you can install the required dependencies.
+
+```
+$ pip install -r requirements.txt
+```
+
+At this point you can now synthesize the CloudFormation template for this code.
+
+```
+$ cdk synth
+```
+
+To add additional dependencies, for example other CDK libraries, just add
+them to your `setup.py` file and rerun the `pip install -r requirements.txt`
+command.
+
+## Useful commands
+
+ * `cdk ls`          list all stacks in the app
+ * `cdk synth`       emits the synthesized CloudFormation template
+ * `cdk deploy`      deploy this stack to your default AWS account/region
+ * `cdk diff`        compare deployed stack with current state
+ * `cdk docs`        open CDK documentation
+
+Enjoy!</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/local/README.md</path>
+    
+  
+    <content># How to test the local IaC
+
+## Prerequisites
+- have docker installed and running
+- have [sam](https://docs.aws.amazon.com/serverless-application-model/index.html) installed
+
+## Setup dynamodb local
+- `docker run -p 8000:8000 amazon/dynamodb-local -sharedDB -inMemory`
+- run `src/shared/infra/repositories/load_user_mock_to_dynamo.py`
+
+
+## Build cdk (/iac)
+- `cdk synth`
+- `sam build -t ./cdk.out/IacStack.template.json`
+- `sam local start-api -t ./cdk.out/IacStack.template.json`
+-</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/local/configure_dynamodb.md</path>
+    
+  
+    <content># DynamoDB Setup Guide
+
+This guide will walk you through the steps to set up DynamoDB on your local machine using Docker and configure it for your project.
+
+## Installation (Only first time)
+
+Before getting started, make sure you have the following installed on your machine:
+
+- Docker: (https://docs.docker.com/desktop/install/windows-install/)
+- NoSQL Workbench: (https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html)
+- AWS CLI: (https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+### AWS Settings
+
+To interact with DynamoDB, you need to set up your AWS credentials. Follow the steps below to configure your credentials:
+
+1. Open a terminal on your machine
+2. Run the following command to configure your AWS credentials:
+```
+    aws configure
+```
+3. Enter your AWS Access Key ID and Secret Access Key when apper. These can be anything you want but empty
+4. Set the Default region name to `sa-east-1`
+5. Set the Default output format to `json`
+```
+    AWS Access Key ID: demo
+    AWS Secret Access Key: demo
+    Default region name: sa-east-1
+    Default output format: json
+```
+
+### Docker Settings
+
+Next, you need to configure DynamoDB for your project and Docker compose. Follow the steps below:
+
+1. Open a terminal and navigate to your project directory
+2. Then, prompt the following commands:
+```
+    cd iac
+    cd local
+    docker-compose up -d
+```
+
+### Create virtual enviroments in python (once for project)
+
+###### Windows
+
+    python -m venv venv
+
+###### Linux
+
+    virtualenv -p python3.9 venv
+
+### Activate the venv
+
+###### Windows:
+
+    venv\Scripts\activate
+
+###### Linux:
+
+    source venv/bin/activate
+
+### Install the requirements
+
+    pip install -r requirements-dev.txt
+
+### Configure Environment Variables
+
+Create a file named `.env` in the root directory and add the following line to the file:
+```
+    STAGE=TEST
+```
+
+## Launch DynamoDB in Docker 
+
+Start the DynamoDB Local container using Docker:
+
+1. Open Docker
+2. Start dynamodb-local container
+
+## Running the `load_user_mock_to_dynamo` Script
+
+Finally, you can run the `load_user_mock_to_dynamo` script to load mock data into DynamoDB. Follow the steps below:
+
+1. Locate the directory or file named `load_user_mock_to_dynamo` within your project. This directory or file is responsible for loading mock data into DynamoDB
+2. If the `load_user_mock_to_dynamo` file doesn't exist, you need to create it.
+3. Once you have located or created the `load_user_mock_to_dynamo` file, make sure it is in the correct location within your project structure. The file should be located in the `src/shared/infra/repositories`
+```bash
+.
+├── iac
+├── src
+│   ├── ...
+│   │     
+│   │    
+│   └── shared
+│       ├── domain
+│       │   └── ...
+│       │   
+│       ├── helpers
+│       │   └── ...
+│       │   
+│       └── infra
+│           ├── dto
+│           ├── external
+│           └── repositories
+│               └── -&gt; [load_user_mock_to_dynamo] &lt;-
+...
+```
+4. This file is responsible for populating DynamoDB with mock data
+5. Then, make sure you are in the root directory of your project again
+6. Run the following command to execute the script:
+   ```
+   py -m src.shared.infra.repositories.load_user_mock_to_dynamo
+   ```
+
+
+This command will run the `load_user_mock_to_dynamo` script and populate DynamoDB with the provided mock data
+
+## Launch NoSQL WorkBench
+
+Lastly, you need to set NoSQL WorkBench to receive and visualize data runned. Follow the steps below:
+
+1. Launch DynamoDB
+2. Open Operation builder and add a connection
+3. Select DynamoDB Local
+4. Open Local</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/local/docker-compose.yml</path>
+    
+  
+    <content>version: '3.8'
+services:
+  dynamodb-local:
+    command: &quot;-jar DynamoDBLocal.jar -sharedDb -dbPath ./data&quot;
+    image: &quot;amazon/dynamodb-local:latest&quot;
+    container_name: dynamodb
+    ports:
+      - &quot;8000:8000&quot;
+    volumes:
+      - &quot;./docker/dynamodb:/home/dynamodblocal/data&quot;
+    working_dir: /home/dynamodblocal
+    networks:
+      - dynamodb-local
+
+networks:
+    dynamodb-local:
+        name: dynamodb-local</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/iac/lambda_stack.py</path>
+    
+  
+    <content>import os
+from aws_cdk import (
+    aws_lambda as lambda_,
+    NestedStack, Duration
+)
+from constructs import Construct
+from aws_cdk.aws_apigateway import Resource, LambdaIntegration
+
+
+class LambdaStack(Construct):
+    functions_that_need_dynamo_permissions = []
+
+    def create_lambda_api_gateway_integration(self, module_name: str, method: str, mss_student_api_resource: Resource,
+                                              environment_variables: dict = {&quot;STAGE&quot;: &quot;TEST&quot;}):
+        function = lambda_.Function(
+            self, module_name.title(),
+            code=lambda_.Code.from_asset(f&quot;../src/modules/{module_name}&quot;),
+            handler=f&quot;app.{module_name}_presenter.lambda_handler&quot;,
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            layers=[self.lambda_layer, self.lambda_power_tools],
+            environment=environment_variables,
+            timeout=Duration.seconds(15)
+        )
+
+        mss_student_api_resource.add_resource(module_name.replace(&quot;_&quot;, &quot;-&quot;)).add_method(method,
+                                                                                        integration=LambdaIntegration(
+                                                                                            function))
+
+        return function
+
+    def __init__(self, scope: Construct, api_gateway_resource: Resource, environment_variables: dict) -&gt; None:
+        super().__init__(scope, &quot;Template_Lambdas&quot;)
+
+        self.lambda_layer = lambda_.LayerVersion(self, &quot;Template_Layer&quot;,
+                                                 code=lambda_.Code.from_asset(&quot;./lambda_layer_out_temp&quot;),
+                                                 compatible_runtimes=[lambda_.Runtime.PYTHON_3_9]
+                                                 )
+
+        self.lambda_power_tools = lambda_.LayerVersion.from_layer_version_arn(self, &quot;Lambda_Power_Tools&quot;, layer_version_arn=&quot;arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:22&quot;)
+
+        self.get_user_function = self.create_lambda_api_gateway_integration(
+            module_name=&quot;get_user&quot;,
+            method=&quot;GET&quot;,
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables
+        )
+
+        self.create_user_function = self.create_lambda_api_gateway_integration(
+            module_name=&quot;create_user&quot;,
+            method=&quot;POST&quot;,
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables
+        )
+
+        self.delete_user_function = self.create_lambda_api_gateway_integration(
+            module_name=&quot;delete_user&quot;,
+            method=&quot;POST&quot;,
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables
+        )
+
+        self.update_user_function = self.create_lambda_api_gateway_integration(
+            module_name=&quot;update_user&quot;,
+            method=&quot;POST&quot;,
+            mss_student_api_resource=api_gateway_resource,
+            environment_variables=environment_variables
+        )
+
+        self.functions_that_need_dynamo_permissions = [self.get_user_function, self.create_user_function,
+                                                  self.delete_user_function, self.update_user_function]</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/iac/template_stack.py</path>
+    
+  
+    <content>from aws_cdk import (
+    # Duration,
+    Stack,
+    # aws_sqs as sqs,
+)
+from constructs import Construct
+from aws_cdk.aws_apigateway import RestApi, Cors
+
+from .lambda_stack import LambdaStack
+from .template_dynamo_table import TemplateDynamoTable
+
+
+class TemplateStack(Stack):
+
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -&gt; None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        self.rest_api = RestApi(self, &quot;Template_RestApi&quot;,
+                                    rest_api_name=&quot;Template_RestApi&quot;,
+                                    description=&quot;This is the Template RestApi&quot;,
+                                    default_cors_preflight_options=
+                                    {
+                                        &quot;allow_origins&quot;: Cors.ALL_ORIGINS,
+                                        &quot;allow_methods&quot;: [&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;],
+                                        &quot;allow_headers&quot;: [&quot;*&quot;]
+                                    },
+                                )
+
+        api_gateway_resource = self.rest_api.root.add_resource(&quot;mss-template&quot;, default_cors_preflight_options=
+        {
+            &quot;allow_origins&quot;: Cors.ALL_ORIGINS,
+            &quot;allow_methods&quot;: [&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;],
+            &quot;allow_headers&quot;: Cors.DEFAULT_HEADERS
+        }
+                                                               )
+
+        self.dynamo_table = TemplateDynamoTable(self, &quot;TemplateDynamoTable&quot;)
+
+        ENVIRONMENT_VARIABLES = {
+            &quot;STAGE&quot;: &quot;DEV&quot;,
+            &quot;DYNAMO_TABLE_NAME&quot;: self.dynamo_table.table.table_name,
+            &quot;DYNAMO_PARTITION_KEY&quot;: &quot;PK&quot;,
+            &quot;DYNAMO_SORT_KEY&quot;: &quot;SK&quot;,
+            &quot;REGION&quot;: self.region,
+        }
+
+
+
+        self.lambda_stack = LambdaStack(self, api_gateway_resource=api_gateway_resource,
+                                        environment_variables=ENVIRONMENT_VARIABLES)
+
+        for function in self.lambda_stack.functions_that_need_dynamo_permissions:
+            self.dynamo_table.table.grant_read_write_data(function)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/iac/template_dynamo_table.py</path>
+    
+  
+    <content>from decimal import Decimal
+from aws_cdk import (
+    aws_dynamodb as dynamodb, RemovalPolicy,
+)
+from constructs import Construct
+
+
+class TemplateDynamoTable(Construct):
+    table: dynamodb.Table
+
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -&gt; None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        self.table = dynamodb.Table(
+            self, &quot;TemplateDynamoTable&quot;,
+            partition_key=dynamodb.Attribute(
+                name=&quot;PK&quot;,
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name=&quot;SK&quot;,
+                type=dynamodb.AttributeType.STRING
+            ), 
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY
+        )</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/requirements-dev.txt</path>
+    
+  
+    <content>pytest==6.2.5</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/.gitignore</path>
+    
+  
+    <content>*.swp
+package-lock.json
+__pycache__
+.pytest_cache
+.venv
+*.egg-info
+lambda_layer_out_temp/
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>iac/app.py</path>
+    
+  
+    <content>#!/usr/bin/env python3
+import os
+
+import aws_cdk as cdk
+from adjust_layer_directory import adjust_layer_directory
+
+from iac.template_stack import TemplateStack
+
+
+
+print(&quot;Starting the CDK&quot;)
+
+print(&quot;Adjusting the layer directory&quot;)
+adjust_layer_directory(shared_dir_name=&quot;shared&quot;, destination=&quot;lambda_layer_out_temp&quot;)
+print(&quot;Finished adjusting the layer directory&quot;)
+
+
+app = cdk.App()
+
+aws_region = os.environ.get(&quot;AWS_REGION&quot;)
+aws_account_id = os.environ.get(&quot;AWS_ACCOUNT_ID&quot;)
+stack_name = os.environ.get(&quot;STACK_NAME&quot;)
+
+if 'prod' in stack_name:
+    stage = 'PROD'
+
+elif 'homolog' in stack_name:
+    stage = 'HOMOLOG'
+
+elif 'dev' in stack_name:
+    stage = 'DEV'
+
+else:
+    stage = 'TEST'
+
+tags = {
+    'project': 'Template',
+    'stage': stage,
+    'stack': 'BACK',
+    'owner': 'DevCommunity'
+}
+
+TemplateStack(app, stack_name=stack_name, env=cdk.Environment(account=aws_account_id, region=aws_region), tags=tags)
+
+
+app.synth()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>requirements-dev.txt</path>
+    
+  
+    <content>pytest==6.2.5
+pytest-cov==4.0.0
+boto3==1.24.88
+python-dotenv==0.21.0
+aws-lambda-powertools==2.9.0
+aws_xray_sdk==2.11.0</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>.gitignore</path>
+    
+  
+    <content># Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+/pytest_html_report.html
+/output.json
+/archive/
+
+/.vscode/
+/.idea/
+iac/local/docker/dynamodb/shared-local-instance.db</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>.github/workflows/CD.yml</path>
+    
+  
+    <content>name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>.github/workflows/CI.yml</path>
+    
+  
+    <content>name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  testApp:
+    uses: maua-dev/ci_workflows_reusable/.github/workflows/pytest_ci.yml@V1.0</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>.github/workflows/CREATE_PR.yml</path>
+    
+  
+    <content>name: Create PR
+
+on:
+  push:
+    branches:
+      - dev
+      - homolog
+
+jobs:
+  pull_request:
+    uses: maua-dev/ci_workflows_reusable/.github/workflows/pull_request.yml@V1.0
+    with:
+      repository: ${{ github.repository }}</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/dto/user_dynamo_dto.py</path>
+    
+  
+    <content>from decimal import Decimal
+
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class UserDynamoDTO:
+    name: str
+    email: str
+    state: STATE
+    user_id: int
+
+    def __init__(self, name: str, email: str, state: STATE, user_id: int):
+        self.name = name
+        self.email = email
+        self.user_id = user_id
+        self.state = state
+
+    @staticmethod
+    def from_entity(user: User) -&gt; &quot;UserDynamoDTO&quot;:
+        &quot;&quot;&quot;
+        Parse data from User to UserDynamoDTO
+        &quot;&quot;&quot;
+        return UserDynamoDTO(
+            name=user.name,
+            email=user.email,
+            user_id=user.user_id,
+            state=user.state
+        )
+
+    def to_dynamo(self) -&gt; dict:
+        &quot;&quot;&quot;
+        Parse data from UserDynamoDTO to dict
+        &quot;&quot;&quot;
+        return {
+            &quot;entity&quot;: &quot;user&quot;,
+            &quot;name&quot;: self.name,
+            &quot;email&quot;: self.email,
+            &quot;user_id&quot;: Decimal(self.user_id),
+            &quot;state&quot;: self.state.value
+        }
+
+    @staticmethod
+    def from_dynamo(user_data: dict) -&gt; &quot;UserDynamoDTO&quot;:
+        &quot;&quot;&quot;
+        Parse data from DynamoDB to UserDynamoDTO
+        @param user_data: dict from DynamoDB
+        &quot;&quot;&quot;
+        return UserDynamoDTO(
+            name=user_data[&quot;name&quot;],
+            email=user_data[&quot;email&quot;],
+            user_id=int(user_data[&quot;user_id&quot;]),
+            state=STATE(user_data[&quot;state&quot;])
+        )
+
+    def to_entity(self) -&gt; User:
+        &quot;&quot;&quot;
+        Parse data from UserDynamoDTO to User
+        &quot;&quot;&quot;
+        return User(
+            name=self.name,
+            email=self.email,
+            user_id=self.user_id,
+            state=self.state
+        )
+
+    def __repr__(self):
+        return f&quot;UserDynamoDto(name={self.name}, email={self.email}, user_id={self.user_id}, state={self.state})&quot;
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/repositories/user_repository_dynamo.py</path>
+    
+  
+    <content>from decimal import Decimal
+from typing import List
+
+from src.shared.domain.entities.user import User
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.environments import Environments
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.infra.dto.user_dynamo_dto import UserDynamoDTO
+from src.shared.infra.external.dynamo.datasources.dynamo_datasource import DynamoDatasource
+
+
+class UserRepositoryDynamo(IUserRepository):
+
+    @staticmethod
+    def partition_key_format(user_id) -&gt; str:
+        return f&quot;user#{user_id}&quot;
+
+    @staticmethod
+    def sort_key_format(user_id: int) -&gt; str:
+        return f&quot;#{user_id}&quot;
+
+    def __init__(self):
+        self.dynamo = DynamoDatasource(endpoint_url=Environments.get_envs().endpoint_url,
+                                       dynamo_table_name=Environments.get_envs().dynamo_table_name,
+                                       region=Environments.get_envs().region,
+                                       partition_key=Environments.get_envs().dynamo_partition_key,
+                                       sort_key=Environments.get_envs().dynamo_sort_key)
+    def get_user(self, user_id: int) -&gt; User:
+        resp = self.dynamo.get_item(partition_key=self.partition_key_format(user_id), sort_key=self.sort_key_format(user_id))
+
+        if resp.get('Item') is None:
+            raise NoItemsFound(&quot;user_id&quot;)
+
+        user_dto = UserDynamoDTO.from_dynamo(resp[&quot;Item&quot;])
+        return user_dto.to_entity()
+
+    def get_all_user(self) -&gt; List[User]:
+        resp = self.dynamo.get_all_items()
+        users = []
+        for item in resp['Items']:
+            if item.get(&quot;entity&quot;) == 'user':
+                users.append(UserDynamoDTO.from_dynamo(item).to_entity())
+
+        return users
+
+
+    def create_user(self, new_user: User) -&gt; User:
+        print(f&quot;repo entered.\n Repo:{self}&quot;)
+        print(self.dynamo.dynamo_table.__dict__)
+        new_user.user_id = self.get_user_counter()
+        print(f&quot;nre user id: {new_user.user_id}&quot;)
+        user_dto = UserDynamoDTO.from_entity(user=new_user)
+        resp = self.dynamo.put_item(partition_key=self.partition_key_format(new_user.user_id),
+                                    sort_key=self.sort_key_format(user_id=new_user.user_id), item=user_dto.to_dynamo(),
+                                    is_decimal=True)
+        return new_user
+
+    def delete_user(self, user_id: int) -&gt; User:
+        resp = self.dynamo.delete_item(partition_key=self.partition_key_format(user_id), sort_key=self.sort_key_format(user_id))
+
+        if &quot;Attributes&quot; not in resp:
+            raise NoItemsFound(&quot;user_id&quot;)
+
+        return UserDynamoDTO.from_dynamo(resp['Attributes']).to_entity()
+
+    def update_user(self, user_id: int, new_name: str) -&gt; User:
+
+        user = self.get_user(user_id=user_id)
+
+        item_to_update = {}
+
+        if new_name:
+            item_to_update['name'] = new_name
+        else:
+            raise NoItemsFound(&quot;Nothing to update&quot;)
+
+        resp = self.dynamo.update_item(partition_key=self.partition_key_format(user_id), sort_key=self.sort_key_format(user_id), update_dict=item_to_update)
+
+        return UserDynamoDTO.from_dynamo(resp['Attributes']).to_entity()
+
+    def get_user_counter(self) -&gt; int:
+
+        return self.update_counter()
+
+    def update_counter(self) -&gt; int: #TODO fix this
+        print(&quot;updating counter&quot;)
+        counter = int(self.dynamo.get_item(partition_key='COUNTER', sort_key='COUNTER')['Item']['COUNTER'])
+        print(f&quot;counter: {counter}&quot;)
+        resp = self.dynamo.update_item(partition_key='COUNTER', sort_key='COUNTER', update_dict={'COUNTER': Decimal(counter+1)})
+        print(f&quot;resp: {resp}&quot;)
+
+        return int(resp['Attributes']['COUNTER'])</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/repositories/load_user_mock_to_dynamo.py</path>
+    
+  
+    <content>from decimal import Decimal
+
+import boto3
+import dotenv
+from src.shared.infra.repositories.user_repository_dynamo import UserRepositoryDynamo
+from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+from src.shared.environments import Environments
+
+
+def setup_dynamo_table():
+    dynamo_table_name = &quot;user_mss_template-table&quot;
+    endpoint_url = &quot;http://localhost:8000&quot;
+    print(&quot;Setting up DynamoDB table...&quot;)
+
+    dynamo_client = boto3.client('dynamodb', endpoint_url=endpoint_url)
+    print(&quot;DynamoDB client created&quot;)
+    tables = dynamo_client.list_tables()['TableNames']
+
+    if dynamo_table_name not in tables:
+        print(&quot;Creating table...&quot;)
+        dynamo_client.create_table(
+            TableName=dynamo_table_name,
+            KeySchema=[
+                {
+                    'AttributeName': 'PK',
+                    'KeyType': 'HASH'
+                },
+                {
+                    'AttributeName': 'SK',
+                    'KeyType': 'RANGE'
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'PK',
+                    'AttributeType': 'S'
+                },
+                {
+                    'AttributeName': 'SK',
+                    'AttributeType': 'S'
+                }
+
+            ],
+            BillingMode='PAY_PER_REQUEST',
+        )
+        print(&quot;Waiting for table to be created...&quot;)
+        dynamo_client.get_waiter('table_exists').wait(TableName=dynamo_table_name)
+
+        print('Loading table...')
+
+        dynamodb = boto3.resource('dynamodb', endpoint_url=endpoint_url)
+
+        table = dynamodb.Table(dynamo_table_name)
+
+        print(&quot;Adding counter to table&quot;)
+
+        table.put_item(
+            Item={
+                'PK': 'COUNTER',
+                'SK': 'COUNTER',
+                'COUNTER': Decimal(0)
+            }
+        )
+
+        print('Table &quot;user_mss_template-table&quot; created!')
+
+    else:
+        print(&quot;Table already exists!&quot;)
+
+
+def load_mock_to_local_dynamo():
+    setup_dynamo_table()
+    mock_repo = UserRepositoryMock()
+    dynamo_repo = UserRepositoryDynamo()
+
+    count = 0
+
+    print('Loading mock data to dynamo...')
+    for user in mock_repo.users:
+        print(f&quot;Loading user {user.user_id} | {user.name} to dynamo&quot;)
+        dynamo_repo.create_user(user)
+        count += 1
+
+    print(f&quot;{count} users loaded to dynamo!&quot;)
+
+def load_mock_to_real_dynamo():
+    mock_repo = UserRepositoryMock()
+    dynamo_repo = UserRepositoryDynamo()
+
+    count = 0
+
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(dynamo_table_name=Environments.get_envs().dynamo_table_name)
+
+    print(&quot;Adding counter to table&quot;)
+
+    table.put_item(
+        Item={
+            'PK': 'COUNTER',
+            'SK': 'COUNTER',
+            'COUNTER': Decimal(0)
+        }
+    )
+
+    print('Loading mock data to dynamo...')
+    for user in mock_repo.users:
+        print(f&quot;Loading user {user.user_id} | {user.name} to dynamo&quot;)
+        dynamo_repo.create_user(user)
+        count += 1
+
+    print(f&quot;{count} users loaded to dynamo!&quot;)
+    
+if __name__ == '__main__':
+    dotenv.load_dotenv()
+    load_mock_to_local_dynamo()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/repositories/user_repository_mock.py</path>
+    
+  
+    <content>from typing import List
+
+from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+
+
+class UserRepositoryMock(IUserRepository):
+    users: List[User]
+    user_counter: int
+
+    def __init__(self):
+        self.users = [
+            User(name=&quot;Bruno Soller&quot;, email=&quot;soller@soller.com&quot;, user_id=1, state=STATE.APPROVED),
+            User(name=&quot;Vitor Brancas&quot;, email=&quot;brancas@brancas.com&quot;, user_id=2, state=STATE.REJECTED),
+            User(name=&quot;João Vilas&quot;, email=&quot;bruno@bruno.com&quot;, user_id=3, state=STATE.PENDING)
+        ]
+        self.user_counter = 3
+
+    def get_user(self, user_id: int) -&gt; User:
+        for user in self.users:
+            if user.user_id == user_id:
+                return user
+        raise NoItemsFound(&quot;user_id&quot;)
+
+    def get_all_user(self) -&gt; List[User]:
+        return self.users
+
+    def create_user(self, new_user: User) -&gt; User:
+        self.users.append(new_user)
+        self.user_counter += 1
+        return new_user
+
+    def delete_user(self, user_id: int) -&gt; User:
+        for idx, user in enumerate(self.users):
+            if user.user_id == user_id:
+                return self.users.pop(idx)
+
+        raise NoItemsFound(&quot;user_id&quot;)
+
+    def update_user(self, user_id: int, new_name: str) -&gt; User:
+        for user in self.users:
+            if user.user_id == user_id:
+                user.name = new_name
+                return user
+
+        raise NoItemsFound(&quot;user_id&quot;)
+
+    def get_user_counter(self) -&gt; int:
+        return self.user_counter</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/external/dynamo/dynamo_table.py</path>
+    
+  
+    <content>import boto3
+
+
+class DynamoTable:
+
+    def __init__(self, dynamo_table_name, region, endpoint_url = None):
+        self.endpoint_url = endpoint_url
+        self.dynamo_table_name = dynamo_table_name
+        self.region = region
+
+
+    def __enter__(self):
+        s = boto3.Session(
+            region_name=self.region)
+        dynamo = s.resource('dynamodb', endpoint_url=self.endpoint_url)
+        table = dynamo.Table(self.dynamo_table_name)
+        return table
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/external/observability/observability_mock.py</path>
+    
+  
+    <content>from src.shared.domain.observability.observability_interface import IObservability
+
+
+class ObservabilityMock(IObservability):
+    module_name: str
+    mss_name: str
+    
+    def __init__(self, module_name: str) -&gt; None:
+        super().__init__(module_name=module_name)
+    
+    def _log_info(self, message: str) -&gt; None:
+        print(message)
+        
+    def log_controller_in(self) -&gt; None:
+        self._log_info(&quot;In Controller&quot;)
+        
+    def log_controller_out(self, input) -&gt; None:
+        self._log_info(f&quot;Out of Controller with this input: {input}&quot;)
+        
+    def log_usecase_in(self) -&gt; None:
+        self._log_info(&quot;In Usecase&quot;)
+        
+    def log_usecase_out(self) -&gt; None:
+        self._log_info(&quot;Out of Usecase&quot;)
+            
+    def log_exception(self, message: str) -&gt; None:
+        print(&quot;Exception message: &quot; + message)
+            
+    def add_metric(self, name: str, unit: str, value: float) -&gt; None:
+        print(f&quot;Metric {name} added with value {value} in {unit}&quot;)
+            
+    def presenter_decorators(self, presenter) -&gt; None:
+        def presenter_wrapper(event):    
+            response = presenter(event)
+            
+            return response
+        return presenter_wrapper
+    
+    def handler_decorators(self, handler) -&gt; None:
+        def handler_wrapper(event, context):    
+            response = handler(event, context)
+            
+            return response
+        return handler_wrapper</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/infra/external/observability/observability_aws.py</path>
+    
+  
+    <content>import os
+import time
+from aws_lambda_powertools import Logger, Tracer, Metrics
+from src.shared.domain.observability.observability_interface import IObservability
+
+class ObservabilityAWS(IObservability):
+    tracer: Tracer
+    logger: Logger
+    metrics: Metrics
+    module_name: str
+    mss_name: str
+     
+    def __init__(self, module_name: str):
+        self.logger = Logger(service=module_name)
+        self.tracer = Tracer(service=module_name)
+        self.metrics = Metrics(namespace=module_name)
+        
+        super().__init__(module_name=module_name)
+       
+    def _log_info(self, message: str) -&gt; None:
+        self.logger.info(message)
+        
+    def log_controller_in(self) -&gt; None:
+        self._log_info(f&quot;In Controller&quot;)
+        
+    def log_controller_out(self, input) -&gt; None:
+        self._log_info(f&quot;Out of Controller with this input: {input}&quot;)
+        
+    def log_usecase_in(self) -&gt; None:
+        self._log_info(&quot;In Usecase&quot;)
+        
+    def log_usecase_out(self) -&gt; None:
+        self._log_info(&quot;Out of Usecase&quot;)
+            
+    def log_exception(self, message: str) -&gt; None:
+        self.logger.exception(message)
+            
+    def add_metric(self, name: str, unit: str, value: float) -&gt; None:
+        self.metrics.add_metric(name, unit, value)
+            
+    def presenter_decorators(self, presenter) -&gt; None:
+        @self.tracer.capture_method
+        def presenter_wrapper(event):    
+            start_time = time.monotonic() # Start - ProcessingTime metrics
+            
+            response = presenter(event)
+            
+            end_time = time.monotonic()
+            processing_time_ms = (end_time - start_time) * 10**3
+            
+            self.metrics.add_metric(name=&quot;ProcessingTime&quot;, unit=&quot;Milliseconds&quot;, value=processing_time_ms) # End - ProcessingTime metrics
+            
+            return response
+        return presenter_wrapper
+    
+    def handler_decorators(self, handler) -&gt; None:
+        @self.tracer.capture_lambda_handler
+        @self.metrics.log_metrics(capture_cold_start_metric=True, default_dimensions={&quot;environment&quot;: os.getenv(&quot;STAGE&quot;, &quot;dev&quot;), &quot;mss&quot;: self.mss_name, &quot;module&quot;: self.module_name}) # ColdStart metrics and adding dimensions
+        @self.logger.inject_lambda_context(log_event=True) # Log event
+        def handler_wrapper(event, context):    
+            
+            response = handler(event, context)
+            
+            return response
+        return handler_wrapper</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/environments.py</path>
+    
+  
+    <content>import enum
+from enum import Enum
+import os
+from src.shared.domain.observability.observability_interface import IObservability
+
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+
+
+class STAGE(Enum):
+    DOTENV = &quot;DOTENV&quot;
+    DEV = &quot;DEV&quot;
+    HOMOLOG = &quot;HOMOLOG&quot;
+    PROD = &quot;PROD&quot;
+    TEST = &quot;TEST&quot;
+
+
+class Environments:
+    &quot;&quot;&quot;
+    Defines the environment variables for the application. You should not instantiate this class directly. Please use Environments.get_envs() method instead.
+
+    Usage:
+
+    &quot;&quot;&quot;
+    stage: STAGE
+    s3_bucket_name: str
+    region: str
+    endpoint_url: str = None
+    dynamo_table_name: str
+    dynamo_partition_key: str
+    dynamo_sort_key: str
+    cloud_frontget_user_presenter_distribution_domain: str
+    mss_name: str 
+
+    def _configure_local(self):
+        from dotenv import load_dotenv
+        load_dotenv()
+        os.environ[&quot;STAGE&quot;] = os.environ.get(&quot;STAGE&quot;) or STAGE.DOTENV.value
+
+    def load_envs(self):
+        if &quot;STAGE&quot; not in os.environ or os.environ[&quot;STAGE&quot;] == STAGE.DOTENV.value:
+            self._configure_local()
+
+        self.stage = STAGE[os.environ.get(&quot;STAGE&quot;)]
+        self.mss_name = os.environ.get(&quot;MSS_NAME&quot;)
+        
+        if self.stage == STAGE.TEST:
+            self.s3_bucket_name = &quot;bucket-test&quot;
+            self.region = &quot;sa-east-1&quot;
+            self.endpoint_url = &quot;http://localhost:8000&quot;
+            self.dynamo_table_name = &quot;user_mss_template-table&quot;
+            self.dynamo_partition_key = &quot;PK&quot;
+            self.dynamo_sort_key = &quot;SK&quot;
+            self.cloud_front_distribution_domain = &quot;https://d3q9q9q9q9q9q9.cloudfront.net&quot;
+
+        else:
+            self.s3_bucket_name = os.environ.get(&quot;S3_BUCKET_NAME&quot;)
+            self.region = os.environ.get(&quot;REGION&quot;)
+            self.endpoint_url = os.environ.get(&quot;ENDPOINT_URL&quot;)
+            self.dynamo_table_name = os.environ.get(&quot;DYNAMO_TABLE_NAME&quot;)
+            self.dynamo_partition_key = os.environ.get(&quot;DYNAMO_PARTITION_KEY&quot;)
+            self.dynamo_sort_key = os.environ.get(&quot;DYNAMO_SORT_KEY&quot;)
+            self.cloud_front_distribution_domain = os.environ.get(&quot;CLOUD_FRONT_DISTRIBUTION_DOMAIN&quot;)
+
+    @staticmethod
+    def get_user_repo() -&gt; IUserRepository:
+        if Environments.get_envs().stage == STAGE.TEST:
+            from src.shared.infra.repositories.user_repository_mock import UserRepositoryMock
+            return UserRepositoryMock
+        elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:
+            from src.shared.infra.repositories.user_repository_dynamo import UserRepositoryDynamo
+            return UserRepositoryDynamo
+        else:
+            raise Exception(&quot;No repository found for this stage&quot;)
+
+    @staticmethod
+    def get_observability() -&gt; IObservability:
+        if Environments.get_envs().stage == STAGE.TEST:
+            from src.shared.infra.external.observability.observability_mock import ObservabilityMock
+            return ObservabilityMock
+        elif Environments.get_envs().stage in [STAGE.DEV, STAGE.HOMOLOG, STAGE.PROD]:
+            from src.shared.infra.external.observability.observability_aws import ObservabilityAWS
+            return ObservabilityAWS
+        else:
+            raise Exception(&quot;No observability class found for this stage&quot;)
+    @staticmethod
+    def get_envs() -&gt; &quot;Environments&quot;:
+        &quot;&quot;&quot;
+        Returns the Environments object. This method should be used to get the Environments object instead of instantiating it directly.
+        :return: Environments (stage={self.stage}, s3_bucket_name={self.s3_bucket_name}, region={self.region}, endpoint_url={self.endpoint_url})
+
+        &quot;&quot;&quot;
+        envs = Environments()
+        envs.load_envs()
+        return envs
+
+    def __repr__(self):
+        return self.__dict__</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/domain/enums/state_enum.py</path>
+    
+  
+    <content>from enum import Enum
+
+
+class STATE(Enum):
+    APPROVED = &quot;APPROVED&quot;
+    PENDING = &quot;PENDING&quot;
+    REJECTED = &quot;REJECTED&quot;</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/domain/repositories/user_repository_interface.py</path>
+    
+  
+    <content>from abc import ABC, abstractmethod
+from typing import List
+
+from src.shared.domain.entities.user import User
+
+
+class IUserRepository(ABC):
+
+    @abstractmethod
+    def get_user(self, user_id: int) -&gt; User:
+        &quot;&quot;&quot;
+        If user not found raise NoItemsFound
+        &quot;&quot;&quot;
+        pass
+
+    @abstractmethod
+    def get_all_user(self) -&gt; List[User]:
+        pass
+
+    @abstractmethod
+    def create_user(self, new_user: User) -&gt; User:
+        pass
+
+    @abstractmethod
+    def delete_user(self, user_id: int) -&gt; User:
+        &quot;&quot;&quot;
+        If user not found raise NoItemsFound
+        &quot;&quot;&quot;
+        pass
+
+    @abstractmethod
+    def update_user(self, user_id: int, new_name: str) -&gt; User:
+        &quot;&quot;&quot;
+        If user not found raise NoItemsFound
+        &quot;&quot;&quot;
+        pass
+
+    @abstractmethod
+    def get_user_counter(self) -&gt; int:
+        &quot;&quot;&quot;
+        Returns the number of all users that have ever been created
+        &quot;&quot;&quot;
+        pass</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/domain/observability/observability_interface.py</path>
+    
+  
+    <content>import os
+import time
+from aws_lambda_powertools import Logger, Tracer, Metrics
+from abc import ABC, abstractmethod
+
+class IObservability(ABC):
+    module_name: str
+    mss_name: str
+    
+    @abstractmethod
+    def __init__(self, module_name: str) -&gt; None:
+        self.module_name = module_name
+        self.mss_name = os.environ.get(&quot;MSS_NAME&quot;)
+    
+    @abstractmethod        
+    def _log_info(self, message: str) -&gt; None:
+        pass
+    
+    @abstractmethod    
+    def log_controller_in(self) -&gt; None:
+        pass
+    
+    @abstractmethod    
+    def log_controller_out(self) -&gt; None:
+        pass
+    
+    @abstractmethod    
+    def log_usecase_in(self) -&gt; None:
+        pass
+    
+    @abstractmethod    
+    def log_usecase_out(self) -&gt; None:
+        pass
+    
+    @abstractmethod
+    def log_exception(self, message: str) -&gt; None:
+        pass
+            
+    @abstractmethod
+    def add_metric(self, name: str, unit: str, value: float) -&gt; None:
+        pass
+            
+    @abstractmethod
+    def presenter_decorators(self, presenter) -&gt; None:
+        &quot;&quot;&quot;
+        this decorator have the following responsabilities:
+        1. calculate the processing time of the presenter
+        2. use the @tracer.capture_method to trace the presenter
+        &quot;&quot;&quot;
+        def presenter_wrapper(event):    
+            pass
+        pass
+    
+    @abstractmethod
+    def handler_decorators(self, handler) -&gt; None:
+        &quot;&quot;&quot;
+        this decorator have the following responsabilities:
+        1. use the @tracer.capture_lambda_handler
+        2. use the @metrics.log_metrics(capture_cold_start_metric=True, default_dimensions={&quot;environment&quot;: os.getenv(&quot;STAGE&quot;, &quot;dev&quot;), &quot;another&quot;: &quot;one&quot;}) # ColdStart metrics and adding dimensions
+        3. use the @logger.inject_lambda_context(log_event=True) # Log event
+        &quot;&quot;&quot;
+        def handler_wrapper(event, context):    
+            pass
+        pass</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/domain/entities/user.py</path>
+    
+  
+    <content>import abc
+import re
+
+from src.shared.domain.enums.state_enum import STATE
+from src.shared.helpers.errors.domain_errors import EntityError
+
+
+class User(abc.ABC):
+    name: str
+    email: str
+    state: STATE
+    MIN_NAME_LENGTH = 2
+    user_id: int
+
+    def __init__(self, name: str, email: str, state: STATE, user_id: int = None):
+        if not User.validate_name(name):
+            raise EntityError(&quot;name&quot;)
+        self.name = name
+
+        if not User.validate_email(email):
+            raise EntityError(&quot;email&quot;)
+        self.email = email
+
+        if type(user_id) == int:
+            if user_id &lt; 0:
+                raise EntityError(&quot;user_id&quot;)
+
+        if type(user_id) != int and user_id is not None:
+            raise EntityError(&quot;user_id&quot;)
+
+        self.user_id = user_id
+
+        if type(state) != STATE:
+            raise EntityError(&quot;state&quot;)
+        self.state = state
+
+    @staticmethod
+    def validate_name(name: str) -&gt; bool:
+        if name is None:
+            return False
+        elif type(name) != str:
+            return False
+        elif len(name) &lt; User.MIN_NAME_LENGTH:
+            return False
+
+        return True
+
+    @staticmethod
+    def validate_email(email: str) -&gt; bool:
+        if email is None:
+            return False
+
+        regex = re.compile(r&quot;(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)&quot;)
+
+        return bool(re.fullmatch(regex, email))
+
+
+
+    def __repr__(self):
+        return f&quot;User(name={self.name}, email={self.email}, user_id={self.user_id}, state={self.state})&quot;</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/enum/http_status_code_enum.py</path>
+    
+  
+    <content>from enum import Enum
+
+
+class HttpStatusCodeEnum(Enum):
+    OK = 200
+    CREATED = 201
+    NO_CONTENT = 204
+    REDIRECT = 303
+    BAD_REQUEST = 400
+    UNAUTHORIZED = 401
+    FORBIDDEN = 403
+    NOT_FOUND = 404
+    METHOD_NOT_ALLOWED = 405
+    CONFLICT = 409
+    INTERNAL_SERVER_ERROR = 500
+    BAD_GATEWAY = 502
+    SERVICE_UNAVAILABLE = 503
+    GATEWAY_TIMEOUT = 504</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/errors/usecase_errors.py</path>
+    
+  
+    <content>from src.shared.helpers.errors.base_error import BaseError
+
+class NoItemsFound(BaseError):
+    def __init__(self, message: str):
+        super().__init__(f'No items found for {message}')
+
+class DuplicatedItem(BaseError):
+    def __init__(self, message: str):
+        super().__init__(f'The item alredy exists for this {message}')
+        
+class ForbiddenAction(BaseError):
+    def __init__(self, message: str):
+        super().__init__(f'That action is forbidden for this {message}')</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/errors/controller_errors.py</path>
+    
+  
+    <content>from src.shared.helpers.errors.base_error import BaseError
+
+
+class MissingParameters(BaseError):
+    def __init__(self, message: str):
+        super().__init__(f'Field {message} is missing')
+class WrongTypeParameter(BaseError):
+    def __init__(self, fieldName: str, fieldTypeExpected: str, fieldTypeReceived: str):
+        super().__init__(f'Field {fieldName} isn\'t in the right type.\n Received: {fieldTypeReceived}.\n Expected: {fieldTypeExpected}')</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/errors/base_error.py</path>
+    
+  
+    <content>class BaseError(Exception):
+    def __init__(self, message: str):
+        self.__message: str = message
+        super().__init__(message)
+
+    @property
+    def message(self):
+        return self.__message</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/errors/domain_errors.py</path>
+    
+  
+    <content>from src.shared.helpers.errors.base_error import BaseError
+
+
+class EntityError(BaseError):
+    def __init__(self, message: str):
+        super().__init__(f'Field {message} is not valid')
+
+class EntityParameterTypeError(EntityError):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.__message = message
+
+    @property
+    def message(self):
+        return self.__message
+
+class EntityParameterError(EntityError):
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.__message = message
+
+    @property
+    def message(self):
+        return self.__message</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/external_interfaces/http_lambda_requests.py</path>
+    
+  
+    <content>import json
+
+from src.shared.helpers.external_interfaces.http_models import HttpRequest, HttpResponse
+
+
+class LambdaHttpResponse(HttpResponse):
+    &quot;&quot;&quot;
+    A class to represent an HTTP response for lambda URL.
+    docs: https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html
+    &quot;&quot;&quot;
+    status_code: int = 200
+    body: any = {&quot;message&quot;: &quot;No response&quot;}
+    headers: dict = {&quot;Content-Type&quot;: &quot;application/json&quot;}
+
+    def __init__(self, body: any = None, status_code: int = None, headers: dict = None, **kwargs) -&gt; None:
+        &quot;&quot;&quot;
+        Constructor for HttpResponse.
+        Args:
+            body: The body of the response. Can be a string or a dict.
+            status_code: The status code of the response. Defaults to 200.
+            headers: The headers of the response. Defaults to {&quot;Content-Type&quot;: &quot;application/json&quot;}.
+            **kwargs: Configuration of the HTTP response. Possible values: add_default_cors_headers (default is True)
+        &quot;&quot;&quot;
+        _body = body or LambdaHttpResponse.body
+        _headers = headers or LambdaHttpResponse.headers
+        _headers['Access-Control-Allow-Origin'] = '*'
+
+        _status_code = status_code or LambdaHttpResponse.status_code
+
+        if kwargs.get(&quot;add_default_cors_headers&quot;, True):
+            _headers.update({&quot;Access-Control-Allow-Origin&quot;: &quot;*&quot;})
+
+        super().__init__(body=_body, headers=_headers, status_code=_status_code)
+
+    def toDict(self) -&gt; dict:
+        &quot;&quot;&quot;
+        Returns a dict representation of the HttpResponse.
+        Returns:
+            {
+                'statuCode': int
+                'body': str or dict
+                'headers': dict
+                'isBase64Encoded': bool
+            }
+        &quot;&quot;&quot;
+        return {
+            &quot;statusCode&quot;: self.status_code,
+            &quot;body&quot;: json.dumps(self.body),
+            &quot;headers&quot;: self.headers,
+            &quot;isBase64Encoded&quot;: False
+        }
+
+    def __repr__(self):
+        return (
+            f&quot;HttpResponse (status_code={self.status_code}, body={self.body}, headers={self.headers})&quot;
+        )
+
+
+class LambdaDefaultHTTP:
+    method: str = &quot;&quot;
+    path: str = &quot;&quot;
+    protocol: str = &quot;&quot;
+    source_ip: str = &quot;&quot;
+    user_agent: str = &quot;&quot;
+
+    def __init__(self, data: dict = None) -&gt; None:
+        &quot;&quot;&quot;
+        Constructor for LambdaHttp.
+        Args:
+            event: dict - the event passed to the lambda function.
+        &quot;&quot;&quot;
+        if not data:
+            return
+        self.method = data.get(&quot;method&quot;) or &quot;&quot;
+        self.path = data.get(&quot;path&quot;) or &quot;&quot;
+        self.protocol = data.get(&quot;protocol&quot;) or &quot;&quot;
+        self.source_ip = data.get(&quot;sourceIp&quot;) or &quot;&quot;
+        self.user_agent = data.get(&quot;userAgent&quot;) or &quot;&quot;
+
+    def __eq__(self, other):
+        if not isinstance(other, LambdaDefaultHTTP):
+            return False
+        return self.method == other.method and self.path == other.path and self.protocol == other.protocol and self.source_ip == other.source_ip and self.user_agent == other.user_agent
+
+
+class LambdaHttpRequest(HttpRequest):
+    &quot;&quot;&quot;
+        A class to represent an HTTP request for lambda URL.
+        docs: https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html
+        &quot;&quot;&quot;
+    version: str
+    raw_path: str
+    raw_query_string: str
+    headers: dict
+    query_string_parameters: dict
+    request_context: dict
+    http: LambdaDefaultHTTP
+    body: any
+
+    def __init__(self, data: dict = None) -&gt; None:
+        &quot;&quot;&quot;
+        Constructor for HttpResponse.
+        &quot;&quot;&quot;
+        _headers = data.get(&quot;headers&quot;)
+        _query_string_parameters = data.get(&quot;queryStringParameters&quot;)
+        _body = None
+
+        if &quot;body&quot; in data:
+            try:
+                _body = json.loads(data.get(&quot;body&quot;))
+            except:
+                _body = data.get(&quot;body&quot;)
+
+        super().__init__(body=_body, headers=_headers, query_params=_query_string_parameters)
+
+        self.version = data.get(&quot;version&quot;)
+        self.raw_path = data.get(&quot;rawPath&quot;)
+        self.raw_query_string = data.get(&quot;rawQueryString&quot;)
+        self.query_string_parameters = data.get(&quot;queryStringParameters&quot;)
+        self.request_context = data.get(&quot;requestContext&quot;)
+        self.http = LambdaDefaultHTTP(self.request_context.get(&quot;external_interfaces&quot;) if self.request_context else None)
+
+
+class HttpResponseRedirect(HttpResponse):
+
+    def __init__(self, location: str) -&gt; None:
+        super().__init__(status_code=302, headers={&quot;Location&quot;: location})</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/external_interfaces/http_models.py</path>
+    
+  
+    <content>from typing import Any
+from warnings import warn
+
+from src.shared.helpers.enum.http_status_code_enum import HttpStatusCodeEnum
+from src.shared.helpers.external_interfaces.external_interface import IRequest, IResponse
+
+
+class HttpRequest(IRequest):
+    body: dict
+    headers: dict
+    query_params: dict
+
+    data: dict
+
+    def __init__(self, body: dict = {}, headers: dict = {}, query_params: dict = {}):
+        self.body = body or {}
+        self.headers = headers or {}
+        self.query_params = query_params or {}
+        data_dict = {}
+
+        # check overlapping keys
+        if type(body) is dict:
+            data_dict.update(body)
+            if [key for key in self.body.keys() if key in self.query_params.keys()] or [key for key in self.body.keys()
+                                                                                        if key in self.headers.keys()]:
+                warn(
+                    f&quot;body, query_params and/or headers have overlapping keys → {[key for key in self.body.keys() if key in self.query_params.keys()] or [key for key in self.body.keys() if key in self.headers.keys()]}&quot;)
+        else:
+            if [key for key in self.query_params.keys() if key in self.headers.keys()]:
+                warn(
+                    f&quot;query_params and headers have overlapping keys → {[key for key in self.query_params.keys() if key in self.headers.keys()]}&quot;)
+
+        if type(body) is str:
+            data_dict.update({&quot;body&quot;: body})
+
+        data_dict.update(self.headers)
+        data_dict.update(self.query_params)
+        self.data = data_dict
+
+    @property
+    def data(self) -&gt; dict:
+        return self._data
+
+    @data.setter
+    def data(self, value: dict):
+        self._data = value
+
+    def __repr__(self):
+        return (
+            f&quot;HttpRequest (body={self.body}, headers={self.headers}, query_params={self.query_params}, data={self.data})&quot;
+        )
+
+
+class HttpResponse(IResponse):
+    status_code: int
+    body: dict
+    headers: dict
+
+    data: dict
+
+    def __init__(self, status_code: int, body: dict = {}, headers: dict = {}, data: dict = {}):
+        self.status_code = status_code
+        self.body = body or data
+        self.headers = headers
+
+        data_dict = {}
+        if type(body) is dict:
+            data_dict.update(body)
+        if type(body) is str:
+            data_dict.update({&quot;body&quot;: body})
+
+        data_dict.update(headers)
+        self.data = data_dict
+
+    @property
+    def data(self) -&gt; dict:
+        return self._data
+
+    @data.setter
+    def data(self, value: dict):
+        self._data = value
+
+    @property
+    def status_code(self) -&gt; dict:
+        return self._status_code
+
+    @status_code.setter
+    def status_code(self, value: dict):
+        self._status_code = value
+
+    def __repr__(self):
+        return (
+            f&quot;HttpResponse (status_code={self.status_code}, body={self.body}, headers={self.headers})&quot;
+        )
+
+
+if __name__ == '__main__':
+    # test
+    body = {&quot;body&quot;: &quot;body&quot;}
+    headers = {&quot;headers&quot;: &quot;headers&quot;, &quot;body&quot;: &quot;body&quot;}
+    query_params = {&quot;query_params&quot;: &quot;query_params&quot;}
+    data = {&quot;data&quot;: &quot;data&quot;}
+    request = HttpRequest(body, headers, query_params)
+    response = HttpResponse(200, body, headers)
+    print(request)
+    print(response)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/external_interfaces/http_codes.py</path>
+    
+  
+    <content>from typing import Any
+
+from src.shared.helpers.enum.http_status_code_enum import HttpStatusCodeEnum
+from src.shared.helpers.external_interfaces.http_models import HttpResponse
+
+
+class OK(HttpResponse):
+    def __init__(self, body: Any = None) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.OK.value, body)
+
+
+class Created(HttpResponse):
+    def __init__(self, body: Any = None) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.CREATED.value, body)
+
+
+class NoContent(HttpResponse):
+    def __init__(self) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.NO_CONTENT.value, None)
+
+
+class BadRequest(HttpResponse):
+    def __init__(self, body: Any) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.BAD_REQUEST.value, body)
+
+
+class InternalServerError(HttpResponse):
+    def __init__(self, body: Any) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.INTERNAL_SERVER_ERROR.value, body)
+
+
+class NotFound(HttpResponse):
+    def __init__(self, body: Any) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.NOT_FOUND.value, body)
+
+
+class Conflict(HttpResponse):
+    def __init__(self, body: Any) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.CONFLICT.value, body)
+
+
+class RedirectResponse(HttpResponse):
+    def __init__(self, body: dict) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.REDIRECT.value, None)
+        self.location = body
+
+
+class Forbidden(HttpResponse):
+    def __init__(self, body: dict) -&gt; None:
+        super().__init__(HttpStatusCodeEnum.FORBIDDEN.value, body)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/shared/helpers/external_interfaces/external_interface.py</path>
+    
+  
+    <content>from abc import ABC, abstractmethod
+
+
+class IRequest(ABC):
+
+    @property
+    def data(self) -&gt; dict:
+        pass
+
+
+class IResponse(ABC):
+
+    @property
+    @abstractmethod
+    def status_code(self) -&gt; int:
+        pass
+
+    @property
+    @abstractmethod
+    def data(self) -&gt; dict:
+        pass</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/create_user/app/create_user_controller.py</path>
+    
+  
+    <content>from src.shared.helpers.external_interfaces.external_interface import IResponse, IRequest
+from .create_user_usecase import CreateUserUsecase
+from .create_user_viewmodel import CreateUserViewmodel
+from src.shared.helpers.errors.controller_errors import MissingParameters, WrongTypeParameter
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.helpers.external_interfaces.http_codes import OK, NotFound, BadRequest, InternalServerError, Created
+
+
+class CreateUserController:
+
+    def __init__(self, usecase: CreateUserUsecase):
+        self.CreateUserUsecase = usecase
+
+    def __call__(self, request: IRequest) -&gt; IResponse:
+        try:
+            if request.data.get('name') is None:
+                raise MissingParameters('name')
+            if request.data.get('email') is None:
+                raise MissingParameters('email')
+
+            user = self.CreateUserUsecase(
+                name=request.data.get('name'),
+                email=request.data.get('email')
+            )
+
+            viewmodel = CreateUserViewmodel(user)
+
+            return Created(viewmodel.to_dict())
+
+        except NoItemsFound as err:
+
+            return NotFound(body=err.message)
+
+        except MissingParameters as err:
+
+            return BadRequest(body=err.message)
+
+        except WrongTypeParameter as err:
+
+            return BadRequest(body=err.message)
+
+        except EntityError as err:
+
+            return BadRequest(body=err.message)
+
+        except Exception as err:
+
+            return InternalServerError(body=err.args[0])</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/create_user/app/create_user_viewmodel.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class CreateUserViewmodel:
+    user_id: int
+    name: str
+    email: str
+    state: STATE
+
+    def __init__(self, user: User):
+        self.user_id = user.user_id
+        self.name = user.name
+        self.email = user.email
+        self.state = user.state
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'name': self.name,
+            'email': self.email,
+            'state': self.state.value,
+            'message': &quot;the user was created successfully&quot;
+        }</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/create_user/app/create_user_presenter.py</path>
+    
+  
+    <content>from .create_user_controller import CreateUserController
+from .create_user_usecase import CreateUserUsecase
+from src.shared.environments import Environments
+from src.shared.helpers.external_interfaces.http_lambda_requests import LambdaHttpRequest, LambdaHttpResponse
+
+repo = Environments.get_user_repo()()
+usecase = CreateUserUsecase(repo)
+controller = CreateUserController(usecase)
+
+def lambda_handler(event, context):
+
+    from pprint import pprint
+
+    pprint(event)
+
+    httpRequest = LambdaHttpRequest(data=event)
+    response = controller(httpRequest)
+    httpResponse = LambdaHttpResponse(status_code=response.status_code, body=response.body, headers=response.headers)
+
+    return httpResponse.toDict()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/create_user/app/create_user_usecase.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.helpers.errors.domain_errors import EntityError
+
+
+class CreateUserUsecase:
+    def __init__(self, repo: IUserRepository):
+        self.repo = repo
+
+    def __call__(self, name: str, email: str) -&gt; User:
+
+        if not User.validate_name(name):
+            raise EntityError(&quot;name&quot;)
+
+        if not User.validate_email(email):
+            raise EntityError(&quot;email&quot;)
+
+        user = User(
+            name=name,
+            email=email,
+            state=STATE.PENDING
+        )
+
+        return self.repo.create_user(user)</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/update_user/app/update_user_presenter.py</path>
+    
+  
+    <content>from .update_user_controller import UpdateUserController
+from .update_user_usecase import UpdateUserUsecase
+from src.shared.environments import Environments
+from src.shared.helpers.external_interfaces.http_lambda_requests import LambdaHttpRequest, LambdaHttpResponse
+
+repo = Environments.get_user_repo()()
+usecase = UpdateUserUsecase(repo)
+controller = UpdateUserController(usecase)
+
+
+def lambda_handler(event, context):
+    httpRequest = LambdaHttpRequest(data=event)
+    response = controller(httpRequest)
+    httpResponse = LambdaHttpResponse(status_code=response.status_code, body=response.body, headers=response.headers)
+
+    return httpResponse.toDict()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/update_user/app/update_user_usecase.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.helpers.errors.domain_errors import EntityError
+
+
+class UpdateUserUsecase:
+    def __init__(self, repo: IUserRepository):
+        self.repo = repo
+
+    def __call__(self, user_id: int, new_name: str) -&gt; User:
+
+        if type(user_id) != int:
+            raise EntityError(&quot;user_id&quot;)
+        
+        if type(new_name) != str:
+            raise EntityError(&quot;new_name&quot;)
+
+        updated_user = self.repo.update_user(user_id=user_id, new_name=new_name)
+
+        return updated_user</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/update_user/app/update_user_controller.py</path>
+    
+  
+    <content>from src.shared.helpers.external_interfaces.external_interface import IResponse, IRequest
+from .update_user_usecase import UpdateUserUsecase
+from .update_user_viewmodel import UpdateUserViewmodel
+from src.shared.helpers.errors.controller_errors import MissingParameters, WrongTypeParameter
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.helpers.external_interfaces.http_codes import OK, NotFound, BadRequest, InternalServerError
+
+
+class UpdateUserController:
+
+    def __init__(self, usecase: UpdateUserUsecase):
+        self.UpdateUserUsecase = usecase
+
+    def __call__(self, request: IRequest) -&gt; IResponse:
+        try:
+            if request.data.get('user_id') is None:
+                raise MissingParameters('user_id')
+            if request.data.get('new_name') is None:
+                raise MissingParameters('new_name')
+
+            if type(request.data.get('user_id')) != str:
+                raise WrongTypeParameter(
+                    fieldName=&quot;user_id&quot;,
+                    fieldTypeExpected=&quot;str&quot;,
+                    fieldTypeReceived=request.data.get('user_id').__class__.__name__
+                )
+
+            user = self.UpdateUserUsecase(user_id=int(request.data.get('user_id')), new_name=request.data.get('new_name'))
+
+            viewmodel = UpdateUserViewmodel(user=user)
+
+            return OK(viewmodel.to_dict())
+
+        except NoItemsFound as err:
+
+            return NotFound(body=err.message)
+
+        except MissingParameters as err:
+
+            return BadRequest(body=err.message)
+
+        except WrongTypeParameter as err:
+
+            return BadRequest(body=err.message)
+
+        except EntityError as err:
+
+            return BadRequest(body=err.message)
+
+        except Exception as err:
+
+            return InternalServerError(body=err.args[0])</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/update_user/app/update_user_viewmodel.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class UpdateUserViewmodel:
+    user_id: int
+    name: str
+    email: str
+    state: STATE
+
+    def __init__(self, user: User):
+        self.user_id = user.user_id
+        self.name = user.name
+        self.email = user.email
+        self.state = user.state
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'name': self.name,
+            'email': self.email,
+            'state': self.state.value,
+            'message': &quot;the user was updated successfully&quot;
+        }</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_all_users/app/get_all_users_presenter.py</path>
+    
+  
+    <content>from .get_all_users_controller import GetAllUsersController
+from .get_all_users_usecase import GetAllUsersUsecase
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.environments import Environments
+from src.shared.helpers.external_interfaces.http_lambda_requests import LambdaHttpRequest, LambdaHttpResponse
+
+repo: IUserRepository = Environments.get_user_repo()()
+usecase = GetAllUsersUsecase(repo)
+controller = GetAllUsersController(usecase)
+
+
+def lambda_handler(event, context):
+    httpRequest = LambdaHttpRequest(data=event)
+    response = controller(httpRequest)
+    httpResponse = LambdaHttpResponse(status_code=response.status_code, body=response.body, headers=response.headers)
+
+    return httpResponse.toDict()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_all_users/app/get_all_users_usecase.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from typing import List
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+
+
+class GetAllUsersUsecase:
+    def __init__(self, repo: IUserRepository):
+        self.repo = repo
+
+    def __call__(self) -&gt; List[User]:
+        all_users_list = self.repo.get_all_user()
+
+        return all_users_list</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_all_users/app/get_all_users_viewmodel.py</path>
+    
+  
+    <content>from typing import List
+
+from src.shared.domain.entities.user import User
+
+
+class UserViewmodel:
+    def __init__(self, user: User):
+        self.state = user.state
+        self.email = user.email
+        self.name = user.name
+        self.user_id = user.user_id
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'name': self.name,
+            'email': self.email,
+            'state': self.state.value
+        }
+
+
+class GetAllUsersViewmodel:
+    def __init__(self, users_list: List[User]):
+        self.users_viewmodel_list = [UserViewmodel(user) for user in users_list]
+
+    def to_dict(self):
+        return {
+            &quot;all_users&quot;: [viewmodel.to_dict() for viewmodel in self.users_viewmodel_list],
+            &quot;message&quot;: &quot;all users has been retrieved&quot;
+        }</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_all_users/app/get_all_users_controller.py</path>
+    
+  
+    <content>from typing import List
+
+from src.shared.helpers.external_interfaces.external_interface import IRequest
+from .get_all_users_usecase import GetAllUsersUsecase
+from .get_all_users_viewmodel import GetAllUsersViewmodel
+from src.shared.domain.entities.user import User
+from src.shared.helpers.errors.controller_errors import MissingParameters, WrongTypeParameter
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.helpers.external_interfaces.http_codes import NotFound, OK, BadRequest, InternalServerError
+
+
+class GetAllUsersController:
+    def __init__(self, usecase: GetAllUsersUsecase):
+        self.usecase = usecase
+
+    def __call__(self, request: IRequest):
+        try:
+            all_users_list: List[User] = self.usecase()
+
+            viewmodel = GetAllUsersViewmodel(all_users_list)
+
+            return OK(viewmodel.to_dict())
+
+        except NoItemsFound as err:
+
+            return NotFound(body=err.message)
+
+        except MissingParameters as err:
+
+            return BadRequest(body=err.message)
+
+        except WrongTypeParameter as err:
+
+            return BadRequest(body=err.message)
+
+        except EntityError as err:
+
+            return BadRequest(body=err.message)
+
+        except Exception as err:
+
+            return InternalServerError(body=err.args[0])</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/delete_user/app/delete_user_controller.py</path>
+    
+  
+    <content>from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.helpers.external_interfaces.external_interface import IRequest, IResponse
+from .delete_user_usecase import DeleteUserUsecase
+from .delete_user_viewmodel import DeleteUserViewmodel
+from src.shared.helpers.errors.controller_errors import MissingParameters, WrongTypeParameter
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.external_interfaces.http_codes import OK, NotFound, BadRequest, InternalServerError
+
+
+class DeleteUserController:
+
+    def __init__(self, usecase: DeleteUserUsecase):
+        self.DeleteUserUsecase = usecase
+
+    def __call__(self, request: IRequest) -&gt; IResponse:
+        try:
+            if request.data.get('user_id') is None:
+                raise MissingParameters('user_id')
+
+            if type(request.data.get('user_id')) != str:
+                raise WrongTypeParameter(
+                    fieldName=&quot;user_id&quot;,
+                    fieldTypeExpected=&quot;str&quot;,
+                    fieldTypeReceived=request.data.get('user_id').__class__.__name__
+                )
+            if not request.data.get('user_id').isdecimal():
+                raise EntityError(&quot;user_id&quot;)
+
+            user = self.DeleteUserUsecase(
+                user_id=int(request.data.get('user_id'))
+            )
+
+            viewmodel = DeleteUserViewmodel(user=user)
+
+            return OK(viewmodel.to_dict())
+
+        except NoItemsFound as err:
+
+            return NotFound(body=err.message)
+
+        except MissingParameters as err:
+
+            return BadRequest(body=err.message)
+
+        except WrongTypeParameter as err:
+
+            return BadRequest(body=err.message)
+
+        except EntityError as err:
+
+            return BadRequest(body=err.message)
+
+        except Exception as err:
+
+            return InternalServerError(body=err.args[0])</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/delete_user/app/delete_user_presenter.py</path>
+    
+  
+    <content>from .delete_user_controller import DeleteUserController
+from .delete_user_usecase import DeleteUserUsecase
+from src.shared.environments import Environments
+from src.shared.helpers.external_interfaces.http_lambda_requests import LambdaHttpRequest, LambdaHttpResponse
+
+repo = Environments.get_user_repo()()
+usecase = DeleteUserUsecase(repo)
+controller = DeleteUserController(usecase)
+
+
+def lambda_handler(event, context):
+    httpRequest = LambdaHttpRequest(data=event)
+    response = controller(httpRequest)
+    httpResponse = LambdaHttpResponse(status_code=response.status_code, body=response.body, headers=response.headers)
+
+    return httpResponse.toDict()</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/delete_user/app/delete_user_usecase.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.helpers.errors.domain_errors import EntityError
+
+
+class DeleteUserUsecase:
+    def __init__(self, repo: IUserRepository):
+        self.repo = repo
+
+    def __call__(self, user_id: int) -&gt; User:
+
+
+        if type(user_id) != int:
+            raise EntityError(&quot;user_id&quot;)
+
+        user = self.repo.delete_user(user_id)
+
+        return user</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/delete_user/app/delete_user_viewmodel.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class DeleteUserViewmodel:
+    user_id: int
+    name: str
+    email: str
+    state: STATE
+
+    def __init__(self, user: User):
+        self.user_id = user.user_id
+        self.name = user.name
+        self.email = user.email
+        self.state = user.state
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'name': self.name,
+            'email': self.email,
+            'state': self.state.value,
+            'message': &quot;the user was deleted successfully&quot;
+        }</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_user/app/get_user_presenter.py</path>
+    
+  
+    <content>from .get_user_controller import GetUserController
+from .get_user_usecase import GetUserUsecase
+from src.shared.environments import Environments
+from src.shared.helpers.external_interfaces.http_lambda_requests import LambdaHttpRequest, LambdaHttpResponse
+from src.shared.infra.external.observability.observability_aws import ObservabilityAWS
+from aws_lambda_powertools import Logger, Tracer, Metrics
+
+
+observability = Environments.get_observability()(module_name=&quot;get_user&quot;)
+
+repo = Environments.get_user_repo()()
+usecase = GetUserUsecase(repo, observability=observability)
+controller = GetUserController(usecase, observability=observability)
+
+@observability.presenter_decorators
+def get_user_presenter(event):
+    httpRequest = LambdaHttpRequest(data=event)
+    response = controller(httpRequest)
+    httpResponse = LambdaHttpResponse(status_code=response.status_code, body=response.body, headers=response.headers)
+    return httpResponse.toDict()
+
+@observability.handler_decorators
+def lambda_handler(event, context):
+    
+    response = get_user_presenter(event)
+    
+    observability.add_metric(name=&quot;ErrorCount&quot;, unit=&quot;Count&quot;, value=1) if response[&quot;statusCode&quot;] != 200 else None # ErrorCount metrics
+    
+    return response</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_user/app/get_user_viewmodel.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.enums.state_enum import STATE
+
+
+class GetUserViewmodel:
+    user_id: int
+    name: str
+    email: str
+    state: STATE
+
+    def __init__(self, user: User):
+        self.user_id = user.user_id
+        self.name = user.name
+        self.email = user.email
+        self.state = user.state
+
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'name': self.name,
+            'email': self.email,
+            'state': self.state.value,
+            'message': &quot;the user was retrieved successfully&quot;
+        }</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_user/app/get_user_usecase.py</path>
+    
+  
+    <content>from src.shared.domain.entities.user import User
+from src.shared.domain.repositories.user_repository_interface import IUserRepository
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.infra.external.observability.observability_aws import ObservabilityAWS
+
+
+class GetUserUsecase:
+    def __init__(self, repo: IUserRepository, observability: ObservabilityAWS):
+        self.repo = repo
+        self.observability = observability
+
+    def __call__(self, user_id: int) -&gt; User:
+        self.observability.log_usecase_in()
+        if type(user_id) != int:
+            raise EntityError(&quot;user_id&quot;)
+        user = self.repo.get_user(user_id)
+        self.observability.log_usecase_out()
+        return user</content>
+    
+
+  </file>
+  <file>
+    
+  
+    <path>src/modules/get_user/app/get_user_controller.py</path>
+    
+  
+    <content>from src.shared.infra.external.observability.observability_aws import ObservabilityAWS
+from .get_user_usecase import GetUserUsecase
+from .get_user_viewmodel import GetUserViewmodel
+from src.shared.helpers.errors.controller_errors import MissingParameters, WrongTypeParameter
+from src.shared.helpers.errors.domain_errors import EntityError
+from src.shared.helpers.errors.usecase_errors import NoItemsFound
+from src.shared.helpers.external_interfaces.external_interface import IRequest, IResponse
+from src.shared.helpers.external_interfaces.http_codes import OK, NotFound, BadRequest, InternalServerError
+from aws_lambda_powertools import Logger
+
+
+
+class GetUserController:
+
+    def __init__(self, usecase: GetUserUsecase, observability: ObservabilityAWS):
+        self.GetUserUsecase = usecase
+        self.observability = observability
+
+    def __call__(self, request: IRequest) -&gt; IResponse:
+        try:
+            self.observability.log_controller_in()
+            if request.data.get('user_id') is None:
+                raise MissingParameters('user_id')
+
+            if type(request.data.get('user_id')) != str:
+                raise WrongTypeParameter(
+                    fieldName=&quot;user_id&quot;,
+                    fieldTypeExpected=&quot;str&quot;,
+                    fieldTypeReceived=request.data.get('user_id').__class__.__name__
+                )
+
+            if not request.data.get('user_id').isdecimal():
+                raise EntityError(&quot;user_id&quot;)
+
+
+            user = self.GetUserUsecase(
+                user_id=int(request.data.get('user_id'))
+            )
+
+            viewmodel = GetUserViewmodel(user)
+            
+            response = OK(viewmodel.to_dict())
+            self.observability.log_controller_out(input=user.user_id)
+            return response
+
+        except NoItemsFound as err:
+            self.observability.log_exception(message=err.message)
+            return NotFound(body=err.message)
+
+        except MissingParameters as err:
+            self.observability.log_exception(message=err.message)
+            return BadRequest(body=err.message)
+
+        except WrongTypeParameter as err:
+            self.observability.log_exception(message=err.message)
+            return BadRequest(body=err.message)
+
+        except EntityError as err:
+            self.observability.log_exception(message=err.message)
+            return BadRequest(body=err.message)
+
+        except Exception as err:
+            self.observability.log_exception(message=err.args[0])
+            return InternalServerError(body=err.args[0])</content>
+    
+
+  </file>
+</repository_files>
+<statistics>
+  <total_files>83</total_files>
+  <total_chars>140042</total_chars>
+  <total_tokens>0</total_tokens>
+  <generated_at>2025-11-10 09:44:40</generated_at>
+</statistics>
+</repository>

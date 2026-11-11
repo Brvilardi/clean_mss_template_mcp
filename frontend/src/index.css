@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+:root {
+  /* Light mode - Dati branding themed colors */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  
+  /* Dati Primary Purple (#655CC6) as primary */
+  --primary: 246 48% 57%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Dati Secondary Light Blue (#5abceb) */
+  --secondary: 198 80% 64%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  
+  /* Dati Accent Blue (#1fa0f3) */
+  --accent: 200 88% 54%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  
+  /* Dati Primary Purple for ring */
+  --ring: 246 48% 57%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  /* Dark mode with improved contrast ratios (WCAG AA compliant) */
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 15%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 15%;
+  --popover-foreground: 210 40% 98%;
+  
+  /* Dati Primary Purple - slightly lighter for better contrast on dark */
+  --primary: 246 48% 65%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Dati Secondary Light Blue - adjusted for dark mode */
+  --secondary: 198 80% 70%;
+  --secondary-foreground: 222 47% 11%;
+  
+  /* Improved muted colors with better contrast */
+  --muted: 217 33% 25%;
+  --muted-foreground: 215 20% 75%;
+  
+  /* Dati Accent Blue - slightly lighter for dark mode */
+  --accent: 200 88% 60%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 63% 50%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 33% 25%;
+  --input: 217 33% 25%;
+  --ring: 246 48% 65%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessibility: Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Accessibility: Focus states for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Ensure focus is visible on all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Accessibility: Skip link styling */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 0 0 0.25rem 0;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Ensure proper spacing and visual hierarchy */
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Mobile-first responsive typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
